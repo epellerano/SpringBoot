@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+	
+	//Funcion Validar Campos del formulario
+	  function validarHoras(){
+		  var valorDefecto="00:00";
+		  if((document.getElementById('horaIniManana').value).length==0){document.getElementById('horaIniManana').value = valorDefecto;}
+		  if((document.getElementById('horaFinManana').value).length==0){document.getElementById('horaFinManana').value = valorDefecto;}
+		  if((document.getElementById('totalManana').value).length==0){document.getElementById('totalManana').value = valorDefecto;}
+		  if((document.getElementById('horaIniTarde').value).length==0){document.getElementById('horaIniTarde').value = valorDefecto;}
+		  if((document.getElementById('horaFinTarde').value).length==0){document.getElementById('horaFinTarde').value = valorDefecto;}
+		  if((document.getElementById('totalTarde').value).length==0){document.getElementById('totalTarde').value = valorDefecto;}
+		  if((document.getElementById('totalGeneral').value).length==0){document.getElementById('totalGeneral').value = valorDefecto;}		  
+	//Subfunciones para calcular horas y totales.
+		  calcularManana(document.getElementById('horaIniManana').value, document.getElementById('horaFinManana').value, 'totalManana');
+		  calcularTarde(document.getElementById('horaIniTarde').value, document.getElementById('horaFinTarde').value, 'totalTarde');
+		  calcularTotalGeneral(document.getElementById('totalManana').value, document.getElementById('totalTarde').value, 'totalGeneral');
+	  }
+	
+	
+		// Calcula horas del turno Mañana
+		function calcularManana(hora_inicio, hora_final, totalManana){
+			
+			  // Aca pasafremos el resultado.
+			  devol = document.getElementById(totalManana);			  
+			  // Expresión regular para comprobar formato
+			  var formatohora = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+			  
+			  // Si algún valor no tiene formato correcto sale
+			  if (!(hora_inicio.match(formatohora)
+			        && hora_final.match(formatohora))){
+			    return;
+			  }
+			  
+			  // Calcula los minutos de cada hora
+			  var minutos_inicio = hora_inicio.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  var minutos_final = hora_final.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  
+			  // Si la hora final es anterior a la hora inicial sale
+			  if (minutos_final < minutos_inicio) return;
+			  
+			  // Diferencia de minutos
+			  var diferencia = minutos_final - minutos_inicio;
+			  
+			  // Cálculo de horas y minutos de la diferencia
+			  var horas = Math.floor(diferencia / 60);
+			  var minutos = diferencia % 60;
+			  
+			  devol.value =((horas < 10 ? '0' : '') + horas + ':'+ (minutos < 10 ? '0' : '') + minutos);
+			  /* $('#horas_justificacion_real').val(horas + ':'
+			    + (minutos < 10 ? '0' : '') + minutos);   */
+			}
+		
+		
+		// Calcula horas del turno Tarde
+		function calcularTarde(hora_inicioTarde, hora_finalTarde, totalTarde){
+			
+			  // Aca pasafremos el resultado.
+			  devol = document.getElementById(totalTarde);			  
+			  // Expresión regular para comprobar formato
+			  var formatohora = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+			  
+			  // Si algún valor no tiene formato correcto sale
+			  if (!(hora_inicioTarde.match(formatohora)
+			        && hora_finalTarde.match(formatohora))){
+			    return;
+			  }
+			  
+			  // Calcula los minutos de cada hora
+			  var minutos_inicio = hora_inicioTarde.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  var minutos_final = hora_finalTarde.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  
+			  // Si la hora final es anterior a la hora inicial sale
+			  if (minutos_final < minutos_inicio) return;
+			  
+			  // Diferencia de minutos
+			  var diferencia = minutos_final - minutos_inicio;
+			  
+			  // Cálculo de horas y minutos de la diferencia
+			  var horas = Math.floor(diferencia / 60);
+			  var minutos = diferencia % 60;
+			  
+			  devol.value =((horas < 10 ? '0' : '') + horas + ':'+ (minutos < 10 ? '0' : '') + minutos);
+			  /* $('#horas_justificacion_real').val(horas + ':'
+			    + (minutos < 10 ? '0' : '') + minutos);   */
+			}
+		
+		
+		// Calcula Total General de horas.
+		function calcularTotalGeneral(hora_inicioTotal, hora_finalTotal, totalGeneral){
+			
+			  // Aca pasafremos el resultado.
+			  devol = document.getElementById(totalGeneral);			  
+			  // Expresión regular para comprobar formato
+			  var formatohora = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+			  
+			  // Si algún valor no tiene formato correcto sale
+			  if (!(hora_inicioTotal.match(formatohora)
+			        && hora_finalTotal.match(formatohora))){
+			    return;
+			  }
+			  
+			  // Calcula los minutos de cada hora
+			  var minutos_inicio = hora_inicioTotal.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  var minutos_final = hora_finalTotal.split(':')
+			    .reduce((p, c) => parseInt(p) * 60 + parseInt(c));
+			  
+			  // Calculo de minutos por la suma de los 2 totales
+			  var diferencia = minutos_inicio + minutos_final;
+			  
+			  // Cálculo de horas y minutos de la diferencia
+			  var horas = Math.floor(diferencia / 60);
+			  var minutos = diferencia % 60;
+			  
+			  devol.value =((horas < 10 ? '0' : '') + horas + ':'+ (minutos < 10 ? '0' : '') + minutos);
+			  /* $('#horas_justificacion_real').val(horas + ':'
+			    + (minutos < 10 ? '0' : '') + minutos);   */
+			}
+		
+	</script>
+</body>
+</html>

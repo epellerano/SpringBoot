@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light text-white">
+			<div class="card-header"></div>
+			<div class="card-body">
+			<!-- TITULO con espacio despues-->
+				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2" style="font-family: Arial"></h2>
+				<h1 class="text-secondary pb-1"></h1>
+			<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/movimientos/editarMovimiento}" th:object="${movimiento}" method="post" name="editarmov">
+							
+							<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Profesional seleccionado</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{profesional.apellido}" class="form-control bg-secondary text-white"
+								th:errorclass="'form-control alert-danger'" id="profesional" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('profesional')}" th:errors="*{profesional}"></small>
+						</div>
+					</div>
+							
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Especialidad seleccionada</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{especialidad.especialidadNombre}" class="form-control bg-secondary text-white"
+								th:errorclass="'form-control alert-danger'" id="especialidad" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('especialidad')}" th:errors="*{especialidad}"></small>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Fecha de Creacion</label>
+						<div class="col-sm-6">
+							<input type="date" th:field="*{createAt}" class="form-control"
+								th:errorclass="'form-control alert-danger'"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('createAt')}" th:errors="*{createAt}"></small>
+						</div>
+					</div>									
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Inicio Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaIniManana}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaIniManana"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaIniManana')}" th:errors="*{horaIniManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Fin Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaFinManana}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinManana"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinManana')}" th:errors="*{horaFinManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Total Hs Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalManana}" class="form-control fw-bold text-danger"
+								th:errorclass="'form-control alert-danger'" id="totalManana" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalManana')}" th:errors="*{totalManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Inicio Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaIniTarde}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaIniTarde"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaIniTarde')}"
+								th:errors="*{horaIniTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Fin Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaFinTarde}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinTarde"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinTarde')}"
+								th:errors="*{horaFinTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Total Hs Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalTarde}" class="form-control fw-bold text-danger"
+								th:errorclass="'form-control alert-danger'" id="totalTarde" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalTarde')}"
+								th:errors="*{totalTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-4 row">
+						<label class="col-sm-2 col-form-label  text-black">Total General Horas</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalGeneral}" class="form-control bg-secondary text-white"
+								th:errorclass="'form-control alert-danger'" id="totalGeneral" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalGeneral')}"
+								th:errors="*{totalGeneral}"></small>
+						</div>
+					</div>
+					
+					<div class="mb-2 row justify-content-center">
+						<div class="col-sm-5">
+							<input type="submit" id="btnGuardarEdicion" value="Guardar Datos Editados"
+								class="btn btn-secondary" th:onmouseover="validarHoras()"/> <a
+								th:href="@{/movimientos/listarMovimiento}"
+								class="btn btn-secondary btn-xs">Volver al listado</a>
+						</div>
+					</div>
+
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+	<script th:replace="movimientos/js/autocomplete-especialidad :: javascript"></script>
+	<script th:replace="movimientos/js/load-combobox-vinculacion :: javascript"></script>	
+	<script th:replace="movimientos/js/suma-horas :: javascript"></script>	
+	
+	<!-- Evitamos guardar formulario al presionar Enter -->
+	<script type="text/javascript">
+$(document).ready(function() {
+    $("form").keypress(function(e) {
+        if (e.which == 13) {
+            return false;
+        }
+    });
+});
+</script>
+	
+
+</body>
+</html>

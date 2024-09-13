@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document).ready(function(){
+			var select = document.getElementById("profesional"); /*Obtener el SELECT */
+			var valor = select.options[select.selectedIndex].value; /* Obtener el valor */
+			$('#profesional').autocomplete({
+				source : function(request, response) {
+					$.ajax({
+						url : "/movimientos/cargar-especialidades/" + request.term,
+						dataType : "json",
+						data : {
+							term : request.term
+						},
+						success : function(data) {
+							response($.map(data, function(item) {
+								return {
+									value : item.id,
+									label : item.especialidadNombre,
+								};
+							}));
+						},
+						/*agregado*/
+						/*// Ejecutar cuando se seleccione un cliente
+						    select: function(evento, selected) {
+						        // Actualizar campo oculto
+						        $('#profesional').val(selected.item.value);
+						    }*/
+					});
+				},
+				select : function(event, ui) {
+					document.querySelectorAll('#buscar_especialidad').forEach(option => option.remove())
+					var linea =$("#buscar_especialidad").val(ui.item.label);
+					$("#buscar_especialidad").append(linea);
+					/*select = document.getElementById("profesional.id");
+					for(i = 2000; i <= 2050; i++){
+					  option = document.createElement("buscar_especialidad");
+					  option.value = i;
+					  option.text = i;
+					  select.appendChild(option);
+					}
+					
+					
+					
+					/* var linea = $("#plantillaProfesionales").html();
+
+					linea = linea.replace(/{ID}/g, ui.item.value);
+					linea = linea.replace(/{APELLIDO}/g, ui.item.label);
+
+					$("#cargarItemProfesionales tbody").append(linea); */
+
+					return false;
+				}
+			});
+		});
+	</script>
+</body>
+</html>

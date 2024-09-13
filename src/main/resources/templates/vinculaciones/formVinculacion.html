@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<!-- aca configuramos el Action guardar -->
+				<form th:action="@{/vinculaciones/formVinculacion}" method="post"
+					th:object="${vinculacion}">
+					<div class="row">
+						<div class="col-md-3">
+						<div class="form-group">
+								<label for="profesional"><strong>Seleccione un Profesional</strong></label> <select
+									class="form-select" th:field="*{profesional.id}">
+									<option th:each="profesional : ${profesionales}"
+										th:value="${profesional.id}" th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+								</select>							
+							</div>
+							</div> 
+						<!-- PARA AUTOCOMPLETE -------------------------------------------------
+						<div class="form-group">
+							<strong><label for="buscar_profesional"
+								class="col-sm-2 col-form-label"
+								th:text="'Seleccione un Profesional'"></label></strong>
+							<div class="col-sm-4">
+								<input type="text" name="buscar_profesional"
+									id="buscar_profesional" class="form-control" />																		
+							</div>							
+							<hr>							
+						</div>
+						FIN AUTOCOMPLETE -------------------------------------------------- -->
+						
+						<div class="col-md-3">
+							<div class="form-group">
+								<strong><label for="especialidad">Seleccione
+										una Especialidad</label></strong><select class="form-select"
+									th:field="*{especialidad.id}" id="especialidad">									
+									<option th:each="especialidad : ${especialidades}"
+										th:value="${especialidad.id}"
+										th:text="${especialidad.especialidadNombre}" ></option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<hr>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label for="Observacion"><strong>Ingrese las
+										observaciones del Profesional-Especialidad</strong></label>
+										<!-- para mayusculas: <textarea class="form-control text-uppercase" th:field="*{Observacion}" -->
+								<textarea class="form-control" th:field="*{Observacion}"
+									name="Observacion" id="Observacion" rows="7" th:errorclass="'form-control alert-danger'"></textarea>
+									<small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('Observacion')}" th:errors="*{Observacion}"></small>
+								<!-- PROCESADOR DE TEXTO -->
+							</div>
+						</div>						
+					</div>
+					<br>
+					<button type="submit" class="btn btn-primary">Guardar</button>
+					<a th:href="@{/vinculaciones/listarVinculacion}"
+						class="btn btn-primary btn-xs">Volver al listado</a>
+					
+				</form>
+
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+	<script
+		th:replace="vinculaciones/js/autocomplete-profesionales :: javascript"></script>
+	<script>
+		$(function() {
+			$("#fecha").datepicker({
+				dateFormat : 'dd-mm-yy'
+			});
+		});
+
+		/* ACA INICIALIZAMOS EL PROCESADOR DE TEXTO */
+		tinymce
+				.init({
+					selector : '#detalles',
+					plugins : "textcolor, table lists code",
+					toolbar : " undo redo | bold italic | alignleft aligncenter alignright alignjustify \n\ | bullist numlist outdent indent | forecolor backcolor table code"
+				});
+	</script>
+</body>
+</html>

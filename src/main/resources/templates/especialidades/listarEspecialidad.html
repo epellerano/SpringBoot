@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			
+			<div class="card-body">
+			<h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/especialidades/formEspecialidad}" class="btn btn-primary btn-xs">Crear
+						Especialidad</a>
+				</h1>
+				<table class="table table-striped">
+					<!-- columnas -->
+					<thead>
+						<tr>
+							<th sec:authorize="hasRole('ROLE_USER')">Id</th>
+							<th>Codigo</th>
+							<th>Nombre</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">EDITAR</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">BORRAR</th>
+						</tr>
+					</thead>
+
+					<!-- filas -->
+					<tbody>
+						<tr th:each="especialidad: ${especialidades}"> <!-- @Table(name = "especialidades") -->
+							<td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/especialidades/verEspecialidad/} + ${especialidad.id}" th:text="${especialidad.id}"></a></td>							
+							<td th:text="${especialidad.especialidadCodigo}"></td>
+							<td th:text="${especialidad.especialidadNombre}"></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-primary btn-xs"
+								th:href="@{/especialidades/formEspecialidad/} + ${especialidad.id}">Editar</a></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/especialidades/eliminarEspecialidad/} + ${especialidad.id}"
+								th:onclick="return confirm('Estas seguro que quieres eliminar la especialidad?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+
+				</table>
+				<nav th:replace="paginator-nav :: paginator"></nav>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>

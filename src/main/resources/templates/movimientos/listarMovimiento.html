@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			
+			<div class="card-body">
+			<h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/movimientos/formMovimiento}" class="btn btn-primary btn-xs">Crear
+						Movimiento</a>
+				</h1>
+				<table class="table table-striped">
+					<!-- columnas -->
+					<thead>
+						<tr>
+							<th sec:authorize="hasRole('ROLE_USER')">Id</th>							
+							<th>Profesional</th>
+							<th>Especialidad</th>
+							<th>Fecha Creacion</th>
+							<th>Inicio Manana</th>
+							<th>Fin Manana</th>
+							<th>Total Manana</th>
+							<th>Inicio Tarde</th>
+							<th>Fin Tarde</th>
+							<th>Total Tarde</th>
+							<th>Total General</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">EDITAR</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">BORRAR</th>
+						</tr>
+					</thead>
+
+					<!-- filas -->
+					<tbody>
+						<tr th:each="movimiento: ${movimientos}"> <!-- @Table(name = "vinculaciones") -->
+							<!-- PARA VER DETALLE - CLICK EN ID -->
+							<td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/movimientos/verMovimiento/} + ${movimiento.id}" th:text="${movimiento.id}"></a></td>							
+							<!-- PARA LOS CAMPOS -->
+							<td th:text="${movimiento.profesional.apellido} + ' ' + ${movimiento.profesional.nombre}"></td>
+							
+							<td th:text="${movimiento.especialidad.especialidadNombre}"></td>	
+													
+							<td th:text="${movimiento.createAt}"></td> 
+							
+							<td th:text="${movimiento.horaIniManana}"></td>
+							
+							<td th:text="${movimiento.horaFinManana}"></td>
+							
+							<td th:text="${movimiento.totalManana}"></td>
+							
+							<td th:text="${movimiento.horaIniTarde}"></td>
+							
+							<td th:text="${movimiento.horaFinTarde}"></td>
+							
+							<td th:text="${movimiento.totalTarde}"></td>
+							
+							<td th:text="${movimiento.totalGeneral}"></td>
+							
+							<!-- PARA LOS BOTONES -->
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-primary btn-xs"
+								th:href="@{/movimientos/editarMovimiento/} + ${movimiento.id}">Editar</a></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/movimientos/eliminarMovimiento/} + ${movimiento.id}"
+								th:onclick="return confirm('Estas seguro que quieres eliminar el movimiento?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+
+				</table>
+				<nav th:replace="paginator-nav :: paginator"></nav>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>

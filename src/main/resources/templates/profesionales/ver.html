@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<!-- ENCABEZADO DE PAGINA -->
+	<header th:replace="layout/layout :: header "></header>
+
+	<!-- CONTENIDO PRINCIPAL -->
+	<div class="container py-4">
+		<div class="card bg-light">
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+			<h1><a th:href="@{/listar}"
+						class="btn btn-primary btn-xs">Volver al listado</a></h1>
+				<!-- MOSTRAMOS LA IMAGEN  Y th:src va a MvcConfig -->
+				<img class="img-thumbnail rounded float-start" th:if="${#strings.length(profesional.foto) > 0}" 
+					style="max-width: 26%;" th:src="@{'/uploads/' + ${profesional.foto}}" 
+					th:alt="${profesional.foto}" />
+				<!-- AL LADO DE LA FOTO LOS DATOS DEL CLIENTE -->
+				<ul class="list-group">
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms me-auto">
+      <div class="fw-bold">Apellido</div> 
+      <p class="list-group" th:text="${profesional.apellido}"></p>     
+    </div>    
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms me-auto">
+      <div class="fw-bold">Nombre</div>
+      <p class="list-group" th:text="${profesional.nombre}"></p>
+    </div>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms me-auto">
+      <div class="fw-bold">Email</div>
+      <p class="list-group" th:text="${profesional.email}"></p>
+    </div>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms me-auto">
+      <div class="fw-bold">Dni</div>
+      <p class="list-group" th:text="${profesional.dni}"></p>
+    </div>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms me-auto">
+      <div class="fw-bold">Fecha</div>
+      <p class="list-group" th:text="${profesional.createAt}"></p>
+    </div>
+  </li>
+				    <!-- <li class="list-group-item" th:text="${profesional.apellido}"></li>
+					<li class="list-group-item" th:text="${profesional.nombre}"></li>					
+					<li class="list-group-item" th:text="${profesional.email}"></li>
+					<li class="list-group-item" th:text="${profesional.dni}"></li>
+					<li class="list-group-item" th:text="${profesional.createAt}"></li> -->
+				</ul>
+				
+			</div>
+		</div>
+	</div>
+
+	<!-- PIE DE PAGINA -->
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

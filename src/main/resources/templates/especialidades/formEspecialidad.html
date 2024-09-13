@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-dark text-white">
+			<div class="card-header"></div>
+			<div class="card-body">
+				<!-- TITULO con espacio despues-->
+				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2" style="font-family: Arial"></h2>
+				<h1 class="text-secondary pb-2"></h1>
+				<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/especialidades/formEspecialidad}"
+					th:object="${especialidad}" method="post"
+					>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Codigo</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{especialidadCodigo}"
+								class="form-control" th:errorclass="'form-control alert-danger'" th:disabled="${especialidad.especialidadCodigo} != null"/>
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('especialidadCodigo')}"
+								th:errors="*{especialidadCodigo}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Nombre</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{especialidadNombre}"
+								class="form-control" th:errorclass="'form-control alert-danger'"/>
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('especialidadNombre')}"
+								th:errors="*{especialidadNombre}"></small>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<div class="col-sm-6">
+							<input type="submit" value="Guardar Datos"
+								class="btn btn-secondary"/>
+								<a th:href="@{/especialidades/listarEspecialidad}"
+						class="btn btn-secondary btn-xs">Volver al listado</a>
+						</div>
+					</div>
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

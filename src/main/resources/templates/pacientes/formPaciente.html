@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-dark text-white">
+			<div class="card-header"></div>
+			<div class="card-body">
+			<!-- TITULO con espacio despues-->
+				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2" style="font-family: Arial"></h2>
+				<h1 class="text-secondary pb-2"></h1>
+			<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/pacientes/formPaciente}" th:object="${paciente}" method="post" enctype="multipart/form-data"> 
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Apellido</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{apellido}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Nombre</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{nombre}" class="form-control"
+								th:errorclass="'form-control alert-danger'"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
+						</div>
+					</div>					
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Email</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{email}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Domicilio</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{domicilio}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('domicilio')}" th:errors="*{domicilio}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Localidad</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{localidad}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('localidad')}" th:errors="*{localidad}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Telefono</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{telefono}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('telefono')}"
+								th:errors="*{telefono}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Nº Socio</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{numeroSocio}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('numeroSocio')}"
+								th:errors="*{numeroSocio}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Dni</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{dni}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('dni')}"
+								th:errors="*{dni}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Fecha</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{createAt}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('createAt')}" th:errors="*{createAt}"></small>
+						</div>
+					</div>
+					<!-- <div class="mb-3 row">
+						<label class="col-sm-2 col-form-label">Estado</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{estado}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('estado')}"
+								th:errors="*{estado}"></small>
+						</div>
+					</div> -->
+					<div class="mb-3 row">
+					<label class="col-sm-2 col-form-label">Estado</label>
+					<div class="col-sm-6">
+								<div class="form-group">
+									 <select
+										class="form-select" th:field="*{estado}" name="estado"
+										id="estado">
+										<option value="Activo">Activo</option>
+										<option value="Inactivo">Inactivo</option>
+									</select>
+								</div>
+							</div>
+					</div>
+					
+					<div class="mb-3 row">
+						<label form="file" class="col-sm-2 col-form-label">Foto</label>
+						<div class="col-sm-6">
+							<input type="file" name="file" class="form-control"/>
+						</div>
+					</div>
+					
+					<div class="mb-3 row">
+						<div class="col-sm-6">
+							<input type="submit" value="Guardar Datos"
+								class="btn btn-secondary" />
+								<a th:href="@{/pacientes/listarPaciente}"
+						class="btn btn-secondary btn-xs">Volver al listado</a>
+						</div>
+					</div>
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

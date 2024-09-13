@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<!-- ENCABEZADO DE PAGINA -->
+	<header th:replace="layout/layout :: header "></header>
+
+	<!-- CONTENIDO PRINCIPAL -->
+	<div class="container py-4">
+		<div class="card bg-light">		
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">	
+			<h1><a th:href="@{/especialidades/listarEspecialidad}"
+						class="btn btn-primary btn-xs">Volver al listado</a></h1>			
+				<!--  DATOS DE LA ESPECIALIDAD -->
+				<ul class="list-group">
+				    <li class="list-group-item" th:text="${especialidad.especialidadCodigo}"></li>
+					<li class="list-group-item" th:text="${especialidad.especialidadNombre}"></li>	
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- PIE DE PAGINA -->
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

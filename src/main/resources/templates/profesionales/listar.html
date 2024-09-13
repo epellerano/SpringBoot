@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/layout :: head}"></head>
+<body>
+
+<!--  para traducciones al click en eliminar-->
+ <!-- <div id="i18n_eliminar_cliente" th:text="#{text.cliente.eliminarOk}" style="display: none;"></div> -->
+
+	<header th:replace="~{layout/layout :: header}"></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+
+				<h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/form}" class="btn btn-primary btn-xs">Crear
+						Profesional</a>
+				</h1>
+				<table class="table table-striped">
+					<!-- columnas -->
+					<thead>
+						<tr>
+							<th sec:authorize="hasRole('ROLE_USER')">id</th>
+							<th th:text="#{text.profesional.nombre}">Nombre</th>
+							<th th:text="#{text.profesional.apellido}">Apellido</th>
+							<th th:text="#{text.profesional.email}">Email</th>
+							<th th:text="#{text.profesional.dni}">Dni</th>
+							<th th:text="#{text.profesional.telefono}">Telefono</th>
+							<th th:text="#{text.profesional.codigo}">Codigo</th>
+							<th th:text="#{text.profesional.matricula}">Matricula</th>
+							<th th:text="#{text.profesional.createAt}">Fecha</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">EDITAR</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">BORRAR</th>
+						</tr>
+					</thead>
+
+					<!-- filas -->
+					<tbody>
+						<tr th:each="profesional: ${profesionales}">
+							<td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/ver/} + ${profesional.id}" th:text="${profesional.id}"></a></td>
+							<td th:text="${profesional.nombre}"></td>
+							<td th:text="${profesional.apellido}"></td>
+							<td th:text="${profesional.email}"></td>
+							<td th:text="${profesional.dni}"></td>
+							<td th:text="${profesional.telefono}"></td>
+							<td th:text="${profesional.codigo}"></td>
+							<td th:text="${profesional.matricula}"></td>
+							<td th:text="${profesional.createAt}"></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-primary btn-xs"
+								th:href="@{/form/} + ${profesional.id}">Editar</a></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/eliminar/} + ${profesional.id}"
+								th:onclick="return confirm('Estas seguro que quieres eliminar el Profesional?');">Eliminar</a></td>
+							
+							<!--  para traducciones al click en eliminar-->
+							<!-- <td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/eliminar/} + ${cliente.id}" th:text="#{text.cliente.eliminar}"
+								onclick="return confirm(document.getElementById('i18n_eliminar_cliente').innerHTML);"></a></td> -->
+						</tr>
+					</tbody>
+
+				</table>
+				<nav th:replace="~{paginator-nav :: paginator}"></nav>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+</body>
+</html>

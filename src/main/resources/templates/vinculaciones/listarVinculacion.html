@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			
+			<div class="card-body">
+			<h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/vinculaciones/formVinculacion}" class="btn btn-primary btn-xs">Crear
+						Vinculacion</a>
+				</h1>
+				<table class="table table-striped">
+					<!-- columnas -->
+					<thead>
+						<tr>
+							<th sec:authorize="hasRole('ROLE_USER')">Id</th>							
+							<th>Profesional</th>
+							<th>Especialidad</th>
+							<th>Observacion</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">EDITAR</th>
+							<th sec:authorize="hasRole('ROLE_ADMIN')">BORRAR</th>
+						</tr>
+					</thead>
+
+					<!-- filas -->
+					<tbody>
+						<tr th:each="vinculacion: ${vinculaciones}"> <!-- @Table(name = "vinculaciones") -->
+							<td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/vinculaciones/verVinculacion/} + ${vinculacion.id}" th:text="${vinculacion.id}"></a></td>							
+							 <td th:text="${vinculacion.profesional.apellido} + ' ' + ${vinculacion.profesional.nombre}"></td>
+							 <td th:text="${vinculacion.especialidad.especialidadNombre}"></td>						
+							<td th:text="${vinculacion.observacion}"></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-primary btn-xs"
+								th:href="@{/vinculaciones/formVinculacion/} + ${vinculacion.id}">Editar</a></td>
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/vinculaciones/eliminarVinculacion/} + ${vinculacion.id}"
+								th:onclick="return confirm('Estas seguro que quieres eliminar la vinculacion?');">Eliminar</a></td>
+								                                     
+						</tr>
+					</tbody>
+
+				</table>
+				<nav th:replace="paginator-nav :: paginator"></nav>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>

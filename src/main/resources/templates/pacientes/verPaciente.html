@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<!-- ENCABEZADO DE PAGINA -->
+	<header th:replace="layout/layout :: header "></header>
+	<!-- CONTENIDO PRINCIPAL -->
+	<div class="container py-4">
+		<div class="card bg-light">
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+			<h1><a th:href="@{/pacientes/listarPaciente}"
+						class="btn btn-primary btn-xs">Volver al listado</a></h1>
+			<!-- MOSTRAMOS LA IMAGEN  Y th:src va a MvcConfig -->
+				<img class="img-thumbnail rounded float-start" th:if="${#strings.length(paciente.foto) > 0}" 
+					style="max-width: 25%;" th:src="@{'/uploads/' + ${paciente.foto}}" 
+					th:alt="${paciente.foto}" />
+					
+				<!-- AL LADO DE LA FOTO LOS DATOS DEL PACIENTE -->
+				<ul class="list-group">
+				    <li class="list-group-item" th:title="Apellido" th:text="${paciente.apellido}"></li>
+					<li class="list-group-item" th:title="Nombre" th:text="${paciente.nombre}"></li>					
+					<li class="list-group-item" th:title="Email" th:text="${paciente.email}"></li>
+					<li class="list-group-item" th:title="Domicilio" th:text="${paciente.domicilio}"></li>
+					<li class="list-group-item" th:title="Localidad" th:text="${paciente.localidad}"></li>
+					<li class="list-group-item" th:title="NumeroSocio" th:text="${paciente.numeroSocio}"></li>
+					<li class="list-group-item" th:title="Dni" th:text="${paciente.dni}"></li>
+					<li class="list-group-item" th:title="Telefono" th:text="${paciente.telefono}"></li>
+					<li class="list-group-item" th:title="CreateAt" th:text="${paciente.createAt}"></li>
+					<li class="list-group-item" th:title="Estado" th:text="${paciente.estado}"></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	
+	<!-- PIE DE PAGINA -->
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

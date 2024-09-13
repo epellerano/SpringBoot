@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light text-white">
+			<div class="card-header"></div>
+			<div class="card-body">
+			<!-- TITULO con espacio despues-->
+				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2" style="font-family: Arial"></h2>
+				<h1 class="text-secondary pb-1"></h1>
+			<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/movimientos/formMovimiento}" th:object="${movimiento}" method="post">
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label text-black" for="profesional">Seleccione el
+							Profesional</label>
+						<div class="col-sm-6">
+							<!-- <select id="profesional" class="form-select" th:field="*{profesional.id}" th:onchange="loadEspecialidades()">
+								<option th:each="profesional : ${profesionales}"
+									th:value="${profesional.id}"
+									th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+							</select> -->
+							<select class="form-control" th:field="*{profesional.id}"
+								id="profesional" th:onchange="loadEspecialidade()">
+								<!--<option value="">Selecciona un profesional</option>-->
+								<!-- Renderizar opciones de países desde el controlador -->
+								<option value="">Seleccione un profesional..</option>
+								<option th:each="profesional : ${profesionales}"
+									th:value="${profesional.id}" th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+							</select>
+						</div>
+					</div>
+					<!-- <!-- PARA AUTOCOMPLETE -------------------------------------------------
+						<div class="form-group">
+							<strong><label for="buscar_especialidad"
+								class="col-sm-2 col-form-label"
+								th:text="'Seleccione una especialidad'"></label></strong>
+							<div class="col-sm-4">
+								<input type="text" name="buscar_especialidad"
+									id="buscar_especialidad" class="form-control" />																		
+							</div>							
+							<hr>							
+						</div>
+						FIN AUTOCOMPLETE -------------------------------------------------- -->
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black" for="especialidad">Seleccione
+							la Especialidad</label>
+						<div class="col-sm-6">
+							<select id="especialidad" class="form-select"
+								th:field="*{especialidad.id}" th:onclick="existeEspecialidad()">
+								<option th:each="especialidad : ${especialidades}"
+									th:value="${especialidad.id}"
+									th:text="${especialidad.especialidadNombre}"></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Fecha de Creacion</label>
+						<div class="col-sm-6">
+							<input type="date" th:field="*{createAt}" class="form-control"
+								th:errorclass="'form-control alert-danger'"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('createAt')}" th:errors="*{createAt}"></small>
+						</div>
+					</div>									
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Inicio Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaIniManana}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaIniManana"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaIniManana')}" th:errors="*{horaIniManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Fin Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaFinManana}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinManana"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinManana')}" th:errors="*{horaFinManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Total Hs Turno Mañana</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalManana}" class="form-control bg-primary text-white"
+								th:errorclass="'form-control alert-danger'" id="totalManana" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalManana')}" th:errors="*{totalManana}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Inicio Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaIniTarde}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaIniTarde"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaIniTarde')}"
+								th:errors="*{horaIniTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora Fin Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="time" th:field="*{horaFinTarde}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinTarde"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinTarde')}"
+								th:errors="*{horaFinTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Total Hs Turno Tarde</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalTarde}" class="form-control bg-primary text-white"
+								th:errorclass="'form-control alert-danger'" id="totalTarde" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalTarde')}"
+								th:errors="*{totalTarde}"></small>
+						</div>
+					</div>
+					<div class="mb-4 row">
+						<label class="col-sm-2 col-form-label  text-black">Total General Horas</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{totalGeneral}" class="form-control bg-primary text-white"
+								th:errorclass="'form-control alert-danger'" id="totalGeneral" th:readonly="true"/> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('totalGeneral')}"
+								th:errors="*{totalGeneral}"></small>
+						</div>
+					</div>
+					<!-- <div class="mb-3 row">
+					<label class="col-sm-2 col-form-label">Estado</label>
+					<div class="col-sm-6">
+								<div class="form-group">
+									 <select
+										class="form-select" th:field="*{estado}" name="estado"
+										id="estado">
+										<option value="Activo">Activo</option>
+										<option value="Inactivo">Inactivo</option>
+									</select>
+								</div>
+							</div>
+					</div> -->
+					<div class="mb-2 row justify-content-center">
+						<div class="col-sm-5">
+							<input type="submit" id="btnGuardar" value="Guardar Datos"
+								class="btn btn-secondary" th:onclick="validarHoras()"/> <a
+								th:href="@{/movimientos/listarMovimiento}"
+								class="btn btn-secondary btn-xs">Volver al listado</a>
+						</div>
+					</div>
+
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+	<script th:replace="movimientos/js/autocomplete-especialidad :: javascript"></script>
+	<script th:replace="movimientos/js/load-combobox-vinculacion :: javascript"></script>	
+	<script th:replace="movimientos/js/suma-horas :: javascript"></script>	
+	
+
+</body>
+</html>
