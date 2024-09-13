@@ -19,7 +19,7 @@ public class PlanillaCabeceraServiceImpl implements IPlanillaCabeceraService {
 	@Autowired
 	private IPlanillaCabeceraDao planillacabeceraDao;	
 	@Autowired
-	private IProfesionalDao profesionalDao;	/* PARA AUTOCOMPLETE PROFESIONAL */
+	private IProfesionalDao profesionalDao;	/* PARA AUTOCOMPLETE PROF */
 	@Autowired
 	private IEspecialidadDao especialidadDao; /* PARA AUTOCOMPLETE ESPECIALIDAD */
 
