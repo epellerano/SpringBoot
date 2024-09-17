@@ -47,6 +47,8 @@ INSERT INTO vinculaciones(id, id_especialidad, id_profesional, observacion) VALU
 
 INSERT INTO movimientos(id, id_profesional, id_especialidad, create_at, horaini_manana, horafin_manana, total_manana, horaini_tarde, horafin_tarde, total_tarde, total_general) VALUES(1, 1, 1, '2024-04-16', '09:00', '12:00', '03:00', '16:00', '20:00', '04:00', '07:00');
 
+INSERT INTO planillacabecera(id, id_profesional, id_especialidad, dia_id, estado_id, observacion, fecha_inicio, fecha_final, hora_inicialR1, hora_finalR1, intervalo_r1, hora_inicialR2, hora_finalR2, intervalo_r2) VALUES(1, 1, 1, 2, 1, 'Prueba Planilla', '2024-09-14', '2024-10-14',  '09:00', '12:00', '30', '15:00', '18:00', '30');
+
 /* Creamos algunos usuarios con sus roles */
 INSERT INTO users (username, password, enabled) VALUES ('andres','$2a$10$eH9W7M2qKr204IjMpILO/OQrXnGNfBZrcZjN/PPxDJOKNV8n1Ycii',1);
 INSERT INTO users (username, password, enabled) VALUES ('admin','$2a$10$ozB.BnqBVzQYY2QKd6iUw.c4KTWCrncJ9SJ8Q9oiJ/vWKgxoc0zpy',1);
@@ -54,3 +56,4 @@ INSERT INTO users (username, password, enabled) VALUES ('admin','$2a$10$ozB.BnqB
 INSERT INTO authorities (user_id, authority) VALUES (1,'ROLE_USER');
 INSERT INTO authorities (user_id, authority) VALUES (2,'ROLE_ADMIN');
 INSERT INTO authorities (user_id, authority) VALUES (2,'ROLE_USER');
+

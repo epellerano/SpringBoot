@@ -23,7 +23,6 @@ public class SpringSecurityConfig {
 	@Autowired
 	private LoginSuccessHandler successHandler;
 	
-	
 	@Autowired
     private BCryptPasswordEncoder passwordEncoder;
     
@@ -83,6 +82,11 @@ public class SpringSecurityConfig {
                 .requestMatchers("movimientos/formMovimiento/**").hasAnyRole("ADMIN")
                 .requestMatchers("movimientos/eliminarMovimiento/**").hasAnyRole("ADMIN")
                 .requestMatchers("movimientos/editarMovimiento/**").hasAnyRole("ADMIN")
+             // para planillas a nivel controller
+                .requestMatchers("planillas/verPlanilla/**").hasAnyRole("USER")
+                .requestMatchers("planillas/formPlanilla/**").hasAnyRole("ADMIN")
+                .requestMatchers("planillas/eliminarPlanilla/**").hasAnyRole("ADMIN")
+                .requestMatchers("planillas/editarPlanilla/**").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
              )
              .formLogin(login -> login.permitAll()
