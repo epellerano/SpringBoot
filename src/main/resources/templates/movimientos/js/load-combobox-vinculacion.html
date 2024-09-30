@@ -33,8 +33,13 @@
 			      validarComboBox();
 			    });	
       			}
-      	else
-      	{document.getElementById('btnGuardar').disabled = true;}
+      	else      		
+      	{
+      		//reseteamos combobox especialidad  		    
+      		document.getElementById('especialidad').selectedIndex = -1;
+      		//Deshabilitamos boton Guardar
+      		document.getElementById('btnGuardar').disabled = true;
+      	}
   }
   
   //Funcion para verificar si existen especialidades vinculadas del profesional seleccionado.

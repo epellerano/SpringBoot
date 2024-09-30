@@ -4,7 +4,7 @@
 	<script type="text/javascript" th:fragment="javascript">
 	
 	//Funcion Validar Campos del formulario
-	  function validarHoras(){
+	  function validarHorasyForm(){
 		  var valorDefecto="00:00";
 		  if((document.getElementById('horaIniManana').value).length==0){document.getElementById('horaIniManana').value = valorDefecto;}
 		  if((document.getElementById('horaFinManana').value).length==0){document.getElementById('horaFinManana').value = valorDefecto;}
@@ -17,7 +17,16 @@
 		  calcularManana(document.getElementById('horaIniManana').value, document.getElementById('horaFinManana').value, 'totalManana');
 		  calcularTarde(document.getElementById('horaIniTarde').value, document.getElementById('horaFinTarde').value, 'totalTarde');
 		  calcularTotalGeneral(document.getElementById('totalManana').value, document.getElementById('totalTarde').value, 'totalGeneral');
-	  }
+	  
+		  //Validamos el formulario tambien
+		  var forms = document.getElementById('form');  
+			if(document.getElementById('form').checkValidity())
+			{ 
+				//inhabilitamos los combobox de profesional y el de especialidad.
+				document.getElementById("profesional").selectedIndex = 0;
+				
+			}		
+	}
 	
 	
 		// Calcula horas del turno Mañana

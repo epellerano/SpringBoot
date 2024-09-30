@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+/* .tableContainer{
+    background-color: rgb(255, 255, 255);
+    color: black;
+    border-radius: 5px;
+    border: 1px solid;
+    height: 344px;
+    padding: 0 10px 10px 10px;
+    overflow: scroll;
+    width: 50%;
+    border-bottom: 1px solid #ddd;
+}
+th {
+  background-color: #04AA6D;
+  color: white;
+} */
+
+.member tr:hover{
+    background-color: rgba(41, 103, 182, 0.89);
+    color: #FFF;
+}
+
+.selected{
+    background-color: rgba(41, 103, 182, 0.89);
+    color: #FFF;
+}

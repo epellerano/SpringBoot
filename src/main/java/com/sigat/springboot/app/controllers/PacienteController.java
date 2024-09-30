@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -114,7 +115,7 @@ public class PacienteController {
 		
 		//Metodo guardar segunda fase (post)
 		@RequestMapping(value="/formPaciente", method=RequestMethod.POST)
-		public String guardarPaciente(@Valid Paciente paciente, BindingResult result, Model model, @RequestParam("file") MultipartFile foto ,RedirectAttributes flash ,SessionStatus status)
+		public String guardarPaciente(@Valid @ModelAttribute("paciente") Paciente paciente, BindingResult result, Model model, @RequestParam("file") MultipartFile foto ,RedirectAttributes flash ,SessionStatus status)
 		{
 			if(result.hasErrors())
 			{

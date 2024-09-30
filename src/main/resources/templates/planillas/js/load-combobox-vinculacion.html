@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		// Función para cargar especialidades al seleccionar un profesional 	  
+		function cargarEspecialidades() {
+
+			//verificamos el indice del combobox profesional -----------------------
+			var indexProf = document.getElementById("profesional").selectedIndex;
+			// ----------------------------------------------------------------------
+			
+				if (indexProf != 0) {
+					var profesionalId = $("#profesional").val();
+					if (profesionalId == "") {
+						//mostramos una Alerta personalizada.
+						Swal.fire({
+							  icon: "error",
+							  title: "Ups.. Algo Salio mal..",
+							  text: "No se encontro el Id del Profesional!"
+							});
+						$("#especialidad").empty().prop("disabled", true);
+						return;
+					} //Usamos la funcion del controlador: @ResponseBody List<Especialidad> findByIdProfInVinculacion
+					$.get("/planillacabecera/cargar-especialidades/" + profesionalId,{profesionalId : profesionalId},
+									function(data) {
+										$("#especialidad").empty().prop(
+												"disabled", false);
+										//$("#citySelect").empty().prop("disabled", true);
+										//$("#especialidad").append(new Option("Selecciona una especialidad", ""));     
+
+										// Iterar sobre las especialidades y establecer la especialidad actual del contacto como seleccionado
+										$
+												.each(
+														data,
+														function(index,
+																especialidad) {
+															var selected = especialidad.id === "${especialidad.id}" ? "selected"
+																	: "";
+															$("#especialidad")
+																	.append(
+																			new Option(
+																					especialidad.especialidadNombre,
+																					especialidad.id,
+																					false,
+																					selected));
+														});
+										/* ejecutamos la funcion validar comboBox para asegurarnos que tanto
+										  en Profesional o Especialidad haya seleccionado al menos 1 item.*/
+										validarComboBox();
+										existeEspecialidad();
+									});
+				} 
+				else 
+				{
+					//deshabilitamos combobox especialidad 
+					document.getElementById('especialidad').innerHTML = "";
+					document.getElementById('especialidad').disabled = true;
+					//Deshabilitamos boton Guardar
+					document.getElementById('btnGuardar').disabled = true;
+				}
+		}
+
+		//Funcion para verificar si existen especialidades vinculadas del profesional seleccionado.
+		function existeEspecialidad() {
+			$(document)
+					.ready(
+							function() {
+								var profesionalId = $("#profesional").val();
+								var profesionalNombre = $('#profesional option:selected').text()
+								$.ajax({
+											type : 'GET',
+											url : "/planillacabecera/cargar-especialidades/"
+													+ profesionalId,
+											dataType : 'json',
+											success : function(lista) {
+												//console.log("OK");
+												// validas si la lista es nula			            
+												if (lista == "") {
+													// Mostramos un mensaje de Alerta Personalizado.
+													Swal.fire({
+														  icon: "error",
+														  title: "Ups.. Algo Salio mal..",
+														  text: "No Existen especialidades Vinculadas para el Profesional: \n"
+														  + profesionalNombre.toUpperCase()
+														});
+													document.getElementById('btnGuardar').disabled = true;
+													/* if(lista.lenght > 0){
+													    $.each(lista, function(i, item){
+													        console.log("item: " + item);
+													    });
+													} */
+												} else {
+													document
+															.getElementById('btnGuardar').disabled = false;
+												}
+											},
+											// aquí capturas cualquier error que venga del backend
+											error : function(XMLHttpRequest,
+													textStatus, error) {
+												//alert("status: " + textStatus);
+												//mostramos una Alerta personalizada.
+												Swal.fire({
+													  icon: "error",
+													  title: "Ups.. Algo Salio mal..",
+													  text: "Debe seleccionar un Profesional!"
+													});
+											}
+										});
+
+							});
+		}
+
+		//Funcion para validar comboBox
+		function validarComboBox() {
+			if (document.getElementById("profesional").value != ""
+					&& document.getElementById("especialidad").value != "") {
+				document.getElementById('btnGuardar').disabled = false;
+			} else {
+				if (document.getElementById("profesional").value == ""
+						|| document.getElementById("especialidad").value == "") {
+					document.getElementById('btnGuardar').disabled = true;
+				}
+			}
+		}		
+	
+
+		//ejecutamos la funcion cuando cargue la pagina	   
+		$(document).ready(function() {
+			if (document.getElementById('profesional').selectedIndex == 0) 
+			{
+        		//alert('Ingrese la obssrvacion');
+        		document.getElementById('btnGuardar').disabled = true;
+        		return false;
+   			 }
+			else
+			{
+				document.getElementById('btnGuardar').disabled = false;
+				document.getElementById('especialidad').disabled = true;
+				return true;
+			}			
+		});
+	</script>
+</body>
+</html>

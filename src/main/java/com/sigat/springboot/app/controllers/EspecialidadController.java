@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -97,12 +98,12 @@ public class EspecialidadController {
 			
 			//Metodo guardar segunda fase (post)
 			@RequestMapping(value="/formEspecialidad", method=RequestMethod.POST)
-			public String guardarEspecialidad(@Valid Especialidad especialidad, BindingResult result, Model model ,RedirectAttributes flash ,SessionStatus status)
+			public String guardarEspecialidad(@Valid @ModelAttribute("especialidad") Especialidad especialidad, BindingResult result, Model model ,RedirectAttributes flash ,SessionStatus status)
 			{
 				if(result.hasErrors())
 				{
 					model.addAttribute("titulo", "Formulario de Especialidades");
-					return"formEspecialidad";
+					return"especialidades/formEspecialidad";
 				}
 				// Si el objeto especialidad viene vacio: entonces verificamos duplicados en la BD.
 				if (especialidad.getId() == null) {

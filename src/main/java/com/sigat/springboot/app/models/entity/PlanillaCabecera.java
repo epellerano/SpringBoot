@@ -1,11 +1,8 @@
 package com.sigat.springboot.app.models.entity;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.Date;
-
 import org.springframework.format.annotation.DateTimeFormat;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,6 +17,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+
 @Entity
 @Table(name = "planillacabecera")
 public class PlanillaCabecera implements Serializable{
@@ -29,23 +27,16 @@ public class PlanillaCabecera implements Serializable{
 	private Long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "idProfesional")
+	@JoinColumn(name = "idProfesional", nullable = false)
 	private Profesional profesional;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "idEspecialidad")
+	@JoinColumn(name = "idEspecialidad", nullable = false)
 	private Especialidad especialidad;
 	
-	@NotEmpty
-	@Column(name = "dia_id")
-	private Integer diaId;
-	
-	@NotEmpty
-	@Column(name = "estado_id")
-	private Integer estadoId;
-	
-	@NotEmpty
-	private String Observacion;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "idDia", nullable = false)
+	private Dia dia;
 	
 	@NotNull
 	@Column(name = "fecha_inicio")
@@ -59,179 +50,168 @@ public class PlanillaCabecera implements Serializable{
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date fechaFinal;
 	
-	@NotNull
-	@Column(name = "hora_inicialR1")
-	@Temporal(TemporalType.TIME)
-	@DateTimeFormat(pattern = "HH:mm")
-	private Time horaInicialR1;
-	
-	@NotNull
-	@Column(name = "hora_finalR1")
-	@Temporal(TemporalType.TIME)
-	@DateTimeFormat(pattern = "HH:mm")
-	private Time horaFinalR1;
-	
+	//@NotNull
 	@NotEmpty
-	@Column(name = "intervalo_r1")
+	@Column(name = "hora_inicialR1")
+	//@Temporal(TemporalType.TIME)
+	//@DateTimeFormat(pattern = "HH:mm")
+	private String horaInicialR1;
+	
+	//@NotNull
+	@NotEmpty
+	@Column(name = "hora_finalR1")
+	//@Temporal(TemporalType.TIME)
+	//@DateTimeFormat(pattern = "HH:mm")
+	private String horaFinalR1;
+	
+	@NotNull
+	@Column(name = "intervalo_r1", nullable = false)
 	private Integer intervaloR1;
 	
-	@NotNull
-	@Column(name = "hora_inicialR2")
-	@Temporal(TemporalType.TIME)
-	@DateTimeFormat(pattern = "HH:mm")
-	private Time horaInicialR2;
-	
-	@NotNull
-	@Column(name = "hora_finalR2")
-	@Temporal(TemporalType.TIME)
-	@DateTimeFormat(pattern = "HH:mm")
-	private Time horaFinalR2;
-	
+	//@NotNull
 	@NotEmpty
-	@Column(name = "intervalo_r2")
+	@Column(name = "hora_inicialR2")
+	//@Temporal(TemporalType.TIME)
+	//@DateTimeFormat(pattern = "HH:mm")
+	private String horaInicialR2;
+	
+	//@NotNull
+	@NotEmpty
+	@Column(name = "hora_finalR2")
+	//@Temporal(TemporalType.TIME)
+	//@DateTimeFormat(pattern = "HH:mm")
+	private String horaFinalR2;
+	
+	@NotNull
+	@Column(name = "intervalo_r2", nullable = false)
 	private Integer intervaloR2;
 	
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "idEstado", nullable = false)
+	private Estado estado;
+	
+	@NotEmpty
+	private String Observacion;	
+	
+	//Serial Version
+	private static final long serialVersionUID = 1L;
+
 	//Getters and Setters
 	public Long getId() {
 		return id;
 	}
 
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 	public Profesional getProfesional() {
 		return profesional;
 	}
 
-
 	public void setProfesional(Profesional profesional) {
 		this.profesional = profesional;
 	}
-
 
 	public Especialidad getEspecialidad() {
 		return especialidad;
 	}
 
-
 	public void setEspecialidad(Especialidad especialidad) {
 		this.especialidad = especialidad;
 	}
 
-
-	public Integer getDiaId() {
-		return diaId;
+	public Dia getDia() {
+		return dia;
 	}
 
-
-	public void setDiaId(Integer diaId) {
-		this.diaId = diaId;
+	public void setDia(Dia dia) {
+		this.dia = dia;
 	}
-
-
-	public Integer getEstadoId() {
-		return estadoId;
-	}
-
-
-	public void setEstadoId(Integer estadoId) {
-		this.estadoId = estadoId;
-	}
-
-
-	public String getObservacion() {
-		return Observacion;
-	}
-
-
-	public void setObservacion(String observacion) {
-		Observacion = observacion;
-	}
-
 
 	public Date getFechaInicio() {
 		return fechaInicio;
 	}
 
-
 	public void setFechaInicio(Date fechaInicio) {
 		this.fechaInicio = fechaInicio;
 	}
-
 
 	public Date getFechaFinal() {
 		return fechaFinal;
 	}
 
-
 	public void setFechaFinal(Date fechaFinal) {
 		this.fechaFinal = fechaFinal;
 	}
 
-
-	public Time getHoraInicialR1() {
+	public String getHoraInicialR1() {
 		return horaInicialR1;
 	}
 
-
-	public void setHoraInicialR1(Time horaInicialR1) {
+	public void setHoraInicialR1(String horaInicialR1) {
 		this.horaInicialR1 = horaInicialR1;
 	}
 
-
-	public Time getHoraFinalR1() {
+	public String getHoraFinalR1() {
 		return horaFinalR1;
 	}
 
-
-	public void setHoraFinalR1(Time horaFinalR1) {
+	public void setHoraFinalR1(String horaFinalR1) {
 		this.horaFinalR1 = horaFinalR1;
 	}
-
 
 	public Integer getIntervaloR1() {
 		return intervaloR1;
 	}
 
-
 	public void setIntervaloR1(Integer intervaloR1) {
 		this.intervaloR1 = intervaloR1;
 	}
 
-
-	public Time getHoraInicialR2() {
+	public String getHoraInicialR2() {
 		return horaInicialR2;
 	}
 
-
-	public void setHoraInicialR2(Time horaInicialR2) {
+	public void setHoraInicialR2(String horaInicialR2) {
 		this.horaInicialR2 = horaInicialR2;
 	}
 
-
-	public Time getHoraFinalR2() {
+	public String getHoraFinalR2() {
 		return horaFinalR2;
 	}
 
-
-	public void setHoraFinalR2(Time horaFinalR2) {
+	public void setHoraFinalR2(String horaFinalR2) {
 		this.horaFinalR2 = horaFinalR2;
 	}
-
 
 	public Integer getIntervaloR2() {
 		return intervaloR2;
 	}
 
-
 	public void setIntervaloR2(Integer intervaloR2) {
 		this.intervaloR2 = intervaloR2;
 	}
 
+	public Estado getEstado() {
+		return estado;
+	}
+
+	public void setEstado(Estado estado) {
+		this.estado = estado;
+	}
+
+	public String getObservacion() {
+		return Observacion;
+	}
+
+	public void setObservacion(String observacion) {
+		Observacion = observacion;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 	
-	private static final long serialVersionUID = 1L;
 }

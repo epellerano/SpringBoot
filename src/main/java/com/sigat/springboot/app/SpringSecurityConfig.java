@@ -65,7 +65,7 @@ public class SpringSecurityConfig {
                 .requestMatchers("/uploads/**").hasAnyRole("USER")
                 .requestMatchers("/form/**").hasAnyRole("ADMIN")
                 .requestMatchers("/eliminar/**").hasAnyRole("ADMIN")
-                // para clientes a nivel controller
+                // para pacientes a nivel controller
                 .requestMatchers("pacientes/verPaciente/**").hasAnyRole("USER")
                 .requestMatchers("pacientes/formPaciente/**").hasAnyRole("ADMIN")
                 .requestMatchers("pacientes/eliminarPaciente/**").hasAnyRole("ADMIN")
@@ -83,10 +83,10 @@ public class SpringSecurityConfig {
                 .requestMatchers("movimientos/eliminarMovimiento/**").hasAnyRole("ADMIN")
                 .requestMatchers("movimientos/editarMovimiento/**").hasAnyRole("ADMIN")
              // para planillas a nivel controller
-                .requestMatchers("planillas/verPlanilla/**").hasAnyRole("USER")
-                .requestMatchers("planillas/formPlanilla/**").hasAnyRole("ADMIN")
-                .requestMatchers("planillas/eliminarPlanilla/**").hasAnyRole("ADMIN")
-                .requestMatchers("planillas/editarPlanilla/**").hasAnyRole("ADMIN")
+                .requestMatchers("planillacabecera/verPlanillaCabecera/**").hasAnyRole("USER")
+                .requestMatchers("planillacabecera/formPlanillaCabecera/**").hasAnyRole("ADMIN")
+                .requestMatchers("planillacabecera/eliminarPlanillaCabecera/**").hasAnyRole("ADMIN")
+                .requestMatchers("planillacabecera/editarPlanillaCabecera/**").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
              )
              .formLogin(login -> login.permitAll()

@@ -47,7 +47,28 @@ INSERT INTO vinculaciones(id, id_especialidad, id_profesional, observacion) VALU
 
 INSERT INTO movimientos(id, id_profesional, id_especialidad, create_at, horaini_manana, horafin_manana, total_manana, horaini_tarde, horafin_tarde, total_tarde, total_general) VALUES(1, 1, 1, '2024-04-16', '09:00', '12:00', '03:00', '16:00', '20:00', '04:00', '07:00');
 
-INSERT INTO planillacabecera(id, id_profesional, id_especialidad, dia_id, estado_id, observacion, fecha_inicio, fecha_final, hora_inicialR1, hora_finalR1, intervalo_r1, hora_inicialR2, hora_finalR2, intervalo_r2) VALUES(1, 1, 1, 2, 1, 'Prueba Planilla', '2024-09-14', '2024-10-14',  '09:00', '12:00', '30', '15:00', '18:00', '30');
+
+
+//seteamos los dias de la semana
+INSERT INTO dia(id, nombre) VALUES(1,'DOMINGO');
+INSERT INTO dia(id, nombre) VALUES(2,'LUNES');
+INSERT INTO dia(id, nombre) VALUES(3,'MARTES');
+INSERT INTO dia(id, nombre) VALUES(4,'MIERCOLES');
+INSERT INTO dia(id, nombre) VALUES(5,'JUEVES');
+INSERT INTO dia(id, nombre) VALUES(6,'VIERNES');
+INSERT INTO dia(id, nombre) VALUES(7,'SABADO');
+
+//setemos los estados
+INSERT INTO estado(id, nombre) VALUES(1,'INACTIVO');
+INSERT INTO estado(id, nombre) VALUES(2,'ACTIVO');
+INSERT INTO estado(id, nombre) VALUES(3,'LIBRE');
+INSERT INTO estado(id, nombre) VALUES(4,'OCUPADO');
+INSERT INTO estado(id, nombre) VALUES(5,'ANULADO');
+INSERT INTO estado(id, nombre) VALUES(6,'CANCELADO');
+INSERT INTO estado(id, nombre) VALUES(7,'PARTICULAR');
+INSERT INTO estado(id, nombre) VALUES(8,'EXPIRADO');
+
+INSERT INTO planillacabecera(id, id_profesional, id_especialidad, id_dia, fecha_inicio, fecha_final, hora_inicialR1, hora_finalR1, intervalo_r1, hora_inicialR2, hora_finalR2, intervalo_r2, id_estado, observacion) VALUES(1, 1, 1, 2, '2024-09-14', '2024-10-14',  '09:00', '12:00', '30', '15:00', '18:00', '30', '2', 'Prueba Planilla');
 
 /* Creamos algunos usuarios con sus roles */
 INSERT INTO users (username, password, enabled) VALUES ('andres','$2a$10$eH9W7M2qKr204IjMpILO/OQrXnGNfBZrcZjN/PPxDJOKNV8n1Ycii',1);

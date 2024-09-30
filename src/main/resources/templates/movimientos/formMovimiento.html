@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout/layout :: head "></head>
-<body>
+<body th:onload="loadEspecialidade()">
 	<header th:replace="layout/layout :: header "></header>
 	<div class="container py-4">
 		<div class="card bg-light text-white">
-			<div class="card-header"></div>
+			<!-- <div class="card-header"></div> -->
 			<div class="card-body">
 			<!-- TITULO con espacio despues-->
 				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2" style="font-family: Arial"></h2>
 				<h1 class="text-secondary pb-1"></h1>
 			<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
-				<form th:action="@{/movimientos/formMovimiento}" th:object="${movimiento}" method="post">
+				<form th:action="@{/movimientos/formMovimiento}" th:object="${movimiento}" method="post" id="form">
 
 					<div class="mb-3 row">
 						<label class="col-sm-2 col-form-label text-black" for="profesional">Seleccione el
@@ -22,11 +22,11 @@
 									th:value="${profesional.id}"
 									th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
 							</select> -->
-							<select class="form-control" th:field="*{profesional.id}"
+							<select class="form-select" th:field="*{profesional.id}"
 								id="profesional" th:onchange="loadEspecialidade()">
 								<!--<option value="">Selecciona un profesional</option>-->
-								<!-- Renderizar opciones de países desde el controlador -->
-								<option value="">Seleccione un profesional..</option>
+								<!-- Renderizar opciones de profesionales desde el controlador -->
+								<option value=""></option>
 								<option th:each="profesional : ${profesionales}"
 									th:value="${profesional.id}" th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
 							</select>
@@ -149,7 +149,7 @@
 					<div class="mb-2 row justify-content-center">
 						<div class="col-sm-5">
 							<input type="submit" id="btnGuardar" value="Guardar Datos"
-								class="btn btn-secondary" th:onclick="validarHoras()"/> <a
+								class="btn btn-secondary" th:onclick="validarHorasyForm()"/> <a
 								th:href="@{/movimientos/listarMovimiento}"
 								class="btn btn-secondary btn-xs">Volver al listado</a>
 						</div>

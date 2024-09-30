@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/layout :: head}"></head>
+
+<body>
+	<header th:replace="~{layout/layout :: header}"></header>
+	
+	<div class="container py-4 mx-5"> 
+			<div class="card bg-light" style="width: 125%;">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+			<!-- aca la magia ---------------------------------------------------------------------------------------->
+			<h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/planillacabecera/formPlanillaCabecera}" class="btn btn-primary btn-xs">Crear
+						Planilla</a>
+				</h1>
+				<table class="table table-striped">
+					<!-- columnas -->
+					<thead>
+						<tr>
+							<th sec:authorize="hasRole('ROLE_USER')">Id</th>							
+							<th>Profesional</th>
+							<th>Especialidad</th>
+							<th>Dia</th>							
+							<th>Fecha Inicio</th>
+							<th>Fecha Final</th>
+							<th>Desde</th>
+							<th>Hasta</th>
+							<th>Duracion</th>
+							<th>Desde</th>
+							<th>Hasta</th>
+							<th>Duracion</th>
+							<th>Estado</th>
+							<th>Observacion</th>
+							<!-- <th sec:authorize="hasRole('ROLE_ADMIN')">EDITAR</th> -->
+							<th sec:authorize="hasRole('ROLE_ADMIN')">BORRAR</th>
+						</tr>
+					</thead>
+
+					<!-- filas -->
+					<tbody>
+						<tr th:each="planillacab: ${planillacabecera}"> <!-- @Table(name = "planilla") -->
+							<!-- PARA VER DETALLE - CLICK EN ID -->
+							<td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/planillas/verPlanilla/} + ${planillacab.id}" th:text="${planillacab.id}"></a></td>							
+							<!-- PARA LOS CAMPOS -->
+							<td th:text="${planillacab.profesional.apellido} + ' ' + ${planillacab.profesional.nombre}"></td>
+							
+							<td th:text="${planillacab.especialidad.especialidadNombre}"></td>	
+													
+							<td th:text="${planillacab.dia.nombre}"></td>
+							
+							<td th:text="${planillacab.fechaInicio}"></td>
+							
+							<td th:text="${planillacab.fechaFinal}"></td>
+							
+							<td th:text="${planillacab.horaInicialR1}"></td>
+							
+							<td th:text="${planillacab.horaFinalR1}"></td>
+							
+							<td th:text="${planillacab.intervaloR1}"></td>
+							
+							<td th:text="${planillacab.horaInicialR2}"></td>
+							
+							<td th:text="${planillacab.horaFinalR2}"></td>
+							
+							<td th:text="${planillacab.intervaloR2}"></td>
+							
+							<td th:text="${planillacab.estado.nombre}"></td>
+							
+							<td th:text="${planillacab.observacion}"></td>
+							
+							<!-- PARA LOS BOTONES -->
+							<!-- <td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-primary btn-xs"
+								th:href="@{/planillas/editarPlanilla/} + ${planillacab.id}">Editar</a></td> -->
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/planillas/eliminarPlanilla/} + ${planillacab.id}"
+								th:onclick="return confirm('Estas seguro que quieres eliminar la Planilla?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+
+				</table>
+				<nav th:replace="paginator-nav :: paginator"></nav>
+			
+			<!-- fin d ela magia ------------------------------------------------------------------------------------->
+			
+			
+			</div>
+		</div>
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+</body>
+</html>

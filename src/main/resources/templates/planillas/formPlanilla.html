@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<!-- <link rel="styLesheet" th:href="@{/css/formatoTabla.css}" /> -->
+</head>
+<body> <!-- th:onload="loadEspecialidade()" -->
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-4">
+		<div class="card bg-light text-white">
+			<!-- <div class="card-header"></div> -->
+			<div class="card-body">
+				<!-- TITULO con espacio despues-->
+				<h2 th:text="${titulo}" class="text-secondary border-bottom pb-2"
+					style="font-family: Arial"></h2>
+				<h1 class="text-secondary pb-1"></h1>
+				<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/planillacabecera/formPlanillaCabecera}"
+					th:object="${planillacabecera}" method="post" id="form">
+
+					<div class="mb-3 row">
+						<!-- espacio entre campos -->
+						<label class="col-sm-2 col-form-label text-black"
+							for="profesional">Seleccione el Profesional</label>
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select class="form-select" th:field="*{profesional.id}"
+								id="profesional" th:onchange="cargarEspecialidades()">
+								<!-- Renderizar opciones desde el controlador -->
+								<option value=""></option>
+								<option th:each="profesional : ${profesionales}"
+									th:value="${profesional.id}"
+									th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+							</select>
+						</div>
+						
+						<label class="col-sm-2 col-form-label  text-black"
+							for="especialidad">Seleccione la Especialidad</label>
+						<div class="col-sm-4">
+							<!-- ancho del campo -->
+							<select id="especialidad" class="form-select"
+								th:field="*{especialidad.id}" th:onclick="existeEspecialidad()">
+								<!-- <option value=""></option> -->
+								<option th:each="especialidad : ${especialidades}"
+									th:value="${especialidad.id}"
+									th:text="${especialidad.especialidadNombre}"></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Fecha
+							Inicial Agenda</label>
+						<div class="col-sm-2">
+							<input type="date" th:field="*{fechaInicio}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('fechaInicio')}"
+								th:errors="*{fechaInicio}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Fecha
+							Final</label>
+						<div class="col-sm-2">
+							<input type="date" th:field="*{fechaFinal}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('fechaFinal')}"
+								th:errors="*{fechaFinal}"></small>
+						</div>
+
+						<label class="col-sm-2 col-form-label  text-black" for="dia">Seleccione
+							el Dia</label>
+						<div class="col-sm-2">
+							<select id="dia" class="form-select" th:field="*{dia}">
+								<option value=""></option>
+								<option th:each="dia : ${dias}" th:value="${dia.id}"
+									th:text="${dia.nombre}"></option>
+							</select>
+						</div>
+
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora
+							Inicio Turno Mañana</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaInicialR1}"
+								class="form-control" th:errorclass="'form-control alert-danger'"
+								id="horaInicialR1" /> <small class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaInicialR1')}"
+								th:errors="*{horaInicialR1}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Hora
+							Final</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaFinalR1}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinalR1" /><small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinalR1')}"
+								th:errors="*{horaFinalR1}"></small>
+						</div>
+
+						<label class="col-sm-2 col-form-label text-black">Duracion
+							en Minutos</label>
+						<div class="col-sm-2">
+							<div class="form-group">
+								<select class="form-select" th:field="*{intervaloR1}"
+									name="intervaloR1" id="intervaloR1">
+									<option value=""></option>
+									<option th:value="5">5</option>
+									<option th:value="10">10</option>
+									<option th:value="15">15</option>
+									<option th:value="20">20</option>
+									<option th:value="30">30</option>
+									<option th:value="40">40</option>
+									<option th:value="45">45</option>
+									<option th:value="60">60</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black">Hora
+							Inicio Turno Tarde</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaInicialR2}"
+								class="form-control" th:errorclass="'form-control alert-danger'"
+								id="horaInicialR2" /> <small class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaInicialR2')}"
+								th:errors="*{horaInicialR2}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Hora
+							Final</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaFinalR2}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinalR2" />
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinalR2')}"
+								th:errors="*{horaFinalR2}"></small>
+						</div>
+
+						<label class="col-sm-2 col-form-label text-black">Duracion
+							del Turno</label>
+						<div class="col-sm-2">
+							<div class="form-group">
+								<select class="form-select" th:field="*{intervaloR2}"
+									name="intervaloR2" id="intervaloR2">
+									<option value=""></option>
+									<option th:value="5">5</option>
+									<option th:value="10">10</option>
+									<option th:value="15">15</option>
+									<option th:value="20">20</option>
+									<option th:value="30">30</option>
+									<option th:value="40">40</option>
+									<option th:value="45">45</option>
+									<option th:value="60">60</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="mb-3 row">
+						<label class="col-sm-2 col-form-label  text-black" for="estado">Seleccione
+							el Estado</label>
+						<div class="col-sm-2">
+							<select id="estado" class="form-select" th:field="*{estado}">
+								<!-- en select agregar th:onclick="existeEspecialidad()"> -->
+								<option value=""></option>
+								<option th:each="estado : ${estados}" th:value="${estado.id}"
+									th:text="${estado.nombre}"></option>
+							</select>
+						</div>
+
+						
+						<label class="col-sm-1 col-form-label text-black" for="Observacion">Observ.</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{Observacion}"  name="Observacion" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('Observacion')}"
+								th:errors="*{Observacion}"></small>
+						</div>
+						
+					</div>
+
+					<div class="container py-3"
+						style="height: 300px; overflow-y: scroll">
+						<!-- class="tableContainer" estilo css-->
+						<!-- <table class="table table-bordered">
+  <caption>Rango Fecha Hora</caption>
+  <thead class=table-primary>
+    <tr>
+      <th scope="col" style="width:3px">ID</th>
+      <th scope="col" style="width:244px">RANGO FECHA / HORA</th>
+    </tr>
+  </thead>
+  <tbody class="member">
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">1</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 10:00</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">2</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 10:30</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">3</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 11:00</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">4</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 11:30</td>
+    </tr>    
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">5</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 12:00</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">6</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 12:30</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">7</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 13:00</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">8</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 13:30</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">9</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 14:00</td>
+    </tr>
+    <tr th:onclick="myFunction(this)">
+      <th scope="row" style="width:3px">10</th>
+      <td style="width:244px">Lunes 25 de Septiembre de 2024 14:30</td>
+    </tr>
+  
+  </tbody>
+</table> -->
+
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>Rango Fecha Hora</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="rangoFechasHora : ${rangoFechasHoras}">
+								<!-- <td th:text="${rangoFechasHora.id}"></td> -->
+									<td th:text="${rangoFechasHora.fechaInicio}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="mb-2 row justify-content-center py-3">
+						<div class="col-sm-5">
+							<a th:href="@{/planillacabecera/crearRangoTurnoMañana}"
+								class="btn btn-primary btn-xs">Generar Rango</a> <input
+								type="submit" id="btnGuardar" value="Guardar Planilla"
+								class="btn btn-secondary"> <!-- th:onmouseover="generarRangoHorario()"> --> 
+							<!-- agregar funcion th:onclick="validarCampos()" -->
+							<a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+								class="btn btn-primary btn-xs">Volver al listado</a>
+						</div>
+					</div>
+
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+	<script
+		th:replace="planillas/js/load-combobox-vinculacion :: javascript"></script>
+	<script>
+		function myFunction(x) {
+			alert("Row index is: " + x.rowIndex);
+		}
+	</script>	
+	
+
+</body>
+</html>

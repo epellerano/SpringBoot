@@ -29,11 +29,12 @@ public class PlanillaCabeceraServiceImpl implements IPlanillaCabeceraService {
 		return (List<PlanillaCabecera>) planillacabeceraDao.findAll();
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public Page<PlanillaCabecera> findAll(Pageable pageable) {
-		return planillacabeceraDao.findAll(pageable);
-	}
+	
+	  @Override	  
+	  @Transactional(readOnly = true) 
+	  public Page<PlanillaCabecera>findAll(Pageable pageable) { 
+		  return planillacabeceraDao.findAll(pageable); }
+	 
 
 	@Override
 	@Transactional
@@ -66,5 +67,4 @@ public class PlanillaCabeceraServiceImpl implements IPlanillaCabeceraService {
 	public List<Especialidad> findByNombreEsp(String term) {
 		return especialidadDao.findByNombre(term);
 	}
-
 }
