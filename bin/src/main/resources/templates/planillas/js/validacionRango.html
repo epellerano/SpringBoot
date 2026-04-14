@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">	
+	
+	//FUNCION QUE VERIFICA DUPLICADOS ANTES DE GUARDAR LA PLANILLA.
+	//a su vez Verifica que Fecha Inicial y Hora Inicial R1 sea menor a la fecha actual.
+	//a su vez Verifica que Fecha Inicial y Hora Final R1 sea menor a la fecha actual
+	function validarRango() {
+		
+		//Obtenemos fecha y Hora de inicio.		
+		const dateInicio = document.getElementById('fechaInicio').value;
+		const timeInicioR1 = document.getElementById('horaInicialR1').value;
+		//Obtenemos Hora de inicio turno tarde.	
+		const timeInicioR2 = document.getElementById('horaInicialR2').value;
+		
+		//Armamos fecha y Hora de inicio R1 para comparar.
+		const fechaHoraInicioR1 = moment(dateInicio + " " + timeInicioR1);
+		//Armamos fecha y Hora de inicio R2 para comparar.
+		const fechaHoraInicioR2 = moment(dateInicio + " " + timeInicioR2);
+		const fechaHoraSistema = moment(new Date());
+		// formateamos la fecha y hora de turno mañana y turno tarde. 
+		const horaIniMañanaFormateada = fechaHoraInicioR1.format("DD/MM/YYYY HH:mm");
+		const horaIniTardeFormateada = fechaHoraInicioR2.format("DD/MM/YYYY HH:mm");
+		
+		//Comparamos R1 Inicial
+		if(fechaHoraInicioR1.isBefore(fechaHoraSistema) && document.getElementById('horaInicialR1').value !== "00:00" && document.getElementById('horaFinalR1').value !== "00:00"){
+			// Show confirmation message using Swal
+	        Swal.fire({
+	            icon: "error",
+	            width: '700px',  // Ancho del recuadro
+	            height: '200px', // Alto del recuadro
+	            title: "Lo sentimos.. Algo salió mal.",
+	            //imageUrl: "/images/thumbs-down.jpg",
+	            html: "Fecha_Hora inicial del Turno Mañana es menor a la del sistema..<br> Fecha_Hora con Error: " + horaIniMañanaFormateada,
+	            draggable: true,
+	            didClose: () => { $("#horaInicialR1").focus()}	            
+	        }); 
+	        // Reset result	
+	        result = "";
+	        // Disable #btnGuardar button
+	        document.getElementById('btnGuardar').disabled = true;			
+		}
+		else
+		{
+			//Verificamos si se repiten fechas y horas en el Rango creado.
+			compararFechasDuplicadas();
+			//Verificamos si se repiten fechas y horas en el Rango creado con los que estan almacenados en MySql.
+			verificarDuplicadosConMySql();
+		}
+		
+		//Comparamos R2 Inicial
+		if(fechaHoraInicioR2.isBefore(fechaHoraSistema) && document.getElementById('horaInicialR2').value !== "00:00" && document.getElementById('horaFinalR2').value !== "00:00"){
+			// Show confirmation message using Swal
+	        Swal.fire({
+	            icon: "error",
+	            draggable: true,
+	            width: '600px',  // Ancho del recuadro
+	            height: '200px', // Alto del recuadro
+	            title: "Lo sentimos.. Algo salió mal.",
+	            //imageUrl: "/images/thumbs-down.jpg",
+	            draggable: false,
+	            html: "Fecha_Hora inicial del Turno Tarde es menor a la del sistema..<br>Fecha_Hora con Error: " + horaIniTardeFormateada,
+	            didClose: () => { $("#horaInicialR2").focus()}
+	        }); 
+	        // Reset result	
+	        result = "";
+	        // Disable #btnGuardar button
+	        document.getElementById('btnGuardar').disabled = true;
+			
+		}
+		else
+		{
+			//Verificamos si se repiten fechas y horas en el Rango creado.
+			compararFechasDuplicadas();	
+			//Verificamos si se repiten fechas y horas en el Rango creado con los que estan almacenados en MySql.
+			verificarDuplicadosConMySql();
+		}
+		
+		
+		//FUNCION VERIFICAR DUPLICADOS EN TABLA CREADA --------------------------------------------		
+		function compararFechasDuplicadas() {
+			// Obtenemos mediante el ID la tabla.
+			const tabla = document.getElementById("rango"); 
+			const filas = tabla.getElementsByTagName("tr");
+
+			const fechasVistas = {};
+
+			for (let i = 1; i < filas.length; i++) { // Ignora la primera fila (encabezado)
+			  const fila = filas[i];
+			  const celdaFecha = fila.getElementsByTagName("td")[1]; // Segundo TD
+			  const textoFecha = celdaFecha.textContent.trim();
+
+			  if (textoFecha) {
+			    const fechaFormateada = moment(textoFecha, "DD/MM/YYYY HH:mm").format("DD/MM/YYYY HH:mm");
+
+			    if (fechasVistas[fechaFormateada]) {
+			    	//alert("llego");
+			    	// Resalta la fila
+			      	//fila.style.backgroundColor = "yellow"; 
+			    	//Marcamos en amarillo la fila Duplicada.
+	            	celdaFecha.style.backgroundColor = "yellow";
+			      
+			   		// Show confirmation message using Swal
+			        Swal.fire({
+			            icon: "error",
+			            draggable: true,
+			            title: "Lo sentimos.. Algo salió mal.",
+			            //imageUrl: "/images/thumbs-down.jpg",
+			            html: "Existen duplicados en el Rango Creado...<br> Seran indicados en color amarillo.<br>Por favor generelo nuevamentre!!"
+			        }); 
+			     	// Disable #btnGuardar button
+				    document.getElementById('btnGuardar').disabled = true;
+			    } else {
+			      fechasVistas[fechaFormateada] = true;
+			    }
+			  }
+			}
+		}
+			  
+		//-----------------------------------------------------------------------------------------
+		
+		function verificarDuplicadosConMySql(){
+			//alert("llego a Mysql");
+			// Get all table rows from #rango and #TablaMysql
+		    var row1 = document.querySelectorAll('#rango tr');
+		    var row2 = document.querySelectorAll('#TablaMysql tr');
+
+		    // Initialize variables to store table data
+		    var td1 = [];
+		    var td2 = [];
+
+		    // Get all table data from #rango and #TablaMysql
+		    row1.forEach(function(row) {
+		        var cells = row.querySelectorAll('td');
+		        cells.forEach(function(cell) {
+		            td1.push(cell);
+		        });
+		    });
+
+		    row2.forEach(function(row) {
+		        var cells = row.querySelectorAll('td');
+		        cells.forEach(function(cell) {
+		            td2.push(cell);
+		        });
+		    });
+
+		    // Initialize variable to store result
+		    var result = [];
+
+		    // Iterate over table data from #rango
+		    for (var i = 0; i < td1.length; i++) {
+		        var val1 = td1[i].innerHTML;
+
+		        // Iterate over table data from #TablaMysql
+		        for (var j = 0; j < td2.length; j++) {
+		            var val2 = td2[j].innerHTML;
+
+		            // Check if values are equal
+		            if (val1 === val2) {
+		            	//Marcamos en amarillo la fila Duplicada.
+		            	td1[i].style.backgroundColor = "yellow";
+		                result += val1;
+		            }
+		        }
+		    }
+		    //alert('aqui: ') + result.tostring();
+		    
+		    // Check if result is not empty
+		    if (result.length >= 1 ) {
+		        // Show confirmation message using Swal
+		        Swal.fire({
+		            icon: "error",
+		            title: "Lo sentimos.. Algo salió mal.",
+		            //imageUrl: "/images/thumbs-down.jpg",
+		            html: "Existe al menos un Rango Horario<br>repetido en la base de Datos...<br> Seran indicados en color amarillo." // + result
+		        }); 
+
+		        // Reset result	
+		        result = "";
+
+		        // Disable #btnGuardar button
+		        document.getElementById('btnGuardar').disabled = true;
+		    }
+		}
+	}
+	</script>
+</body>
+</html>

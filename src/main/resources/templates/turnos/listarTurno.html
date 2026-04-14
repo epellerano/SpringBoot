@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
+    <!-- Font Awesome 7 Local -->
+    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+    /* Estética SIGAT: Full Width y Control de Altura */
+    .viewport-container {
+        min-height: calc(100vh - 110px);
+        padding: 1.5rem 15px;
+    }
+
+    .header-clinica {
+        border-bottom: 2px solid #dee2e6;
+        position: relative;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+    .header-clinica::after {
+        content: "";
+        position: absolute; bottom: -2px; left: 0;
+        width: 100px; height: 4px;
+        background-color: #0d6efd; border-radius: 2px;
+    }
+
+    /* Panel de Búsqueda Estilizado */
+    .search-panel {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Tabla Médica Moderna */
+    .table-container {
+        height: 400px; /* Altura optimizada para ver muchos turnos */
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+    }
+    .table thead th {
+        position: sticky; top: 0;
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        z-index: 10;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .badge-clinico {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+        padding: 0.4em 0.7em;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+
+    .btn-action-turno {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+</style>
+<body class="bg-light">
+
+    <header th:replace="~{layout/layout :: header}"></header>
+
+    <div class="container-fluid viewport-container px-lg-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-1">
+                
+                <!-- ENCABEZADO Y BOTÓN NUEVO -->
+                <div class="header-clinica d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-calendar-check fa-2x text-primary me-3"></i>
+                        <div>
+                            <h3 th:text="${titulo}" class="fw-bold text-dark mb-0" style="font-family: Arial;"></h3>
+                            <p class="text-muted mb-0 small fw-bold text-uppercase" style="font-size: 0.7rem;">SIGAT • Control Central de Busqueda de Citas Médicas</p>
+                        </div>
+                    </div>
+                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/turnos/formTurno}" 
+                       class="btn btn-primary fw-bold shadow-sm px-4">
+                        <i class="fa-solid fa-calendar-plus me-2"></i>GENERAR NUEVO TURNO
+                    </a>
+                </div>
+
+                <!-- PANEL DE FILTROS -->
+                <div class="search-panel">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-magnifying-glass me-1"></i> Buscar por Apellido</label>
+                            <input type="text" id="filtroBusquedaApellido" class="form-control" placeholder="Escriba apellido..." onclick="limpiarFiltros()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-address-card me-1"></i> Buscar por DNI</label>
+                            <input type="text" id="filtroBusquedaDni" class="form-control" placeholder="Escriba documento..." onclick="limpiarFiltros()">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="limpiarFiltros()">
+                                <i class="fa-solid fa-broom me-2"></i>BORRAR FILTROS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA DE TURNOS -->
+                <div class="table-container shadow-sm">
+                    <table class="table table-hover align-middle mb-0" id="tablaListadoTurnos">
+                        <thead>
+                            <tr>
+                                <th class="text-center">ID</th>
+                                <th>Alta</th>
+                                <th>Profesional</th>
+                                <th>Especialidad</th>
+                                <th>Paciente</th>
+                                <th>DNI</th>
+                                <th>Fecha Cita</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="turno: ${turnos}">
+                                <td class="text-center font-monospace small" th:text="${turno.id}"></td>
+                                <td th:text="${#temporals.format(turno.fechaCreacion, 'dd/MM/yyyy')}"></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa-solid fa-user-doctor text-primary me-2"></i>
+                                        <span class="fw-bold text-dark" th:text="${turno.profesional.apellido} + ' ' + ${turno.profesional.nombre}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-clinico" th:text="${turno.especialidad.especialidadNombre}"></span>
+                                </td>
+                                <td class="text-dark fw-bold" th:text="${turno.paciente.apellido} + ' ' + ${turno.paciente.nombre}"></td>
+                                <td th:text="${turno.paciente.dni}"></td>
+                                <td class="fw-bold text-primary">
+                                    <i class="fa-solid fa-clock-pulse me-1"></i>
+                                    <span th:text="${#dates.format(turno.planilladetalle.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></span>
+                                </td>
+                                
+                                <!-- ACCIONES -->
+                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <button class="btn btn-action-turno btn-outline-info" th:onclick="|printTurno('${turno.id}')|" title="Imprimir Comprobante">
+                                            <i class="fa-solid fa-print"></i>
+                                        </button>
+                                        <a th:href="@{/turnos/formTurno(profId=${turno.profesional.id}, especId=${turno.especialidad.id})}" 
+                                           class="btn btn-action-turno btn-outline-success" title="Repetir / Nuevo Turno">
+                                            <i class="fa-solid fa-hand-point-left"></i>
+                                        </a>
+                                        <a th:href="@{/turnos/eliminar/} + ${turno.id}" 
+                                           class="btn btn-action-turno btn-outline-danger" 
+                                           th:onclick="return confirm('¿Está seguro que desea eliminar este turno?');" title="Eliminar">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layout/layout :: footer}"></footer>
+    <script th:replace="turnos/js/funcionesParaListarTurnos :: javascript"></script>
+</body>
+</html>

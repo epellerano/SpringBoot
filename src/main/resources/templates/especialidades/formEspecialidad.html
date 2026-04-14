@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<!-- Font Awesome para iconos médicos -->
+<link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<style>
+/* Estética SIGAT: Centrado vertical y aprovechamiento de pantalla */
+.viewport-container {
+	min-height: calc(100vh - 120px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 12px;
+	margin-bottom: 28px;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 100px;
+	height: 4px;
+	background-color: #198754;
+	border-radius: 2px;
+}
+
+/* Inputs coherentes con Profesionales y Pacientes */
+.form-control {
+	padding: 0.6rem 0.75rem;
+	border: 1px solid #ced4da;
+}
+
+.input-group-text {
+	background-color: #f8f9fa;
+	border: 1px solid #ced4da;
+	border-right: none;
+	color: #495057;
+}
+</style>
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header "></header>
+
+	<div class="container viewport-container">
+		<div class="row justify-content-center w-100 m-0">
+			<div class="col-12 col-md-8 col-lg-6 col-xl-8">
+				<!-- Más angosto por ser pocos campos -->
+
+				<div class="card shadow-lg border-0 rounded-3">
+					<div class="card-body p-4 p-md-5">
+
+						<!-- TÍTULO CON ICONO DE ESPECIALIDAD (ESTILO RELLENO) -->
+						<div class="header-clinica d-flex align-items-center">
+							<!-- Mismo fondo verde claro -->
+							<div
+								class="d-flex align-items-center justify-content-center rounded-3 me-3"
+								style="width: 80px; height: 80px; background-color: #e8f5e9;">
+
+								<!-- Usamos bi-patch-check-fill o bi-briefcase-fill para que sea sólido -->
+								<i class="bi bi-patch-check-fill"
+									style="font-size: 3rem; color: #2e7d32;"></i>
+							</div>
+
+							<div>
+								<h3 th:text="${titulo}" class="fw-bold text-dark mb-0"></h3>
+								<p class="text-muted mb-0 text-uppercase small"
+									style="letter-spacing: 1px; font-size: 0.7rem; font-weight: 600;">
+									SIGAT • Configuración de Especialidades</p>
+							</div>
+						</div>
+
+
+						<form th:action="@{/especialidades/formEspecialidad}"
+							th:object="${especialidad}" method="post" id="formEspecialidad">
+							<div class="row g-4">
+
+								<!-- Código de Especialidad -->
+								<div class="col-12">
+									<label class="form-label fw-bold text-dark small mb-1">Código</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-hashtag"></i></span> <input type="text"
+											style="text-transform: uppercase;"
+											th:field="*{especialidadCodigo}" class="form-control"
+											th:errorclass="'form-control is-invalid'"
+											th:disabled="${especialidad.especialidadCodigo} != null"
+											placeholder="EJ: CARD" />
+									</div>
+									<div class="invalid-feedback d-block"
+										th:if="${#fields.hasErrors('especialidadCodigo')}"
+										th:errors="*{especialidadCodigo}"></div>
+								</div>
+
+								<!-- Nombre de Especialidad -->
+								<div class="col-12">
+									<label class="form-label fw-bold text-dark small mb-1">Nombre
+										de la Especialidad</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-briefcase-medical"></i></span> <input type="text"
+											style="text-transform: uppercase;"
+											th:field="*{especialidadNombre}" class="form-control"
+											th:errorclass="'form-control is-invalid'"
+											placeholder="EJ: CARDIOLOGÍA" />
+									</div>
+									<div class="invalid-feedback d-block"
+										th:if="${#fields.hasErrors('especialidadNombre')}"
+										th:errors="*{especialidadNombre}"></div>
+								</div>
+
+								<!-- ACCIONES -->
+								<div class="col-12 mt-4 pt-2">
+									<div class="d-flex flex-column gap-2">
+										<button type="submit" id="btnGuardar"
+											class="btn btn-success btn-lg fw-bold shadow-sm">
+											<i class="fa-solid fa-save me-2"></i>GUARDAR ESPECIALIDAD
+										</button>
+										<a th:href="@{/especialidades/listarEspecialidad}"
+											class="btn btn-outline-secondary fw-bold"> VOLVER AL
+											LISTADO </a>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer "></footer>
+
+	<script th:inline="javascript">
+		// Feedback visual al enviar
+		document
+				.getElementById('formEspecialidad')
+				.addEventListener(
+						'submit',
+						function() {
+							const btn = document.getElementById('btnGuardar');
+							btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-2"></i> Procesando...';
+							btn.classList.add('disabled');
+						});
+	</script>
+</body>
+</html>

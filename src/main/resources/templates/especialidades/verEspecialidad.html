@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+    <!-- Font Awesome para iconos médicos -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<style>
+    /* --- ESTILOS PARA PANTALLA --- */
+    .viewport-container {
+        min-height: calc(100vh - 110px); 
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .header-clinica {
+        border-bottom: 2px solid #dee2e6;
+        position: relative;
+        padding-bottom: 12px;
+        margin-bottom: 30px;
+    }
+    .header-clinica::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100px;
+        height: 4px;
+        background-color: #0d6efd;
+        border-radius: 2px;
+    }
+
+    .info-box {
+        background-color: #f8fafc;
+        border-radius: 8px;
+        padding: 15px 20px;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #64748b;
+        font-weight: 800;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .info-label i { margin-right: 8px; color: #0d6efd; }
+
+    .info-value {
+        font-size: 1.2rem;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .badge-clinico {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    /* --- ESTILOS EXCLUSIVOS PARA IMPRESIÓN (PDF) --- */
+    @media print {
+        /* Oculta botones, encabezado y pie de página */
+        header, footer, .btn-acciones, .fa-solid {
+            display: none !important;
+        }
+        
+        body {
+            background-color: white !important;
+        }
+        
+        .viewport-container {
+            min-height: auto !important;
+            padding: 0 !important;
+            display: block !important;
+        }
+        
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .info-box {
+            border: 1px solid #dee2e6 !important;
+            background-color: white !important;
+        }
+
+        .badge-clinico {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            border: 1px solid #10b981 !important;
+        }
+    }
+</style>
+<body class="bg-light">
+
+    <header th:replace="layout/layout :: header "></header>
+
+    <div class="container viewport-container">
+        <div class="row justify-content-center w-100 m-0">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6"> 
+                
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <!-- ENCABEZADO DE FICHA -->
+                        <div class="header-clinica d-flex align-items-center">
+                            <i class="fa-solid fa-stethoscope fa-3x text-primary me-4"></i>
+                            <div>
+                                <h2 th:text="${titulo}" class="fw-bold text-dark mb-0"></h2>
+                                <p class="text-muted mb-0 small fw-bold text-uppercase">Detalles del Área Médica</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mt-2">
+                            <!-- BLOQUE CÓDIGO -->
+                            <div class="col-12">
+                                <div class="info-box shadow-sm">
+                                    <div class="info-label"><i class="fa-solid fa-hashtag"></i>Código de Identificación</div>
+                                    <div class="mt-2">
+                                        <span class="badge-clinico" th:text="${especialidad.especialidadCodigo}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOQUE NOMBRE -->
+                            <div class="col-12">
+                                <div class="info-box shadow-sm">
+                                    <div class="info-label"><i class="fa-solid fa-briefcase-medical"></i>Nombre de la Especialidad</div>
+                                    <div class="info-value text-uppercase" th:text="${especialidad.especialidadNombre}"></div>
+                                </div>
+                            </div>
+
+                            <!-- ACCIONES (Se ocultan al imprimir gracias a la clase btn-acciones) -->
+                            <div class="col-12 mt-5 btn-acciones">
+                                <div class="d-flex flex-column flex-sm-row gap-3">
+                                    <button onclick="window.print();" class="btn btn-primary btn-lg flex-grow-1 fw-bold shadow">
+                                        <i class="fa-solid fa-print me-2"></i>IMPRIMIR FICHA
+                                    </button>
+                                    <a th:href="@{/especialidades/listarEspecialidad}" class="btn btn-outline-secondary btn-lg flex-grow-1 fw-bold">
+                                        <i class="fa-solid fa-arrow-left me-2"></i>VOLVER AL LISTADO
+                                    </a>                                    
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

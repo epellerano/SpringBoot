@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
+<!-- Font Awesome 7 Local -->
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+/* Estética SIGAT: Diseño Compacto de Alta Densidad */
+body {
+	font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.viewport-container {
+	min-height: calc(100vh - 115px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 15px; /* Padding externo reducido */
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 8px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -1px;
+	left: 0;
+	width: 100px;
+	height: 4px;
+	background-color: #198754;
+	border-radius: 2px;
+}
+
+/* CAJAS MÁS CORTAS DE ALTO */
+.sigat-box {
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 12px 15px; /* Padding reducido al mínimo prolijo */
+	margin-bottom: 10px;
+}
+
+.box-label {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #6c757d;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	margin-bottom: 2px;
+	display: block;
+}
+
+/* FOTO COMPACTA */
+.doctor-photo-frame {
+	width: 65px;
+	height: 65px;
+	border-radius: 8px;
+	border: 2px solid #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+	background-color: #edf2f7;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.doctor-photo-frame img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* TABLAS DE RESULTADOS COMPACTAS */
+.table-scroll-fixed {
+	height: 170px; /* Altura optimizada para monitores estándar */
+	overflow-y: auto;
+	border: 1px solid #e2e8f0;
+	border-radius: 6px;
+	background: white;
+}
+
+.table thead th {
+	position: sticky;
+	top: 0;
+	background-color: #f1f5f9;
+	font-size: 0.7rem;
+	z-index: 10;
+	padding: 5px;
+}
+
+.form-control, .form-select {
+	border: 1px solid #ced4da;
+	padding: 0.4rem 0.75rem;
+	font-size: 0.9rem;
+}
+
+#fechaHora {
+	font-weight: 700;
+	color: #64748b;
+	font-size: 0.95rem;
+	border: none;
+	background: transparent;
+	width: 210px;
+}
+</style>
+<body class="bg-light">
+
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<div class="container-fluid viewport-container px-lg-4">
+		<div class="row w-100 m-0 justify-content-center">
+			<div class="col-12">
+
+				<div class="card shadow-sm border-0 rounded-3">
+					<div class="card-body p-3 p-lg-4">
+
+						<!-- ENCABEZADO: TÍTULO Y RELOJ IZQUIERDA (VERDE PROFESIONAL) -->
+						<div
+							class="header-clinica d-flex justify-content-between align-items-center">
+
+							<!-- LADO IZQUIERDO: Icono y Títulos -->
+							<div class="d-flex align-items-center">
+								<!-- Contenedor con fondo verde suave -->
+								<div
+									class="d-flex align-items-center justify-content-center rounded-3 me-3"
+									style="width: 70px; height: 70px; background-color: #e8f5e9;">
+
+									<!-- Icono de Calendario con X (Relleno) -->
+									<i class="bi bi-calendar-x-fill"
+										style="font-size: 2.5rem; color: #2e7d32;"></i>
+								</div>
+
+								<div>
+									<h4 th:text="${titulo}" class="fw-bold text-dark mb-0"></h4>
+									<p class="text-muted mb-0 small text-uppercase"
+										style="font-size: 0.7rem; letter-spacing: 1.2px; font-weight: 600;">
+										SIGAT • Cancelacion de Agendas Médicas</p>
+								</div>
+							</div>
+
+							<!-- LADO DERECHO: Box de Hora (Estilo Moderno) -->
+							<div
+								class="d-flex align-items-center bg-light border-0 px-3 py-2 rounded-3 shadow-sm">
+								<i class="bi bi-clock-fill text-success me-2"></i> <input
+									type="text" id="fechaHora" name="fechaHora" readonly
+									style="border: none; background: transparent; font-weight: bold; outline: none; width: 170px; color: #2e7d32; font-size: 0.9rem;">
+							</div>
+						</div>
+
+
+						<form id="myFormCancelarPlanilla">
+							<input type="checkbox" id="isCheckProfEsp" style="display: none;">
+
+							<!-- BOX 1: MÉDICO Y ESPECIALIDAD (Más corto) -->
+							<div class="sigat-box">
+								<div class="row g-3 align-items-center">
+									<!-- Foto del Doctor -->
+									<div class="col-auto">
+										<div class="doctor-photo-frame">
+											<img id="fotoMedico" src="" style="display: none;">
+											<div id="defaultAvatar" class="text-center text-muted">
+												<i class="fa-solid fa-user-doctor fa-2x"></i>
+												<div style="font-size: 0.5rem; font-weight: 800;">DOCTOR</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Contenedor de Selección -->
+									<div class="col">
+										<!-- Título General (Opcional, si quieres quitarlo para ganar espacio puedes hacerlo) -->
+										<!-- <span class="box-label mb-2 d-block"><i class="fa-solid fa-user-md me-1"></i> Seleccióne un Profesional</span> -->
+
+										<div class="row g-2">
+											<!-- Columna Médico -->
+											<div class="col-md-6">
+												<span class="box-label"><i
+													class="fa-solid fa-user me-1"></i> Seleccióne un
+													Profesional</span> <select class="form-select form-select-sm"
+													id="profesional" name="profesional"
+													onchange="cargarEspecialidades()">
+													<option value="" disabled selected>Médico...</option>
+													<option th:each="p : ${profesionales}" th:value="${p.id}"
+														th:text="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"></option>
+												</select>
+											</div>
+
+											<!-- Columna Especialidad -->
+											<div class="col-md-6">
+												<span class="box-label"><i
+													class="fa-solid fa-stethoscope me-1"></i> Especialidad
+													Vinculada</span> <select id="especialidad" name="especialidad"
+													class="form-select form-select-sm"
+													onclick="existeEspecialidad()"
+													onchange="focusTipoCancelacion();">
+													<option value="" disabled selected>Especialidad...</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<!-- BOX 2 Y 3: MOTIVOS Y RANGO (En una sola fila para ahorrar alto) -->
+							<div class="row g-2">
+								<div class="col-lg-5">
+									<div class="sigat-box h-100">
+										<span class="box-label"><i
+											class="fa-solid fa-circle-info me-1"></i> Configuración de
+											Baja</span>
+										<div class="row g-2">
+											<div class="col-12">
+												<select class="form-select form-select-sm mb-2"
+													id="tipoCancelacion" name="tipoCancelacion"
+													onchange="deshabilitarElementos()">
+													<option value="" disabled selected>Modalidad...</option>
+													<option value="PorFecha">Por Fecha Completa</option>
+													<option value="PorFechaHora">Por Rango Horario</option>
+												</select>
+											</div>
+											<div class="col-12">
+												<select id="motivoCancelacion" name="motivoCancelacion"
+													class="form-select form-select-sm"
+													onchange="focusFechaInicio();">
+													<option value="" disabled selected>Motivo...</option>
+													<option value="Trafico Intenso">Tráfico Intenso</option>
+													<option value="Congreso">Congreso Médico</option>
+													<option value="Paro General">Paro General</option>
+													<option value="Enfermedad">Enfermedad</option>
+													<option value="Cirugia">Cirugía</option>
+													<option value="Otro Motivo">Otro Motivo</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-lg-7">
+									<div class="sigat-box h-100 border-primary-subtle shadow-sm">
+										<span class="box-label text-secondary"><i
+											class="fa-solid fa-clock-rotate-left me-1"></i> Período de
+											Aplicación</span>
+										<div class="row g-2">
+											<div class="col-md-6 border-end pe-2">
+												<label class="small fw-bold text-success mb-1"
+													style="font-size: 0.65rem;">INICIO</label>
+												<div class="d-flex gap-1">
+													<input type="date" class="form-control form-control-sm"
+														id="fechaInicial"> <input type="time"
+														class="form-control form-control-sm" id="horaInicio"
+														style="width: 100px;">
+												</div>
+											</div>
+											<div class="col-md-6 ps-2">
+												<label class="small fw-bold text-warning mb-1"
+													style="font-size: 0.65rem;">FINAL</label>
+												<div class="d-flex gap-1">
+													<input type="date" class="form-control form-control-sm"
+														id="fechaFin"> <input type="time"
+														class="form-control form-control-sm" id="horaFinal"
+														style="width: 100px;">
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- TABLAS DE RESULTADOS (Altura balanceada) -->
+							<div class="row g-2 mt-2">
+								<div class="col-md-4">
+									<h6 class="fw-bold text-success" style="font-size: 0.7rem;">
+										<i class="fa-solid fa-door-open me-1"></i> TURNOS LIBRES
+									</h6>
+									<div class="table-scroll-fixed shadow-sm">
+										<table class="table table-sm table-hover mb-0"
+											id="tablaTurnosLibres">
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<h6 class="fw-bold text-primary" style="font-size: 0.7rem;">
+										<i class="fa-solid fa-user-check me-1"></i> OCUPADOS
+									</h6>
+									<div class="table-scroll-fixed shadow-sm">
+										<table class="table table-sm table-hover mb-0"
+											id="tablaTurnosOcupados">
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<h6 class="fw-bold text-warning" style="font-size: 0.7rem;">
+										<i class="fa-solid fa-plus-circle me-1"></i> SOBRETURNOS
+									</h6>
+									<div class="table-scroll-fixed shadow-sm">
+										<table class="table table-sm table-hover mb-0"
+											id="tablaSobreturnosOcupados">
+											<tbody></tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+
+							<!-- ACCIONES FINALES -->
+							<div class="d-flex gap-2 mt-3">
+								<button type="button" id="btnBuscarDatos"
+									class="btn btn-secondary fw-bold flex-grow-1 shadow-sm py-2"
+									onclick="buscarDatos()">
+									<i class="fa-solid fa-search me-1"></i> BUSCAR RESULTADOS
+								</button>
+								<button type="button" id="btnCancelarTurnos"
+									class="btn btn-success fw-bold flex-grow-1 shadow py-2"
+									onclick="cancelarTurnos()">
+									<i class="fa-solid fa-ban me-1"></i> EJECUTAR CANCELACIÓN
+								</button>
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+
+	<!-- SCRIPTS MANTENIDOS -->
+	<script
+		th:replace="planillas/js/load-combobox-vinculacion-cancelar-turnos :: javascript"></script>
+	<script
+		th:replace="planillas/js/funcionesParaCancelarPlanillas :: javascript"></script>
+
+	<script>
+		// Lógica de Foto con Fallback
+		const imgEl = document.getElementById('fotoMedico');
+		const fallback = document.getElementById('defaultAvatar');
+		imgEl.onerror = function() {
+			this.style.display = 'none';
+			fallback.style.display = 'block';
+		};
+
+		// Reloj Sincronizado
+		function updateTime() {
+			const now = new Date();
+			const timeStr = now.toLocaleDateString() + ' '
+					+ now.toLocaleTimeString();
+			const el = document.getElementById('fechaHora');
+			if (el)
+				el.value = timeStr;
+		}
+		setInterval(updateTime, 1000);
+		updateTime();
+	</script>
+</body>
+</html>

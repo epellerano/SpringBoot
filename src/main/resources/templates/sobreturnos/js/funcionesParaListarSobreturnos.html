@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+	
+	//Convertimos a español los dias de la semana de moment.
+	function ObtenerDiaEspañol(date) {
+		const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+		return days[moment(date).day()];
+	}
+	
+	//Funcion Ver datos del sobreturno y reimprimir por id mediante la funcion que escucha click en impresora.
+	  function printSobreturno(sobreturno_id) {
+		//Continuamos
+		$.ajax({
+       url: "/api/sobreturnosLibresController/obtener-sobreturno-id/" + sobreturno_id,
+ 		method: "GET",
+ 		success: function(data) { 			
+           moment.locale('es-ar');
+           data.forEach(function(sobreturno) {
+              swal.fire({
+           	   title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL SOBRETURNO ASIGNADO</h5>
+           		   <p style='float: center;color: green; font-size: 22px;'>${ObtenerDiaEspañol(sobreturno.rangoFechaHora) + ' ' + moment(sobreturno.rangoFechaHora).format('DD/MM/YYYY HH:mm')}</p><hr style='margin-bottom: -5px;'>`,
+		      html: `
+		    	  <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${sobreturno.profesional.apellido.toUpperCase() + ' ' + sobreturno.profesional.nombre.toUpperCase()}</span><br>
+		    	  <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${sobreturno.especialidad.especialidadCodigo + ' - ' + sobreturno.especialidad.especialidadNombre.toUpperCase()}</span><br>
+		    	  <hr>
+		    	  <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${sobreturno.paciente.apellido.toUpperCase() + ' ' + sobreturno.paciente.nombre.toUpperCase()}</span><br>
+		    	  <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${sobreturno.paciente.dni}</span><br>
+		    	  <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${sobreturno.observacion.toUpperCase()}</span><br>
+		    	  <hr>
+		    	  <span style='font-family: Arial; font-size: 12px;'>Juan Francisco Segui 1331 - Grand Bourg || Telefonos: 02320-410000/411317/486666</span><br>
+		    	  <span style='font-family: Arial; font-size: 12px;'>** Asistir 20 Minutos antes de su hora asignada **</span><br>				    	  				    	  						
+		    	  <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>www.centromedicosalud.com</span>
+		      `,
+		      //icon: "info",
+		      imageUrl : '/images/termalPrinter-56.png',
+		      showDenyButton: true,
+		      confirmButtonText: `
+		    	    <i class="fa fa-print"></i> Imprimir
+		    	  `,
+		      denyButtonText: 'Cerrar Ventana',	
+		      denyButtonColor: "#3085d6",
+		      customClass: {
+		      popup: 'swal2-border-custom' //Style producido en styleformTurno.css
+		      }
+		      })
+		      .then((result) => {
+		      if (result.isConfirmed) {
+		      //Reimprimimos en turno
+		      									
+		      Swal.fire('IMPRIMIENDO', 'El sobreturno seleccionado', 'success')
+		      } else if (result.isDenied) {
+		      //Swal.fire('HASTA PRONTO', '', 'info')
+		      }
+		      });	                	
+           });
+           
+ 		},
+ 		error: function(error) {
+           console.log(error);
+       }
+   });
+	}
+	
+	//FUNCION PARA FILTRAR SOBRETURNOS POR APELLIDO EN listarSobreturnos.html
+	     document.getElementById('filtroBusquedaApellido').addEventListener('input', function() {
+	        var textoFiltro = this.value.toLowerCase(); // Obtiene el texto en minúsculas
+	        var filas = document.getElementById('tablaListadoSobreturnos').getElementsByTagName('tr');
+	        //limpia el filtro por Dni
+	        const myInputDni = document.getElementById('filtroBusquedaDni');
+	        myInputDni.value = '';
+
+	        for (var i = 0; i < filas.length; i++) {
+	            var celdaNombre = filas[i].getElementsByTagName('td')[4]; // La cuarta celda es la de nombre
+	            
+              if (celdaNombre) {
+                  var textoCelda = celdaNombre.textContent || celdaNombre.innerText;
+                  // Compara el texto del filtro con el texto de la celda (ambos en minúsculas)
+                  if ((textoCelda.toLowerCase().indexOf(textoFiltro) > -1)) {
+                      filas[i].style.display = ""; // Muestra la fila si hay coincidencia
+                  } else {
+                      filas[i].style.display = "none"; // Oculta la fila si no hay coincidencia
+                  }
+              }
+	        }
+	    }); 
+	    
+	  //FUNCION PARA FILTRAR SOBRETURNOS POR DNI EN listarSobreturnos.html
+	     document.getElementById('filtroBusquedaDni').addEventListener('input', function() {
+	        var textoFiltro = this.value.toLowerCase(); // Obtiene el texto en minúsculas
+	        var filas = document.getElementById('tablaListadoSobreturnos').getElementsByTagName('tr');
+	        //limpia el filtro por Apellido
+	        const myInputApellido = document.getElementById('filtroBusquedaApellido');
+	        myInputApellido.value = '';
+
+	        for (var i = 0; i < filas.length; i++) {
+	            var celdaNombre = filas[i].getElementsByTagName('td')[5]; // La quinta celda es la del Dni
+	            
+              if (celdaNombre) {
+                  var textoCelda = celdaNombre.textContent || celdaNombre.innerText;
+                  // Compara el texto del filtro con el texto de la celda (ambos en minúsculas)
+                  if ((textoCelda.toLowerCase().indexOf(textoFiltro) > -1)) {
+                      filas[i].style.display = ""; // Muestra la fila si hay coincidencia
+                  } else {
+                      filas[i].style.display = "none"; // Oculta la fila si no hay coincidencia
+                  }
+              }
+	        }
+	    });
+
+	  //FUNCION PARA LIMPIAR LOS FILTROS APELLIDO Y DNI EN listarSobreturnos.html
+	    function limpiarFiltros() {
+	        document.getElementById('filtroBusquedaApellido').value = ''; // Limpia el campo de texto
+	        // Repite la lógica de filtrado para mostrar todas las filas (textoFiltro vacío)
+	        document.getElementById('filtroBusquedaApellido').dispatchEvent(new Event('input'));
+	        
+	        document.getElementById('filtroBusquedaDni').value = ''; // Limpia el campo de texto
+	        // Repite la lógica de filtrado para mostrar todas las filas (textoFiltro vacío)
+	        document.getElementById('filtroBusquedaDni').dispatchEvent(new Event('input'));
+	    }
+
+	</script>
+	</body>
+	</html>

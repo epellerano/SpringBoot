@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+    <!-- Font Awesome 7 Local -->
+    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+    /* --- ESTÉTICA SIGAT: RECUADROS COMPACTOS --- */
+    body { 
+        font-family: 'Segoe UI', Arial, sans-serif; 
+        font-size: 1.1rem; 
+    }
+
+    .viewport-container {
+        min-height: calc(100vh - 110px); 
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        padding: 1rem 20px; /* Reducido para ganar aire */
+    }
+
+    .header-clinica {
+        border-bottom: 2px solid #dee2e6;
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .header-clinica::after {
+        content: "";
+        position: absolute; bottom: -2px; left: 0;
+        width: 150px; height: 4px;
+        background-color: #0d6efd; border-radius: 2px;
+    }
+
+    .title-main {
+        font-family: Arial; 
+        font-size: 1.75rem; 
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .card-panoramic {
+        width: 100%;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+    }
+
+    /* RECUADROS CON MENOS ALTO (Padding vertical reducido) */
+    .info-block-premium {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 25px; /* Reducido de 30px a 12px de alto */
+        height: 100%;
+    }
+
+    .label-header {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px; /* Espacio mínimo */
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .value-text {
+        font-size: 1.25rem; /* Ligeramente ajustado para armonía */
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+
+    /* BARRA FINAL MÁS CORTA */
+    .footer-actions-bar {
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 15px 35px; /* Reducido para que sea más fina */
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge-total-session {
+        font-size: 1rem;
+        padding: 0.4rem 1rem;
+        font-weight: 700;
+    }
+
+    @media print {
+        header, footer, .no-print { display: none !important; }
+        .card-panoramic { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+    }
+</style>
+<body class="bg-light">
+
+    <header th:replace="layout/layout :: header "></header>
+
+    <div class="container-fluid viewport-container px-lg-5">
+        <div class="row w-100 m-0 justify-content-center">
+            <div class="col-12">
+                
+                <div class="card card-panoramic">
+                    <div class="card-body p-4">
+                        
+                        <!-- ENCABEZADO -->
+                        <div class="header-clinica d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-3 p-2 px-3 me-3 shadow-sm">
+                                    <i class="fa-solid fa-clipboard-user fa-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 th:text="${titulo}" class="title-main mb-0"></h2>
+                                    <p class="text-muted mb-0 small fw-bold text-uppercase" style="font-size: 0.75rem;">SIGAT • Auditoría de Productividad</p>
+                                </div>
+                            </div>
+                            <div class="no-print">
+                                <a th:href="@{/movimientos/listarMovimiento}" class="btn btn-sm btn-outline-secondary fw-bold px-3 py-2">
+                                    <i class="fa-solid fa-arrow-left me-1"></i>VOLVER
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- FILA 1: DATOS PRINCIPALES (Recuadros Cortos) -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-5">
+                                <div class="info-block-premium shadow-sm">
+                                    <span class="label-header"><i class="fa-solid fa-user-doctor text-primary"></i> Profesional</span>
+                                    <div class="value-text text-uppercase" th:text="${movimiento.profesional.apellido} + ' ' + ${movimiento.profesional.nombre}"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-block-premium shadow-sm">
+                                    <span class="label-header"><i class="fa-solid fa-stethoscope text-primary"></i> Especialidad</span>
+                                    <div class="value-text" th:text="${movimiento.especialidad.especialidadNombre}"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-block-premium shadow-sm text-center">
+                                    <span class="label-header justify-content-center"><i class="fa-solid fa-calendar-day text-primary"></i> Fecha</span>
+                                    <div class="value-text" th:text="${#dates.format(movimiento.CreateAt,'dd/MM/yyyy')}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FILA 2: SESIONES (Recuadros Cortos) -->
+                        <div class="row g-3 mb-3">
+                            <!-- Sesión Mañana -->
+                            <div class="col-md-6">
+                                <div class="info-block-premium border-start border-success border-4 shadow-sm">
+                                    <h6 class="fw-bold text-success mb-2 text-uppercase" style="font-size: 0.8rem;"><i class="fa-solid fa-sun me-1"></i>Mañana</h6>
+                                    <div class="row align-items-center">
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">INGRESO</small>
+                                            <span class="fs-5 fw-bold" th:text="${movimiento.horaIniManana}"></span>
+                                        </div>
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">EGRESO</small>
+                                            <span class="fs-5 fw-bold" th:text="${movimiento.horaFinManana}"></span>
+                                        </div>
+                                        <div class="col-4 text-center">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">TOTAL hs</small>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle badge-total-session" th:text="${movimiento.totalManana}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sesión Tarde -->
+                            <div class="col-md-6">
+                                <div class="info-block-premium border-start border-primary border-4 shadow-sm">
+                                    <h6 class="fw-bold text-primary mb-2 text-uppercase" style="font-size: 0.8rem;"><i class="fa-solid fa-moon me-1"></i>Tarde</h6>
+                                    <div class="row align-items-center">
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">INGRESO</small>
+                                            <span class="fs-5 fw-bold" th:text="${movimiento.horaIniTarde}"></span>
+                                        </div>
+                                        <div class="col-4 border-end">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">EGRESO</small>
+                                            <span class="fs-5 fw-bold" th:text="${movimiento.horaFinTarde}"></span>
+                                        </div>
+                                        <div class="col-4 text-center">
+                                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">TOTAL hs</small>
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle badge-total-session" th:text="${movimiento.totalTarde}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BARRA DE CIERRE: TOTAL (Fina e Imponente) -->
+                        <div class="footer-actions-bar shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white border-danger border-start border-4 rounded p-2 px-3 me-4 d-flex align-items-center shadow-sm">
+                                    <i class="fa-solid fa-stopwatch text-danger fa-2x me-3"></i>
+                                    <div>
+                                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Cómputo Total de Jornada</small>
+                                        <span class="fs-2 fw-bold text-danger" style="font-family: 'Courier New', monospace; line-height: 1;" th:text="${movimiento.totalGeneral}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="no-print">
+                                <button onclick="window.print()" class="btn btn-primary fw-bold px-5 py-2 shadow-sm">
+                                    <i class="fa-solid fa-print me-2"></i>IMPRIMIR REPORTE
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>
+

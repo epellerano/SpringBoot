@@ -1,0 +1,24 @@
+/* 1. MAESTROS */
+INSERT INTO estado (id, nombre) VALUES (1,'INACTIVO'),(2,'ACTIVO'),(3,'LIBRE'),(4,'OCUPADO'),(5,'ANULADO'),(6,'CANCELADO'),(7,'PARTICULAR'),(8,'EXPIRADO');
+INSERT INTO dia (id, nombre) VALUES (1,'DOMINGO'),(2,'LUNES'),(3,'MARTES'),(4,'MIERCOLES'),(5,'JUEVES'),(6,'VIERNES'),(7,'SABADO');
+
+/* 2. CATALOGOS */
+INSERT INTO especialidades (id, especialidad_codigo, especialidad_nombre) VALUES (1, 'GIN', 'Ginecologia'),(2, 'DER', 'Dermatologia'),(3, 'CLI', 'Clinica Medica');
+
+/* 3. PROFESIONALES */
+INSERT INTO profesionales (id, nombre, apellido, email, dni, telefono, codigo, matricula, create_at, foto) VALUES (1, 'Eduardo', 'Pellerano','pellenorma@hotmail.com', '8269979', '1149935694', 'PEL', 'mp 1234', '1980-07-03', '');
+INSERT INTO profesionales (id, nombre, apellido, email, dni, telefono, codigo, matricula, create_at, foto) VALUES (2, 'Maria', 'Tallada','talladamar@hotmail.com', '8111333', '1154253697', 'TAL', 'mp 2345', '1980-07-03', '');
+
+/* 4. PLANILLA CABECERA (Columnas exactas de Hibernate) */
+INSERT INTO planillacabecera (id, id_profesional, id_especialidad, id_dia, fecha_inicio, fecha_final, hora_inicialr1, hora_finalr1, intervalo_r1, hora_inicialr2, hora_finalr2, intervalo_r2, id_estado, observacion, fecha_expira) 
+VALUES (1, 1, 1, 2, '2024-09-14', '2024-10-14', '09:00', '12:00', 30, '15:00', '18:00', 30, 2, 'PLANILLA ACTIVA', '2024-10-14 18:00:00');
+
+/* 5. PLANILLA DETALLE */
+INSERT INTO planilladetalle (id, planillacabecera_id, estado_id, rango_fecha_hora, observacion) 
+VALUES (1, 1, 3, '2025-01-10 09:30:00', 'PLANILLA DETALLE');
+INSERT INTO planilladetalle (id, planillacabecera_id, estado_id, rango_fecha_hora, observacion) 
+VALUES (2, 1, 3, '2025-01-10 10:00:00', 'PLANILLA DETALLE');
+
+/* 6. SEGURIDAD */
+INSERT INTO users (id, username, password, enabled) VALUES (1, 'admin','$2a$10$ozB.BnqBVzQYY2QKd6iUw.c4KTWCrncJ9SJ8Q9oiJ/vWKgxoc0zpy', 1);
+INSERT INTO authorities (id, user_id, authority) VALUES (1, 1,'ROLE_ADMIN');

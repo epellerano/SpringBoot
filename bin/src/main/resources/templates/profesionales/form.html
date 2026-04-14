@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+
+	<header th:replace="layout/layout :: header "></header>
+
+	<div class="container py-3">
+		<div class="card bg-light">
+			<!-- <div class="card-header"></div> -->
+			<div class="card-body">
+				<!-- TITULO con espacio despues-->
+				<h3 th:text="${titulo}" class="text-secondary border-bottom pb-2"
+					style="font-family: Arial"></h3>
+				<h1 class="text-secondary pb-1"></h1>
+				<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/form}" th:object="${profesional}" method="post"
+					enctype="multipart/form-data">
+
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Nombre</label>
+						<div class="col-sm-6">
+							<input type="text" style="text-transform: uppercase;"
+								th:field="*{nombre}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Apellido</label>
+						<div class="col-sm-6">
+							<input type="text" style="text-transform: uppercase;"
+								th:field="*{apellido}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Email</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{email}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Dni</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{dni}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Telefono</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{telefono}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Codigo</label>
+						<div class="col-sm-6">
+							<!-- Ocultamos el Codigo original para usarlo de backup ------------------------------->
+							<input type="hidden" name="codigoProfRollback"
+								th:value="${profesional.codigo}" />
+							<!-- fin rolback ---------------------------------------------------------------------->
+							<input type="text" style="text-transform: uppercase;"
+								th:field="*{codigo}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></small>
+							<!-- lo de abajo es para deshabilitar el campo CODIGO en el input de arriba -->
+							<!-- th:disabled="${!#strings.isEmpty(profesional.codigo) and profesional.codigo != null}" -->
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Matricula</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{matricula}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('matricula')}"
+								th:errors="*{matricula}"></small>
+						</div>
+					</div>
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label">Fecha</label>
+						<div class="col-sm-6">
+							<input type="date" th:field="*{createAt}" class="form-control"
+								th:errorclass="'form-control alert-danger'" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('createAt')}" th:errors="*{createAt}"></small>
+						</div>
+					</div>
+
+					<div class="mb-2 row">
+						<label form="file" class="col-sm-2 col-form-label">Foto</label>
+						<div class="col-sm-6">
+							<input type="file" name="file" class="form-control" />
+						</div>
+					</div>
+
+					<div class="d-grid gap1">
+						<br>
+						<div id="full" class="d-flex mb-2">
+
+							<button type="submit" value="Guardar Datos"
+								class="btn btn-success btn-lg flex-fill me-2">Guardar
+								Datos</button>
+							<a th:href="@{/listar}" class="btn btn-success btn-lg flex-fill">Volver
+								al Listado</a>
+						</div>
+					</div>
+
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

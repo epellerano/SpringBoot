@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+/* Estética SIGAT: Balanceada (Ni muy grande ni muy chica) */
+.viewport-container {
+	min-height: calc(100vh - 110px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.2rem 10px;
+}
+
+/* Tamaño de fuente intermedio */
+#form {
+	font-size: 0.95rem;
+	/* Un punto justo entre el anterior y el estándar */
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 10px;
+	margin-bottom: 25px;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 140px;
+	height: 4px;
+	background-color: #198754;
+	border-radius: 2px;
+}
+
+.card-panoramic {
+	width: 100%;
+	border-radius: 12px;
+	border: none;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Campos con tamaño cómodo (estándar de Bootstrap pero limpios) */
+.form-control, .form-select {
+	padding: 0.55rem 0.75rem;
+	font-size: 0.95rem;
+	border: 1px solid #ced4da;
+}
+
+.input-group-text {
+	background-color: #f8f9fa;
+	color: #495057;
+	border: 1px solid #ced4da;
+	border-right: none;
+	padding: 0.55rem 0.75rem;
+}
+
+.form-label {
+	margin-bottom: 0.4rem;
+	font-size: 0.9rem;
+}
+
+/* Bloques de sesión con buen aire interno */
+.session-block {
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 20px;
+	height: 100%;
+}
+
+.total-footer-bar {
+	background-color: #f1f5f9;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	padding: 15px 25px;
+}
+
+/* Botones con presencia pero sin exagerar */
+.btn-sigat {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+}
+</style>
+
+<body class="bg-light" th:onload="loadEspecialidade()">
+
+	<header th:replace="layout/layout :: header "></header>
+
+	<!-- px-lg-5 le da el aire a los costados que querías -->
+	<div class="container-fluid viewport-container px-lg-5">
+		<div class="row w-100 m-0 justify-content-center">
+			<!-- col-xl-11 para que el formulario sea amplio pero no sature -->
+			<div class="col-12 col-xl-11">
+
+				<div class="card card-panoramic">
+					<!-- El padding horizontal px-lg-5 es lo que genera el espacio lateral interno -->
+					<div class="card-body p-5 px-lg-5">
+
+						<!-- TÍTULO -->
+						<div class="header-clinica d-flex align-items-center">
+							<div
+								class="d-flex align-items-center justify-content-center rounded-3 me-3"
+								style="width: 65px; height: 65px; background-color: #e8f5e9;">
+								<i class="bi bi-clock-history"
+									style="font-size: 2.5rem; color: #2e7d32;"></i>
+							</div>
+							<div>
+								<h3 th:text="${titulo}" class="fw-bold text-dark mb-0"></h3>
+								<p class="text-muted mb-0 text-uppercase small"
+									style="letter-spacing: 1px; font-size: 0.75rem; font-weight: 600;">
+									SIGAT • Registro y Control de Jornada Laboral Médica</p>
+							</div>
+						</div>
+
+						<form th:action="@{/movimientos/formMovimiento}"
+							th:object="${movimiento}" method="post" id="form">
+
+							<!-- FILA 1: IDENTIFICACIÓN -->
+							<div class="row g-3 mb-4">
+								<div class="col-md-5">
+									<label class="form-label fw-bold text-dark">Profesional</label>
+									<div class="input-group">
+										<span class="input-group-text"> <i
+											class="fa-solid fa-user-doctor text-dark"></i>
+										</span> <select class="form-select" th:field="*{profesional.id}"
+											id="profesional" th:onchange="loadEspecialidade()"
+											th:errorclass="'is-invalid'">
+											<option value="" selected disabled>Seleccionar...</option>
+											<option th:each="p : ${profesionales}" th:value="${p.id}"
+												th:text="${p.apellido} + ' ' + ${p.nombre}"></option>
+										</select>
+									</div>
+									<div class="invalid-feedback d-block"
+										th:if="${#fields.hasErrors('profesional.id')}"
+										th:errors="*{profesional.id}"></div>
+								</div>
+
+								<div class="col-md-4">
+									<label class="form-label fw-bold text-dark">Especialidad</label>
+									<div class="input-group">
+										<span class="input-group-text"> <i
+											class="fa-solid fa-stethoscope text-dark"></i>
+										</span> <select id="especialidad" class="form-select"
+											th:field="*{especialidad.id}"
+											th:onclick="existeEspecialidad()"
+											th:errorclass="'is-invalid'">
+											<option th:each="e : ${especialidades}" th:value="${e.id}"
+												th:text="${e.especialidadNombre}"></option>
+										</select>
+									</div>
+									<div class="invalid-feedback d-block"
+										th:if="${#fields.hasErrors('especialidad.id')}"
+										th:errors="*{especialidad.id}"></div>
+								</div>
+
+								<div class="col-md-3">
+									<label class="form-label fw-bold text-dark">Fecha de
+										Carga</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-calendar-day text-dark"></i></span> <input
+											type="date" th:field="*{createAt}" class="form-control"
+											th:errorclass="'is-invalid'" />
+									</div>
+								</div>
+							</div>
+
+							<!-- FILA 2: SESIONES -->
+							<div class="row g-4 mb-4">
+								<div class="col-md-6">
+									<div
+										class="session-block border-start border-success border-4 shadow-sm">
+										<h6 class="fw-bold text-success mb-3">
+											<i class="fa-solid fa-sun me-2"></i>SESIÓN MAÑANA
+										</h6>
+										<div class="row g-2">
+											<div class="col-4">
+												<label class="small fw-bold">Ingreso</label> <input
+													type="time" th:field="*{horaIniManana}"
+													class="form-control" id="horaIniManana" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold">Egreso</label> <input
+													type="time" th:field="*{horaFinManana}"
+													class="form-control" id="horaFinManana"
+													th:onblur="validarHorasyForm()" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-success">Subtotal
+													Hs</label> <input type="text" th:field="*{totalManana}"
+													class="form-control bg-white fw-bold text-success border-success-subtle"
+													id="totalManana" readonly />
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div
+										class="session-block border-start border-primary border-4 shadow-sm">
+										<h6 class="fw-bold text-primary mb-3">
+											<i class="fa-solid fa-moon me-2"></i>SESIÓN TARDE
+										</h6>
+										<div class="row g-2">
+											<div class="col-4">
+												<label class="small fw-bold">Ingreso</label> <input
+													type="time" th:field="*{horaIniTarde}" class="form-control"
+													id="horaIniTarde" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold">Egreso</label> <input
+													type="time" th:field="*{horaFinTarde}" class="form-control"
+													id="horaFinTarde" th:onblur="validarHorasyForm()" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-primary">Subtotal
+													Hs</label> <input type="text" th:field="*{totalTarde}"
+													class="form-control bg-white fw-bold text-primary border-primary-subtle"
+													id="totalTarde" readonly />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- FILA 3: TOTAL GENERAL -->
+							<div class="total-footer-bar mb-4 shadow-sm">
+								<div class="row align-items-center">
+									<div class="col-md-9">
+										<h5 class="fw-bold mb-0 text-dark">
+											<i class="fa-solid fa-calculator text-muted me-2"></i>
+											Cómputo de Horas Totales
+										</h5>
+									</div>
+									<div class="col-md-3">
+										<div class="input-group input-group-lg">
+											<span
+												class="input-group-text bg-white border-danger border-end-0 text-danger"><i
+												class="fa-solid fa-clock"></i></span> <input type="text"
+												th:field="*{totalGeneral}"
+												class="form-control border-danger border-start-0 text-danger fw-bold text-center"
+												id="totalGeneral" readonly />
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- BOTONES -->
+							<div class="d-flex gap-3">
+								<button type="submit" id="btnGuardar"
+									class="btn btn-success flex-grow-1 fw-bold btn-sigat shadow"
+									th:onmouseover="validarHorasyForm()">
+									<i class="fa-solid fa-floppy-disk me-2"></i>GUARDAR PACIENTE
+								</button>
+								<a th:href="@{/movimientos/listarMovimiento}"
+									class="btn btn-outline-secondary px-5 fw-bold btn-sigat">
+									CANCELAR </a>
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer "></footer>
+
+	<script
+		th:replace="movimientos/js/autocomplete-especialidad :: javascript"></script>
+	<script
+		th:replace="movimientos/js/load-combobox-vinculacion :: javascript"></script>
+	<script th:replace="movimientos/js/suma-horas :: javascript"></script>
+
+</body>
+</html>
+

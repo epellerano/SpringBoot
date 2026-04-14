@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<link rel="styLesheet" th:href="@{/css/fijarCabecera_Tabla.css}" />
+</head>
+<body>
+	<!-- th:onload="loadEspecialidade()" -->
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-1 mx-1">
+		<div class="card bg-light text-white" style="width: 115%; margin-bottom: 10px;">
+			<!-- <div class="card-header"></div> -->
+			<div class="card-body">
+				<!-- TITULO con espacio despues-->
+				<h3 th:text="${titulo}" class="text-secondary border-bottom pb-2"
+					style="font-family: Arial"></h3>
+				<h1 class="text-secondary pb-1"></h1>
+				<!-- Fundamental para Subir Archivos o fotos: enctype="multipart/form-data"  -->
+				<form th:action="@{/planillacabecera/formPlanillaCabecera}"
+					th:object="${planillacabecera}" method="post" id="form"
+					style="font-family: Arial; font-size: 14px;">
+
+					<div class="mb-2 row">
+						<!-- espacio entre campos -->
+						<label class="col-sm-2 col-form-label text-black"
+							for="profesional">Seleccione el Profesional</label>
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select class="form-select" th:field="*{profesional.id}"
+								id="profesional" th:onchange="cargarEspecialidades()">
+								<!-- Renderizar opciones desde el controlador -->
+								<option value="" disabled>Seleccione una opción...</option>
+								<option th:each="profesional : ${profesionales}"
+									th:value="${profesional.id}"
+									th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+							</select>
+						</div>
+
+						<label class="col-sm-2 col-form-label  text-black"
+							for="especialidad">Seleccione la Especialidad</label>
+						<div class="col-sm-4">
+							<!-- ancho del campo -->
+							<select id="especialidad" class="form-select"
+								th:field="*{especialidad.id}" th:onclick="existeEspecialidad()">
+								<!-- <option value=""></option> -->
+								<!-- <option th:each="especialidad : ${especialidades}"
+									th:value="${especialidad.id}"
+									th:text="${especialidad.especialidadNombre}"></option> -->
+							</select>
+						</div>
+
+						<!-- --BOX PERSONALIZADO------------------------------------ -->
+						<div class="col-sm">
+							<span id="Box" class="full-height-image"
+								style="position: absolute; width: 80px; height: 85px; resize: none; border: 1px solid lightgrey; border-radius: 10%;">
+
+								<input class="form-check-input" type="checkbox"
+								id="isCheckBoxes" name="isCheckBoxes" value="true"
+								style="margin-top: 7px; margin-left: 5px; margin-right: 1px; width: 16px; height: 16px;">
+								<label class="text-secondary fs-6" style="margin-top: 4px;">
+									Box&nbsp;<img class="iconoZoom"
+									th:src="@{/images/exclamation-16.png}" alt="message" width="16"
+									height="16" data-bs-toggle="tooltip" data-bs-placement="top"
+									title="Usado generalmente para planillas&#10;de Kinesiologos o terapeutas&#10;que atienden en boxes diferentes&#10;de a cuatro o mas personas&#10;al mismo tiempo!">
+							</label> <select class="form-select" name="optionBox" id="optionBox"
+								style="margin-top: 6px; margin-left: 9px; width: 60px; height: 35px;">
+									<option value="0">0</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+							</select>
+							</span>
+						</div>
+						<!-- --FIN BOX PERSONALIZADO-------------------------------- -->
+					</div>
+
+					<div class="mb-2 row">
+						<label class="col-sm-2 col-form-label  text-black">Fecha
+							Inicial de Agenda</label>
+						<div class="col-sm-2">
+							<input type="date" th:field="*{fechaInicio}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="fechaInicio" />
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('fechaInicio')}"
+								th:errors="*{fechaInicio}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Fecha
+							Final</label>
+						<div class="col-sm-2">
+							<input type="date" th:field="*{fechaFinal}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="fechaFinal" />
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('fechaFinal')}"
+								th:errors="*{fechaFinal}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black" for="dia">El
+							Dia</label>
+						<div class="col-sm-3">
+							<select class="form-select" th:field="*{dia}">
+								<option value="" disabled>Seleccione un día...</option>
+								<option th:each="dia : ${dias}" th:value="${dia.id}"
+									th:text="${dia.nombre}" id="dia"></option>
+							</select>
+						</div>
+						<!-- <div class="col-sm">
+							<a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+								class="btn btn-primary btn-xs">Volver..</a>
+						</div> -->
+					</div>
+
+					<div class="mb-2 row">
+						<!-- <label class="col-sm-2 col-form-label  text-black">Hora
+							Inicio Turno Mañana</label> -->
+						<label class="col-sm-2 text-black"><input
+							class="form-check-input" type="checkbox" id="isCheckMañana"
+							name="isCheckMañana" value="true"
+							style="width: 18px; height: 18px;"> Hora Inicial Mañana</label>
+
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaInicialR1}"
+								class="form-control" th:errorclass="'form-control alert-danger'"
+								id="horaInicialR1" th:onblur="validarHora()" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaInicialR1')}"
+								th:errors="*{horaInicialR1}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Hora
+							Final</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaFinalR1}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinalR1" /><small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinalR1')}"
+								th:errors="*{horaFinalR1}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label text-black">Duracion</label>
+						<div class="col-sm-3">
+							<div class="form-group">
+								<select class="form-select" th:field="*{intervaloR1}"
+									name="intervaloR1" id="intervaloR1"
+									th:onchange="generarRangoHorario()">
+									<option value=""></option>
+									<option th:value="1">1</option>
+									<option th:value="5">5</option>
+									<option th:value="10">10</option>
+									<option th:value="15">15</option>
+									<option th:value="20">20</option>
+									<option th:value="30">30</option>
+									<option th:value="40">40</option>
+									<option th:value="45">45</option>
+									<option th:value="60">60</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="col-sm py-1">
+							<a class="btn btn-danger btn-xs" id="limpiarTM"
+								style="width: 80px; height: 35px;" th:onclick="limpiarTM()">Limpiar</a>
+						</div>
+
+					</div>
+
+					<div class="mb-2 row">
+						<!-- <label class="col-sm-2 col-form-label  text-black">Hora
+							Inicio Turno Tarde</label> -->
+						<label class="col-sm-2 text-black"><input
+							class="form-check-input" type="checkbox" id="isCheckTarde"
+							name="isCheckTarde" value="true"
+							style="width: 18px; height: 18px;"> Hora Inicial Tarde</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaInicialR2}"
+								class="form-control" th:errorclass="'form-control alert-danger'"
+								id="horaInicialR2" /> <small class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaInicialR2')}"
+								th:errors="*{horaInicialR2}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label  text-black">Hora
+							Final</label>
+						<div class="col-sm-2">
+							<input type="time" th:field="*{horaFinalR2}" class="form-control"
+								th:errorclass="'form-control alert-danger'" id="horaFinalR2" />
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('horaFinalR2')}"
+								th:errors="*{horaFinalR2}"></small>
+						</div>
+
+						<label class="col-sm-1 col-form-label text-black">Duracion</label>
+						<div class="col-sm-3">
+							<div class="form-group">
+								<select class="form-select" th:field="*{intervaloR2}"
+									name="intervaloR2" id="intervaloR2"
+									th:onchange="generarRangoHorario()">
+									<option value=""></option>
+									<option th:value="5">5</option>
+									<option th:value="10">10</option>
+									<option th:value="15">15</option>
+									<option th:value="20">20</option>
+									<option th:value="30">30</option>
+									<option th:value="40">40</option>
+									<option th:value="45">45</option>
+									<option th:value="60">60</option>
+								</select>
+							</div>
+						</div>
+						<div class="col-sm py-1">
+							<a class="btn btn-danger btn-xs" id="limpiarTT"
+								style="width: 80px; height: 35px;" th:onclick="limpiarTT()">Limpiar</a>
+						</div>
+					</div>
+
+					<!-- <div class="mb-2 row">
+						<label class="col-sm-2 col-form-label  text-black" for="estado">Seleccione
+							el Estado</label>
+						<div class="col-sm-2">
+							<select id="estado" class="form-select" th:field="*{estado}">
+								en select agregar th:onclick="existeEspecialidad()">
+								<option value="" disabled></option>
+								<option th:each="estado : ${estados}" th:value="${estado.id}"
+									th:text="${estado.nombre}"></option>
+							</select>
+						</div>
+
+
+						<label class="col-sm-1 col-form-label text-black"
+							for="Observacion">Observ.</label>
+						<div class="col-sm-6">
+							<input type="text" th:field="*{Observacion}" name="Observacion"
+								class="form-control" th:errorclass="'form-control alert-danger'" />
+							<small class="form-text text-danger"
+								th:if="${#fields.hasErrors('Observacion')}"
+								th:errors="*{Observacion}"></small>
+						</div>
+
+					</div> -->
+					<div class="row">
+						<div class="row my-1">
+							<div class="col-sm-6">
+								<!-- border-bottom -->
+								<h5 class="text-success pb-0 mx-2"
+									style="font-family: Arial; font-size: 16px;">Rango
+									Generado Recientemente</h5>
+
+								<div class="card">
+									<!-- <div class="card-body"> -->
+									<div class="table-responsive"
+										style="height: 210px; overflow-y: auto">
+										<table class="table table-responsive" id="rango">
+											<thead>
+												<tr>
+													<th class="text-black-50"
+														style="position: sticky; top: 0px">DIA</th>
+													<th class="text-black-50"
+														style="position: sticky; top: 0px">RANGO FECHA Y HORA</th>
+													<!-- <th class="text-black-50"
+														style="position: sticky; top: 0px">BOX</th> -->
+													<!-- <td></td> -->
+												</tr>
+											</thead>
+											<tbody>
+											 <!-- El contenido de la tabla se llenará con JavaScript -->
+											</tbody>
+										</table>
+									</div>
+									<!-- </div> -->
+								</div>
+							</div>
+
+							<div class="col-sm-6">
+								<!-- border-bottom -->
+								<h5 class="text-success pb-0 mx-2"
+									style="font-family: Arial; font-size: 16px;">Rango
+									Almacenado en la Base de Datos</h5>
+
+								<div class="card">
+									<!-- <div class="card-body"> -->
+									<div class="table-responsive"
+										style="height: 210px; overflow-y: auto">
+										<table class="table table-responsive" id="TablaMysql">
+											<thead>
+												<tr>
+													<!-- <th class="text-black-50"
+														style="position: sticky; top: 0px">DIA</th> -->
+													<th class="text-black-50"
+														style="position: sticky; top: 0px">RANGO FECHA Y HORA</th>
+													<!-- <td></td> -->
+												</tr>
+											</thead>
+											<tbody>
+											</tbody>
+										</table>
+									</div>
+									<!-- </div> -->
+								</div>
+							</div>
+							<!-- pegar aqui tabla de block de notas -->
+
+						</div>
+
+					</div>
+					<!-- Fin de Tabla -->
+					<div class="d-grid gap-1">
+						<h4></h4>
+						<div id="full" class="d-flex mb-2" style="height: 45px;">
+							<button type="button"
+								class="btn btn-primary btn-lg flex-fill me-1"
+								th:onclick="generarRangoHorario()">Generar Rango</button>
+							<button type="submit" id="btnGuardar"
+								class="btn btn-primary btn-lg flex-fill me-1"
+								th:onclick="validarRango()">Guardar Planilla</button>
+							<a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+								class="btn btn-primary btn-lg flex-fill">&laquo; Volver al
+								Listado</a>
+						</div>
+					</div>
+
+					<!-- <input type="hidden" th:field="*{id}" />  en el controlador se seteo @SessionAttributes-->
+				</form>				
+			</div>
+			
+		</div>
+		<!--<br>-->
+	</div>
+
+	<footer th:replace="layout/layout :: footer "></footer>
+	<script
+		th:replace="planillas/js/load-combobox-vinculacion :: javascript"></script>
+	<script th:replace="planillas/js/generarRangoHorario :: javascript"></script>
+	<script th:replace="planillas/js/validacionRango :: javascript"></script>
+
+	<!-- Funcion que detecta cuando esta tildado un check Box -->
+	<script>
+    const isCheckMañana = document.getElementById("isCheckMañana");
+    const isCheckBoxes = document.getElementById("isCheckBoxes");
+    const isCheckTarde = document.getElementById("isCheckTarde");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    isCheckMañana.addEventListener("click", () => {
+      if (isCheckMañana.checked === true && isCheckBoxes.checked !== true) {
+    		//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;
+			//habilitamos todos los values del combobox.
+			const miCombobox = document.getElementById('intervaloR1');
+			const opciones = miCombobox.options;
+			// bucle 'for'
+			for (let i = 0; i < opciones.length; i++) {
+			  //opciones[i].disabled = false;
+			  opciones[i].style.visibility = 'visible';
+			}
+			 
+      }
+      
+      if (isCheckMañana.checked === true && isCheckBoxes.checked === true) {
+  			//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;		
+			
+			document.getElementById("intervaloR1").selectedIndex = 1;
+			document.getElementById("intervaloR1").disabled = true;
+    }
+      
+      if (isCheckMañana.checked !== true && isCheckBoxes.checked === true) {
+			//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;		
+			
+			document.getElementById("intervaloR1").selectedIndex = 0;
+			document.getElementById("intervaloR1").disabled = true;
+			deshabilitar_isCheckBoxes();
+    }
+      
+      
+      
+      if (isCheckMañana.checked === false) {
+    		//turno mañana deshabilitado
+    	    const limpiarTM = document.getElementById('limpiarTM');
+    	  	// click en boton limpiar turno Mañana
+    	  	limpiarTM.click();
+      }      
+    });
+    
+    isCheckTarde.addEventListener("click", () => {      
+        if (isCheckTarde.checked === true) {
+      	//Turno tarde habilitado
+  			document.getElementById('horaInicialR2').disabled = false;
+  		    document.getElementById('horaFinalR2').disabled = false;
+  			document.getElementById('intervaloR2').disabled = false;
+          }else{
+      		//turno tarde deshabilitado
+      	    const limpiarTT = document.getElementById('limpiarTT');
+      	  	// click en boton limpiar turno Tarde.
+      	  	limpiarTT.click();
+        }
+      });
+    
+    btnGuardar.addEventListener("mouseover", () => {      
+        if (isCheckTarde.checked === true && document.getElementById("intervaloR2").value.length === 0) {
+        	//limpiar turno tarde
+        	document.getElementById('horaInicialR2').value='00:00';
+			 document.getElementById('horaInicialR2').disabled = true;
+			 document.getElementById('horaFinalR2').value='00:00';
+			 document.getElementById('horaFinalR2').disabled = true;
+			 document.getElementById('intervaloR2').selectedIndex = 0;
+			 document.getElementById('intervaloR2').disabled = true;
+			 const checkTarde = document.getElementById('isCheckTarde');
+			 checkTarde.checked = false;
+          }
+        
+        if (isCheckMañana.checked === true && document.getElementById("intervaloR1").value.length === 0) {
+        	//limpiar turno mañana
+        	document.getElementById('horaInicialR1').value='00:00';
+			document.getElementById('horaInicialR1').disabled = true;
+			document.getElementById('horaFinalR1').value='00:00';
+			document.getElementById('horaFinalR1').disabled = true;
+			document.getElementById('intervaloR1').selectedIndex = 0;
+			document.getElementById('intervaloR1').disabled = true;			  
+			const checkMañana = document.getElementById('isCheckMañana');
+			checkMañana.checked = false;
+          }
+      });
+    
+    //FUNCION AL DETECTAR CLICK EN COMBOBOX Personalizado.
+    isCheckBoxes.addEventListener("click", () => {
+    	//if(document.getElementById('especialidad').options.length > 0){
+    	
+	        if (isCheckBoxes.checked === true) {
+	      		
+	        	//hacer algo
+	        	optionBox.selectedIndex = 0;
+	    	    optionBox.disabled=false;
+	    	    //limpiamos y tildamos el chek mañana
+	    	    const limpiarTM = document.getElementById('limpiarTM');
+	    	    limpiarTM.click();
+	    	    document.getElementById('horaInicialR1').value='00:00';
+				document.getElementById('horaFinalR1').value='00:00';
+				//document.getElementById("intervaloR1").selectedIndex = 0;
+				const isCheckMañana = document.getElementById("isCheckMañana");
+				isCheckMañana.click();
+				//habilitamos solo el value1 del combobox
+				var combobox = document.getElementById("intervaloR1");
+
+			    // Recorrer el combobox.
+			    for (var i = 0; i < combobox.options.length; i++) {
+			        // Obtener la opción actual
+			        var opcion = combobox.options[i];			
+			        // Deshabilitar todo exceopto el índice 1
+			        if (i !== 1) {
+			            //opcion.disabled = true;
+			            opcion.style.visibility = 'hidden';
+			        } else {
+			            // Asegurarse que la opción 1 está habilitada.			            
+			            opcion.style.visibility = 'visible';
+			            //opcion.style.display = 'none'
+			        }
+			    }
+			  document.getElementById("intervaloR1").selectedIndex = 1;
+			  document.getElementById("intervaloR1").disabled = false; 
+	    	  //deshabilitamos
+	    	    document.getElementById('isCheckTarde').checked = false;
+				document.getElementById('isCheckTarde').disabled = true;
+				document.getElementById('horaInicialR2').disabled = true;
+				document.getElementById('horaFinalR2').disabled = true;
+				document.getElementById('intervaloR2').disabled = true;
+				//limpiamos campos
+				document.getElementById('horaInicialR2').value='00:00';
+				document.getElementById('horaFinalR2').value='00:00';
+				document.getElementById("intervaloR2").selectedIndex = 0;
+	          }else{
+	      		//hacer algo	      	    
+	        	  optionBox.selectedIndex = 0;
+	        	  optionBox.disabled=true;
+	        	//habilitamos
+	        	  document.getElementById('isCheckTarde').checked = false;
+				  document.getElementById('isCheckTarde').disabled = false;
+				  document.getElementById('horaInicialR2').disabled = false;
+				  document.getElementById('horaFinalR2').disabled = false;
+				  document.getElementById('intervaloR2').disabled = false;
+				  const limpiarTM = document.getElementById('limpiarTM');
+	        	  const limpiarTT = document.getElementById('limpiarTT');
+	        	  limpiarTM.click();
+	        	  limpiarTT.click();	        	  
+	        }    	
+      });
+    
+    function deshabilitar_isCheckBoxes(){
+    	document.getElementById('isCheckBoxes').checked = false;
+        const optionBox=document.getElementById('optionBox');
+        optionBox.selectedIndex = 0;
+        optionBox.disabled=true;
+    }
+    
+    //Al cargar la pagina
+    deshabilitar_isCheckBoxes();
+  </script>
+
+</body>
+</html>

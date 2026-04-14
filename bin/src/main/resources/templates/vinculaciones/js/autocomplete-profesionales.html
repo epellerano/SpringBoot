@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document).ready(function() {
+
+			$("#buscar_profesional").autocomplete({
+
+				source : function(request, response) {
+					$.ajax({
+						url : "/vinculaciones/cargar-profesionales/" + request.term,
+						dataType : "json",
+						data : {
+							term : request.term
+						},
+						success : function(data) {
+							response($.map(data, function(item) {
+								return {
+									value : item.id,
+									label : item.apellido + " " + item.nombre,
+								};
+							}));
+						},
+					});
+				},
+				select : function(event, ui) {
+					$("#buscar_profesional").val(ui.item.label);
+					/*var linea = $("#plantillaProfesionales").html();
+
+					linea = linea.replace(/{ID}/g, ui.item.value);
+					linea = linea.replace(/{APELLIDO}/g, ui.item.label);
+
+					$("#cargarItemProfesionales tbody").append(linea);*/
+
+					return false;
+				}
+			});
+		});
+	</script>
+</body>
+</html>

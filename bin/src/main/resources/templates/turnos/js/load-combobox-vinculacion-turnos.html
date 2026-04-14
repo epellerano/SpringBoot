@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript"> 
+		// Función para cargar especialidades al seleccionar un profesional 	  
+		function cargarEspecialidades() {
+
+			//verificamos el indice del combobox profesional -----------------------
+			var indexProf = document.getElementById("profesional").selectedIndex;
+			// ----------------------------------------------------------------------
+
+			if (indexProf != 0) {
+				var profesionalId = $("#profesional").val();//Obtenemos el IdProf del comboBox en la vista 
+				if (profesionalId == "") { //donde se esta ejecutando este script mediante id="profesional".
+					//mostramos una Alerta personalizada.
+					Swal.fire({
+						icon : "error",
+						title : "Lo sentimos.. Algo Salió mal..",
+						text : "No se encontro el Id del Profesional!",
+						//imageUrl : "/images/thumbs-down.jpg"
+					});
+					$("#especialidad").empty().prop("disabled", true);
+					return;
+				} //Usamos la funcion del controlador: @ResponseBody List<Especialidad> findByIdProfInVinculacion
+				//para obtener las especialidades vinculadas.
+				$
+						.get(
+								"/turnos/cargar-especialidades/"
+										+ profesionalId,
+								{
+									profesionalId : profesionalId
+								},
+								function(data) {
+									$("#especialidad").empty().prop("disabled",
+											false);
+									//$("#especialidad").append(new Option("Selecciona una especialidad", ""));     
+
+									// Iterar sobre las especialidades y establecer la especialidad 
+									// seleccionada en el comboBox
+									$
+											.each(
+													data,
+													function(index,
+															especialidad) {
+														var selected = especialidad.id === "${especialidad.id}" ? "selected"
+																: "";
+														$("#especialidad")
+																.append(
+																		new Option(
+																				especialidad.especialidadNombre,
+																				especialidad.id,
+																				false,
+																				selected));
+													});
+									//MARCAMOS EL CHECK BOX
+									marcarCheckProfesionalEspecialidad();
+									//verificar si existen especialidades vinculadas.
+									existeEspecialidad();
+									//foco en Buscar Paciente 
+									focusPacienteApeyNom();
+								});
+			} else {
+				//deshabilitamos combobox especialidad 
+				document.getElementById('especialidad').innerHTML = "";
+				document.getElementById('especialidad').disabled = true;
+			}
+		}
+		
+		//FUNCION FOCU PACIENTE APELLIDO Y NOMBRE
+	    function focusPacienteApeyNom(){
+	     //foco en busqueda de paciente por apellido.
+	     var pacienteApeNom = document.getElementById('buscar_pacienteApeNom'); 
+	     pacienteApeNom.focus();
+	    }
+
+		// OTRAS FUNCIONES ********************************************************************************
+
+		//Funcion para verificar si existen especialidades vinculadas del profesional seleccionado.
+		function existeEspecialidad() {
+			$(document)
+					.ready(
+							function() {
+								var profesionalId = $("#profesional").val();
+								//alert("profId: " + profesionalId);
+								var profesionalNombre = $(
+										'#profesional option:selected').text()
+								$
+										.ajax({
+											type : 'GET',
+											url : "/turnos/cargar-especialidades/"
+													+ profesionalId,
+											dataType : 'json',
+											success : function(lista) {
+												//console.log("OK");
+
+												// validas si la lista es nula			            
+												if (lista == "") {
+													// Mostramos un mensaje de Alerta Personalizado.
+													Swal
+															.fire({
+																icon : "error",
+																title : "Lo sentimos.. Algo Salió mal..",
+																//imageUrl : "/images/thumbs-down.jpg",
+																text : "No Existen especialidades Vinculadas para el Profesional: \n"
+																		+ profesionalNombre
+																				.toUpperCase()
+															});
+													//document.getElementById("btnConfirmar").disabled = true;
+													//DESMARCAMOS EL CHECK BOX
+													desmarcarCheckProfesionalEspecialidad();
+													// mostramos imagen por defecto del Medico en Turnos Alta.
+													mostrarImagenMysql(profesionalId);
+													/* if(lista.lenght > 0){
+													    $.each(lista, function(i, item){
+													        console.log("item: " + item);
+													    });
+													} */
+													
+												} else {
+													//Mostramos la imagen del medico.
+													mostrarImagenMysql(profesionalId);
+													//mostramos Info semanal, Horarios, turnos y sobreturnos ocupados
+													const btnMostrar = document.getElementById('btnMostrar');
+													btnMostrar.click();													
+												}
+											},
+											// aquí capturas cualquier error que venga del backend
+											error : function(XMLHttpRequest,
+													textStatus, error) {
+												//alert("status: " + textStatus);
+												//mostramos una Alerta personalizada.
+												Swal
+														.fire({
+															icon : "error",
+															title : "Lo sentimos.. Algo Salió mal..",
+															text : "Debe seleccionar un Profesional!",
+															//imageUrl : "/images/thumbs-down.jpg"
+														});
+											}
+										});
+
+							});
+		}
+		
+		function mostrarImagenMysql(profId) {
+			
+            fetch(`/api/turnosLibresController/obtener-imagen/` + profId)            
+                .then(response => response.text())
+                .then(nombreArchivo => {
+                    //const img = document.getElementById('fotoMedico');
+                    //img.src = `/uploads/${nombreArchivo}`; // Asumiendo carpeta 'uploads' en la raíz del servidor
+                    
+                    if (nombreArchivo.length > 0) {
+                        // mostramos la imagen guardada en MySql
+                    	const img = document.getElementById('fotoMedico');
+                        img.src = `/uploads/${nombreArchivo}`;
+                      }
+                    else{
+                    	// mostramos la imagen POR DEFAULT
+                    	const img = document.getElementById('fotoMedico');
+                        img.src = `/images/doctor_56.png`;
+                    }
+                })
+                .catch(error => console.error('Error al obtener la imagen:', error));
+        }
+		
+		
+		
+		
+
+		function desmarcarCheckProfesionalEspecialidad() {
+			//deshabilitamos el chek validar pacientes
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Desmarca la casilla de verificación
+			checkbox.checked = false;
+		}
+
+		function marcarCheckProfesionalEspecialidad() {
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Marca la casilla de verificación
+			checkbox.checked = true;
+			//redirect focus
+			document.getElementById('btnConfirmar').focus();
+		}		
+
+		//ejecutamos la funcion cuando cargue la pagina	   
+		$(document).ready(function() {
+			//document.getElementById("btnConfirmar").disabled = true;
+			document.getElementById('profesional').selectedIndex = 0;
+			
+			/* if (document.getElementById('profesional').selectedIndex == 0) 
+			{
+				//alert('Ingrese la observacion');
+				document.getElementById('btnGuardar').disabled = true;
+				return false;
+			 }
+			else
+			{
+				document.getElementById('btnGuardar').disabled = false;
+				//document.getElementById('especialidad').disabled = true;
+				return true;
+			} */
+		});
+	</script>
+</body>
+</html>

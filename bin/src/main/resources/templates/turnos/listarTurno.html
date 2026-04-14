@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head}"></head>
+<body>
+	<header th:replace="~{layout/layout :: header}"></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+
+				<!-- <h1 class="card-title">
+					<a sec:authorize="hasRole('ROLE_ADMIN')"
+						th:href="@{/sobreturnos/formSobreturno}"
+						class="btn btn-primary btn-xs">Generar Sobreturno Nuevo</a>
+				</h1> -->
+
+				<!-- BUSQUEDA DEL PACIENTE POR DNI | APELLIDO ----------------------->
+				<div class="mb-3 row" style="margin-top: -7px;">
+					<!-- label para Paciente Apellido-->
+					<div class="col-sm-2" style="display: flex; align-items: center;">
+						<img th:src="@{/images/lupa.png}" width="16" height="16"
+							style="margin-right: 10px;"> <span for="paciente">Paciente
+							Apellido:</span>
+					</div>
+
+					<div class="col-sm-3">
+						<input class="form-control" type="text"
+							id="filtroBusquedaApellido" placeholder="Buscar por apellido..."
+							style="user-select: none; height: 35px; font-size: 15px"
+							th:onclick="limpiarFiltros()" />
+					</div>
+
+					<!-- label para Paciente Documento-->
+					<div class="col-sm-2" style="display: flex; align-items: center;">
+						<img th:src="@{/images/lupa.png}" width="16" height="16"
+							style="margin-right: 10px;"> <span for="paciente">Paciente
+							Nº Dni:</span>
+					</div>
+
+					<div class="col-sm-3">
+						<input class="form-control" type="text" id="filtroBusquedaDni"
+							placeholder="Buscar por dni..."
+							style="user-select: none; height: 35px; font-size: 15px"
+							th:onclick="limpiarFiltros()" />
+					</div>
+
+					<div class="col-sm" style="display: flex; align-items: center;">
+						<button type="button" class="btn btn-secondary btn-xs"
+							style="width: 150px; height: 32px; display: inline-block; vertical-align: middle; padding: 1px 1px;"
+							th:onclick="limpiarFiltros()">Borrar Filtros</button>
+					</div>
+
+
+				</div>
+				<!-- FIN BUSQUEDA DEL PACIENTE--------------------------------------------------->
+
+				<!-- ESPACIO DESPUES DE LA LINEA -------------------------------------------------------------------------------->
+				<div
+					style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;"></div>
+				<h1 class="text-secondary pb-0"></h1>
+				<!--------------------------------------------------------------------------------------------------------------->
+				<div class="table-responsive"
+					style="height: 310px; overflow-y: auto">
+					<table class="table table-striped" id="tablaListadoTurnos">
+						<!-- columnas -->
+						<thead>
+							<tr>
+								<th sec:authorize="hasRole('ROLE_USER')">Id</th>
+								<th>Fecha Alta</th>
+								<!-- th:text="#{}" -->
+								<th>Profesional</th>
+								<th>Especialidad</th>
+								<th>Paciente</th>
+								<th>Dni</th>
+								<th>Fecha a Presentarse</th>
+								<!-- <th>Observaciones</th> -->
+								<th sec:authorize="hasRole('ROLE_ADMIN')"><span
+									for="banderaIconoVerde" data-bs-toggle='tooltip'
+									data-bs-placement='top' title='Ver Detalle || Reimprimir'
+									style="margin-left: 8px; font-size: 18px; color: green;">
+										⚑</span></th>
+								<th sec:authorize="hasRole('ROLE_ADMIN')"><span
+									for="banderaIconoRojo" data-bs-toggle='tooltip'
+									data-bs-placement='top' title='Eliminar turno'
+									style="margin-left: 9px; font-size: 18px; color: red;">⚑</span></th>
+							</tr>
+						</thead>
+
+						<!-- filas -->
+						<tbody>
+							<tr th:each="turno: ${turnos}">
+								<!-- <td sec:authorize="hasRole('ROLE_USER')"> <a class="btn btn-primary btn-xs" th:href="@{/ver/} + ${profesional.id}">Ver</a></td> -->
+								<!-- <td sec:authorize="hasRole('ROLE_USER')"><a
+								class="btn btn-primary btn-xs"
+								th:href="@{#} + ${turno.id}" data-bs-toggle="tooltip"
+								data-bs-placement="top" title="Ver Detalles del Sobreturno"><img
+									src="/images/icons8-eye-60.png" width="20" height="20"></a></td> -->
+								<td th:text="${turno.id}"></td>
+								<td
+									th:text="${#strings.toUpperCase(#temporals.format(turno.fechaCreacion, 'dd/MM/yyyy'))}"></td>
+								<td
+									th:text="${turno.profesional.codigo}+ ' - ' +${turno.profesional.apellido}+ ' ' +${turno.profesional.nombre}"></td>
+								<td
+									th:text="${turno.especialidad.especialidadCodigo}+ ' - ' + ${turno.especialidad.especialidadNombre} "></td>
+								<td
+									th:text="${turno.paciente.apellido} + ' ' + ${turno.paciente.nombre}"></td>
+								<td th:text="${turno.paciente.dni}"></td>
+								<td
+									th:text="${#dates.format(turno.planilladetalle.rangoFechaHora, 'EEEE, dd/MM/yyyy HH:mm')}"></td>
+									
+
+								<!-- <td th:text="${sobreturno.observacion}"></td> -->
+								<td sec:authorize="hasRole('ROLE_ADMIN')"><a
+									class="btn btn-danger btn-xs"
+									style="width: 38px; height: 35px; font-size: 14px;"
+									th:onclick="|printTurno('${turno.id}')|"><i
+										class="fa fa-print" aria-hidden="true" style="margin-left: -3px;"></i></a></td>
+								<td sec:authorize="hasRole('ROLE_ADMIN')"><a
+									class="btn btn-danger btn-xs"
+									style="width: 38px; height: 35px; font-size: 14px;"
+									th:href="@{/turnos/eliminar/} + ${turno.id}"
+									th:onclick="return confirm('Estas seguro que quieres eliminar el Turno?');"><i
+										class="fa fa-trash" aria-hidden="true" style="margin-left: -3px;"></i></a></td>
+
+
+								<!--  para traducciones al click en eliminar-->
+								<!-- <td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-xs"
+								th:href="@{/eliminar/} + ${cliente.id}" th:text="#{text.cliente.eliminar}"
+								onclick="return confirm(document.getElementById('i18n_eliminar_cliente').innerHTML);"></a></td> -->
+							</tr>
+						</tbody>
+
+					</table>
+				</div>
+				<!-- <nav th:replace="~{paginator-nav :: paginator}"></nav> -->
+
+
+			</div>
+
+		</div>
+		<h1 class="card-title">
+			<a sec:authorize="hasRole('ROLE_ADMIN')"
+				th:href="@{/turnos/formTurno}"
+				class="btn btn-primary btn-xs">Generar Turno Nuevo</a>
+		</h1>
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script
+		th:replace="turnos/js/funcionesParaListarTurnos :: javascript"></script>
+</body>
+</html>

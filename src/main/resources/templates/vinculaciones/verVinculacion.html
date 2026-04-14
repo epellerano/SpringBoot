@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<style>
+/* Estética SIGAT: Centrado vertical y balance de pantalla */
+.viewport-container {
+	min-height: calc(100vh - 110px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem 0;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 12px;
+	margin-bottom: 30px;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 100px;
+	height: 4px;
+	background-color: #0d6efd;
+	border-radius: 2px;
+}
+
+/* Bloques de información */
+.info-box {
+	background-color: #f8fafc;
+	border-radius: 10px;
+	padding: 15px 20px;
+	border: 1px solid #e2e8f0;
+	height: 100%;
+}
+
+.info-label {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	color: #64748b;
+	font-weight: 800;
+	margin-bottom: 5px;
+	display: flex;
+	align-items: center;
+}
+
+.info-label i {
+	margin-right: 8px;
+	color: #0d6efd;
+}
+
+.info-value {
+	font-size: 1.15rem;
+	color: #1e293b;
+	font-weight: 600;
+}
+
+/* Badge Verde para Especialidad */
+.badge-clinico {
+	background-color: #d1fae5;
+	color: #065f46;
+	border: 1px solid #10b981;
+	padding: 0.5rem 1rem;
+	border-radius: 50px;
+	font-weight: 700;
+	text-transform: uppercase;
+	display: inline-block;
+}
+
+/* Estilo para observaciones largas */
+.obs-text {
+	font-size: 1rem;
+	color: #475569;
+	line-height: 1.6;
+	white-space: pre-wrap;
+}
+
+/* Configuración de Impresión PDF */
+@media print {
+	@page {
+		size: auto;
+		margin: 15mm;
+	}
+	header, footer, .btn-acciones {
+		display: none !important;
+	}
+	.card {
+		border: none !important;
+		box-shadow: none !important;
+	}
+	.viewport-container {
+		min-height: auto !important;
+		padding: 0 !important;
+		display: block !important;
+	}
+	.info-box {
+		border: 1px solid #dee2e6 !important;
+		background-color: white !important;
+	}
+}
+</style>
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header "></header>
+
+	<div class="container viewport-container">
+		<div class="row justify-content-center w-100 m-0">
+			<div class="col-12 col-md-10 col-lg-8">
+
+				<div class="card shadow-lg border-0 rounded-3">
+					<div class="card-body p-4 p-md-5">
+
+						<!-- ENCABEZADO -->
+						<div class="header-clinica d-flex align-items-center">
+							<i class="fa-solid fa-handshake-angle fa-3x text-primary me-4"></i>
+							<div>
+								<h2 th:text="${titulo}" class="fw-bold text-dark mb-0"></h2>
+								<p class="text-muted mb-0 small fw-bold text-uppercase">Detalle
+									de Asignación Profesional</p>
+							</div>
+						</div>
+
+						<div class="row g-4">
+							<!-- BLOQUE MÉDICO -->
+							<div class="col-md-6">
+								<div class="info-box shadow-sm">
+									<div class="info-label">
+										<i class="fa-solid fa-user-doctor"></i>Profesional Responsable
+									</div>
+									<div class="info-value text-uppercase"
+										th:text="${vinculacion.profesional.apellido} + ' ' + ${vinculacion.profesional.nombre}"></div>
+								</div>
+							</div>
+
+							<!-- BLOQUE ESPECIALIDAD -->
+							<div class="col-md-6">
+								<div class="info-box shadow-sm">
+									<div class="info-label">
+										<i class="fa-solid fa-stethoscope"></i>Especialidad Vinculada
+									</div>
+									<div class="mt-2">
+										<span class="badge-clinico"
+											th:text="${vinculacion.especialidad.especialidadNombre}"></span>
+									</div>
+								</div>
+							</div>
+
+							<!-- BLOQUE OBSERVACIONES -->
+							<div class="col-12">
+								<div class="info-box shadow-sm">
+									<div class="info-label">
+										<i class="fa-solid fa-comment-medical"></i>Observaciones y
+										Requisitos de Turno
+									</div>
+									<div class="obs-text mt-2" th:text="${vinculacion.Observacion}"></div>
+								</div>
+							</div>
+
+							<!-- ACCIONES (Se ocultan en el PDF) -->
+							<div class="col-12 mt-5 btn-acciones">
+								<div class="d-flex flex-column flex-sm-row gap-3">
+									<!-- Botón para tu reporte PDF del controlador -->
+									<a class="btn btn-danger btn-lg flex-grow-1 fw-bold shadow"
+										th:href="@{'/vinculaciones/reporteVinculacion/' + ${vinculacion.id}(format=pdf)}"
+										target="_blank"> <i class="fa-solid fa-file-pdf me-2"></i>REPORTE
+										PDF
+									</a> <a th:href="@{/vinculaciones/listarVinculacion}"
+										class="btn btn-outline-secondary btn-lg flex-grow-1 fw-bold">
+										<i class="fa-solid fa-arrow-left me-2"></i>VOLVER
+									</a>
+
+
+								</div>
+							</div>
+						</div>
+						<!-- Fin row -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

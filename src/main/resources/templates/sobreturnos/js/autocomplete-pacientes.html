@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document)
+				.ready(
+						function() {
+
+							$("#buscar_pacienteApeNom")
+									.autocomplete({ delay: 0 },
+											{
+
+												source : function(request,
+														response) {
+													$
+															.ajax({
+																url : "/sobreturnos/cargar-pacientes/"
+																		+ request.term,
+																dataType : "json",
+																data : {
+																	term : request.term
+																},
+																success : function(
+																		data) {
+																	response($
+																			.map(
+																					data,
+																					function(
+																							item) {
+																						return {
+																							value : item.id,
+																							label : item.apellido
+																									+ " "
+																									+ item.nombre,
+																							label2 : item.dni,
+																						};
+
+																					}));
+																},
+																error : function(
+																		jqXHR,
+																		textStatus,
+																		errorThrown) {
+																	// Esta función se ejecuta si la solicitud falla.
+																	console
+																			.log("Error: "
+																					+ textStatus
+																					+ ", "
+																					+ errorThrown);
+																	// Por ejemplo, puedes mostrar un mensaje de error al usuario:
+																	//$("#mi_div").html("Error: " + textStatus);
+																	// Mostramos un mensaje.																	
+																			Swal.fire({
+																				  icon: "error",
+																				  title: "Lo sentimos.. Algo Salió mal..",
+																				  text: "Error en la busqueda del paciente!",
+																				  //imageUrl : "/images/thumbs-down.jpg"
+																				});
+																	//DESMARCAMOS CHECK VALIDAR PACIENTES
+																	desmarcarCheckPacientes();
+																	// desHabilitamos el botón.
+																	document
+																			.getElementById('btnConfirmar').disabled = true;
+																}
+															});
+												},
+												select : function(event, ui) {
+													//por apellido y nombre en en modalProfEsp.html
+													$("#buscar_pacienteApeNom")
+															.val(ui.item.label); //apellido y nombre
+													$("#pacienteId").val(
+															ui.item.value); // id	
+													//por Dni en modalProfEsp.html
+													$("#buscar_pacienteDni")
+															.val(ui.item.label2); //numero de dni
+													$("#pacientedniId").val(
+															ui.item.value); // id
+
+													//MARCAMOS CHECK VALIDAR PACIENTES
+													marcarCheckPacientes();
+													// Habilitamos el botón.
+													document
+															.getElementById('btnConfirmar').disabled = false;
+													return false;
+												}
+											});
+						});
+
+		//-----------------------por dni ---------------------------------------------------------------------
+
+		$(document)
+				.ready(
+						function() {
+
+							$("#buscar_pacienteDni")
+									.autocomplete({ delay: 0 },
+											{
+
+												source : function(request,
+														response) {
+													$
+															.ajax({
+																url : "/sobreturnos/cargar-pacientes-dni/"
+																		+ request.term,
+																dataType : "json",
+																data : {
+																	term : request.term
+																},
+																success : function(
+																		data) {
+																	response($
+																			.map(
+																					data,
+																					function(
+																							item) {
+																						return {
+																							value : item.id,
+																							label : item.dni,
+																							label2 : item.apellido
+																									+ " "
+																									+ item.nombre,
+																						};
+																					}));
+																},
+																error : function(
+																		jqXHR,
+																		textStatus,
+																		errorThrown) {
+																	// Esta función se ejecuta si la solicitud falla.
+																	console
+																			.log("Error: "
+																					+ textStatus
+																					+ ", "
+																					+ errorThrown);
+																	// Por ejemplo, puedes mostrar un mensaje de error al usuario:
+																	//$("#mi_div").html("Error: " + textStatus);
+																	// Mostramos un mensaje.
+																	Swal
+																			.fire({
+																				icon : "error",
+																				title : "Lo sentimos.. Algo Salió mal..",
+																				text : "Error en la busqueda del paciente por Dni.."
+																						+ textStatus
+																						+ ", "
+																						+ errorThrown,
+																				//imageUrl : "/images/thumbs-down.jpg"
+																			});
+																	//DESMARCAMOS CHECK VALIDAR PACIENTES
+																	desmarcarCheckPacientes();
+																	// desHabilitamos el botón.
+																	document
+																			.getElementById('btnConfirmar').disabled = true;
+																}
+															});
+												},
+												select : function(event, ui) {
+													//por Dni en modalProfEsp.html
+													$("#buscar_pacienteDni")
+															.val(ui.item.label); //numero de dni
+													$("#pacienteId").val(
+															ui.item.value); // id	
+
+													//por apellido y nombre en en modalProfEsp.html
+													$("#buscar_pacienteApeNom")
+															.val(ui.item.label2); //apellido y nombre
+													$("#pacientedniId").val(
+															ui.item.value); // id
+													// habilitamos el botón.
+													document
+															.getElementById('btnConfirmar').disabled = false;
+													//MARCAMOS CHECK VALIDAR PACIENTES
+													marcarCheckPacientes();
+													// Habilitamos el botón.
+													document
+															.getElementById('btnConfirmar').disabled = false;
+													return false;
+												}
+											});
+						});
+
+		//LO LLAMAMOS DESDE LA PAGINA modalProfEsp.HTML
+		function clearInput() {
+			document.getElementById("buscar_pacienteApeNom").value = "";
+			document.getElementById("buscar_pacienteDni").value = "";
+			document.getElementById("pacienteId").value = "";
+			document.getElementById("pacientedniId").value = ""
+			document.getElementById("Observacion").value = ""
+			// destildamos el check Pacientes
+			document.getElementById("isCheckPaciente").checked = false;
+		}
+
+		//Funcion para verificar si el profesional y la especialidad tiene alguna planilla creada, activa y no vencida.
+		//ademas muestra el resumen del turno.
+		function existePlanillaActiva() {
+
+			var profId = $("#profesional").val();
+			var EspecId = $("#especialidad").val();
+
+			$
+					.get(
+							"/sobreturnos/existe-planilla/" + profId + "/" + EspecId,
+							function(data) {
+								//alert('Welcome!' + profId + " / " + EspecId);			                        
+
+								//verificamos si data tiene datos para habilitar boton guardar.
+								if (data.length === 0) {
+									// Mostramos un mensaje.
+									Swal.fire({
+										icon : "error",
+										title : "Lo sentimos.. Algo Salió mal..",
+										html : "No Existen Sobreturnos libres para el Profesional. <br> O bien su Planilla Horaria esta Inactiva.",
+										//imageUrl : "/images/thumbs-down.jpg"
+									});
+									// Deshabilitamos el botón. 
+									//document.getElementById('btnConfirmar').disabled = true;
+									//Actualizamos los indices de comboBox.
+									document.getElementById('profesional').selectedIndex = 0;
+									document.getElementById('especialidad').value = "";
+									//DESMARCAMOS EL CHECK BOX
+									desmarcarCheckProfesionalEspecialidad();
+
+								}
+							});
+		}
+		
+		
+
+
+		//OTRAS FUNCIONES ***********************************************************
+		function desmarcarCheckPacientes() {
+			//deshabilitamos el chek validar pacientes
+			const checkbox = document.getElementById('isCheckPaciente');
+			// Desmarca la casilla de verificación
+			checkbox.checked = false;
+		}
+
+		function marcarCheckPacientes() {
+			const checkbox = document.getElementById('isCheckPaciente');
+			// Marca la casilla de verificación
+			checkbox.checked = true;
+			//redirect focus	
+			const miElemento = document.getElementById('Observacion');
+			miElemento.focus();
+			miElemento.value ='SOBRETURNO';
+		}
+
+		function desmarcarCheckProfesionalEspecialidad() {
+			//deshabilitamos el chek validar pacientes
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Desmarca la casilla de verificación
+			checkbox.checked = false;
+		}
+
+		function marcarCheckProfesionalEspecialidad() {
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Marca la casilla de verificación
+			checkbox.checked = true;
+			//redirect focus
+			document.getElementById('btnConfirmar').focus();
+		}
+
+		//evitamos resaltar el texto-------------------
+		$("input").select(function() {
+			window.getSelection().removeAllRanges();
+		});
+		//---------------------------------------------
+	</script>
+</body>
+</html>

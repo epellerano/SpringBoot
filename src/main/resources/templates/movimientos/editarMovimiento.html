@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+/* Estética SIGAT: Estilo de Edición Balanceado */
+.viewport-container {
+	min-height: calc(100vh - 110px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.2rem 10px;
+}
+
+#form {
+	font-size: 0.95rem;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 10px;
+	margin-bottom: 25px;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 140px;
+	height: 4px;
+	background-color: #0d6efd;
+	border-radius: 2px;
+}
+
+.card-panoramic {
+	width: 100%;
+	border-radius: 12px;
+	border: none;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Campos con tamaño cómodo (Igual al anterior) */
+.form-control, .form-select {
+	padding: 0.55rem 0.75rem;
+	font-size: 0.95rem;
+	border: 1px solid #ced4da;
+}
+
+.input-readonly-premium {
+	background-color: #f8fafc !important;
+	border-color: #e2e8f0 !important;
+	font-weight: 600;
+	color: #64748b !important;
+}
+
+.input-group-text {
+	background-color: #f8f9fa;
+	color: #495057;
+	padding: 0.55rem 0.75rem;
+}
+
+.form-label {
+	margin-bottom: 0.4rem;
+	font-size: 0.9rem;
+}
+
+.session-block {
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 18px;
+	height: 100%;
+}
+
+.total-footer-bar {
+	background-color: #f1f5f9;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	padding: 15px 25px;
+}
+</style>
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header "></header>
+
+	<!-- px-lg-5 para margen lateral en PC -->
+	<div class="container-fluid viewport-container px-lg-5">
+		<div class="row w-100 m-0 justify-content-center">
+			<div class="col-12 col-xl-11">
+
+				<div class="card card-panoramic">
+					<!-- p-4 px-lg-5 para "aire" interno -->
+					<div class="card-body p-5 px-lg-5">
+
+						<!-- TÍTULO SIGAT EDICIÓN -->
+						<div class="header-clinica d-flex align-items-center">
+							<div
+								class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center me-3 shadow-sm"
+								style="width: 60px; height: 60px;">
+								<i class="fa-solid fa-pen-to-square fa-xl"></i>
+							</div>
+							<div>
+								<h3 th:text="${titulo}" class="fw-bold text-dark mb-0"></h3>
+								<p class="text-muted mb-0 text-uppercase small fw-bold"
+									style="letter-spacing: 1px; font-size: 0.7rem;">SIGAT •
+									Modificación de Jornada Laboral Registrada</p>
+							</div>
+						</div>
+
+						<form th:action="@{/movimientos/editarMovimiento}"
+							th:object="${movimiento}" method="post" id="form">
+
+							<!-- FILA 1: DATOS FIJOS -->
+							<div class="row g-3 mb-4">
+								<div class="col-md-4">
+									<label
+										class="form-label fw-bold text-secondary small text-uppercase">Profesional
+										Seleccionado</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-user-doctor"></i></span> <input type="text"
+											th:field="*{profesional.apellido}"
+											class="form-control input-readonly-premium" readonly />
+									</div>
+								</div>
+								<div class="col-md-5">
+									<label
+										class="form-label fw-bold text-secondary small text-uppercase">Especialidad</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-stethoscope"></i></span> <input type="text"
+											th:field="*{especialidad.especialidadNombre}"
+											class="form-control input-readonly-premium" readonly />
+									</div>
+								</div>
+								<div class="col-md-3">
+									<label
+										class="form-label fw-bold text-dark small text-uppercase">Fecha
+										de Creación</label>
+									<div class="input-group">
+										<span class="input-group-text"><i
+											class="fa-solid fa-calendar-day"></i></span> <input type="date"
+											th:field="*{createAt}" class="form-control"
+											th:errorclass="'is-invalid'" />
+									</div>
+								</div>
+							</div>
+
+							<!-- FILA 2: SESIONES -->
+							<div class="row g-4 mb-4">
+								<div class="col-md-6">
+									<div
+										class="session-block border-start border-success border-4 shadow-sm">
+										<h6 class="fw-bold text-success mb-3">
+											<i class="fa-solid fa-sun me-2"></i>REVISIÓN MAÑANA
+										</h6>
+										<div class="row g-2">
+											<div class="col-4">
+												<label class="small fw-bold text-muted">Ingreso</label> <input
+													type="time" th:field="*{horaIniManana}"
+													class="form-control" id="horaIniManana" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-muted">Egreso</label> <input
+													type="time" th:field="*{horaFinManana}"
+													class="form-control" id="horaFinManana" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-success">Subtotal</label> <input
+													type="text" th:field="*{totalManana}"
+													class="form-control bg-white fw-bold text-success border-success-subtle"
+													id="totalManana" readonly />
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div
+										class="session-block border-start border-primary border-4 shadow-sm">
+										<h6 class="fw-bold text-primary mb-3">
+											<i class="fa-solid fa-moon me-2"></i>REVISIÓN TARDE
+										</h6>
+										<div class="row g-2">
+											<div class="col-4">
+												<label class="small fw-bold text-muted">Ingreso</label> <input
+													type="time" th:field="*{horaIniTarde}" class="form-control"
+													id="horaIniTarde" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-muted">Egreso</label> <input
+													type="time" th:field="*{horaFinTarde}" class="form-control"
+													id="horaFinTarde" />
+											</div>
+											<div class="col-4">
+												<label class="small fw-bold text-primary">Subtotal</label> <input
+													type="text" th:field="*{totalTarde}"
+													class="form-control bg-white fw-bold text-primary border-primary-subtle"
+													id="totalTarde" readonly />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- FILA 3: TOTAL GENERAL -->
+							<div class="total-footer-bar mb-4 shadow-sm">
+								<div class="row align-items-center">
+									<div class="col-md-9">
+										<h5 class="fw-bold mb-0 text-dark">
+											<i class="fa-solid fa-calculator text-muted me-2"></i>
+											Cómputo de Horas Totales
+										</h5>
+										<small class="text-muted">El total se actualiza
+											automáticamente al modificar cualquier horario.</small>
+									</div>
+									<div class="col-md-3">
+										<div class="input-group input-group-lg">
+											<span
+												class="input-group-text bg-white border-success border-end-0 text-success"><i
+												class="fa-solid fa-check-double"></i></span> <input type="text"
+												th:field="*{totalGeneral}"
+												class="form-control border-success border-start-0 text-success fw-bold text-center"
+												id="totalGeneral" readonly />
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- BOTONES -->
+							<div class="d-flex gap-3">
+								<button type="submit" id="btnGuardarEdicion"
+									class="btn btn-success flex-grow-1 fw-bold shadow py-3"
+									th:onmouseover="validarHorasyForm()">
+									<i class="fa-solid fa-cloud-arrow-up me-2"></i>GUARDAR CAMBIOS
+									REALIZADOS
+								</button>
+								<a th:href="@{/movimientos/listarMovimiento}"
+									class="btn btn-outline-secondary px-5 fw-bold py-3">
+									DESCARTAR </a>
+							</div>
+
+							<input type="hidden" th:field="*{id}" />
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer "></footer>
+
+	<script
+		th:replace="movimientos/js/autocomplete-especialidad :: javascript"></script>
+	<script
+		th:replace="movimientos/js/load-combobox-vinculacion :: javascript"></script>
+	<script th:replace="movimientos/js/suma-horas :: javascript"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("form").keypress(function(e) {
+				if (e.which == 13)
+					return false;
+			});
+		});
+	</script>
+</body>
+</html>

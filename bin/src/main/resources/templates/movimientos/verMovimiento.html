@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<!-- ENCABEZADO DE PAGINA -->
+	<header th:replace="layout/layout :: header "></header>
+
+	<!-- CONTENIDO PRINCIPAL -->
+	<div class="container py-4">
+		<div class="card bg-light">
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h1>
+					<a th:href="@{/movimientos/listarMovimiento}"
+						class="btn btn-primary btn-xs">Volver al listado</a>
+				</h1>
+				<!--  DATOS DEL MOVIMIENTO -->
+				<ul class="list-group">
+					
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Fecha de
+							Creación:</div>
+						<p class="list-group" th:text="${#dates.format(movimiento.CreateAt,'dd/MM/yyyy')}"></p>						
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Profesional Seleccionado:</div>
+						<p class="list-group"
+							th:text="${movimiento.profesional.apellido} + ' ' + ${movimiento.profesional.nombre}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Especialidad seleccionada:</div>
+						<p class="list-group"
+							th:text="${movimiento.especialidad.especialidadNombre}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Hora Inicio Turno
+							Mañana:</div>
+						<p class="list-group" th:text="${movimiento.horaIniManana}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Hora Fin Turno
+							Mañana:</div>
+						<p class="list-group" th:text="${movimiento.horaFinManana}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Total Horas Turno
+							Mañana:</div>
+						<p class="list-group fw-bold" th:text="${movimiento.totalManana}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Hora Inicio Turno
+							Tarde:</div>
+						<p class="list-group" th:text="${movimiento.horaIniTarde}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Hora Fin Turno
+							Tarde:</div>
+						<p class="list-group" th:text="${movimiento.horaFinTarde}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Total Horas Turno
+							Tarde:</div>
+						<p class="list-group fw-bold" th:text="${movimiento.totalTarde}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 220px;">Total Horas
+							Trabajadas:</div>
+						<p class="list-group text-danger fw-bold" th:text="${movimiento.totalGeneral}"></p>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- PIE DE PAGINA -->
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

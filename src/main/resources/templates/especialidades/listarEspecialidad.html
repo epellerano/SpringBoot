@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/layout :: head}">
+    <!-- Font Awesome 7 Local -->
+    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+    /* --- ESTÉTICA SIGAT PREMIUM (UNIFICADA) --- */
+    .header-sigat-modern {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #e2e8f0;
+        position: relative;
+    }
+
+    .header-sigat-modern::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 150px;
+        height: 3px;
+        background-color: #0d6efd;
+        border-radius: 2px;
+    }
+
+    .icon-shape {
+        width: 50px;
+        height: 50px;
+        background-color: #eef2ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.5rem;
+    }
+
+    .system-tag {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        display: block;
+        margin-bottom: -2px;
+    }
+
+    .title-main {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.75rem;
+        margin: 0;
+    }
+
+    .subtitle-main {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    /* --- ESTILOS DE TABLA PREMIUM --- */
+    .table thead th {
+        background-color: #f8fafc;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        padding: 15px 10px;
+        border-top: none;
+    }
+
+    .badge-clinico {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+        padding: 0.4em 0.8em;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* Botones de acción estilo minimalista */
+    .btn-action-link {
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    .btn-action-link:hover { color: #0d6efd; }
+    .btn-delete-link:hover { color: #dc3545; }
+</style>
+
+<body class="bg-light">
+
+    <header th:replace="~{layout/layout :: header}"></header>
+
+    <div class="container-fluid px-lg-5 py-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-lg-5">
+
+                <!-- CABECERA PREMIUM REDISEÑADA -->
+                <div class="header-sigat-modern">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-shape me-3 shadow-sm">
+                            <i class="fa-solid fa-stethoscope"></i>
+                        </div>
+                        <div>
+                            <!-- <span class="system-tag">SIGAT • ÁREAS MÉDICAS</span> -->
+                            <h2 class="title-main" th:text="${titulo}"></h2>
+                            <span class="subtitle-main">SIGAT • Gestión de especialidades para la asignación de turnos y profesionales</span>
+                        </div>
+                    </div>
+                    
+                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/especialidades/formEspecialidad}" 
+                       class="btn btn-primary fw-bold shadow-sm px-4 py-2 rounded-3">
+                        <i class="fa-solid fa-plus-circle me-2"></i>NUEVA ESPECIALIDAD
+                    </a>
+                </div>
+
+                <!-- TABLA DE ESPECIALIDADES -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th class="text-center" sec:authorize="hasRole('ROLE_USER')">Ver</th>
+                                <th>Código de Área</th>
+                                <th>Nombre de la Especialidad</th>
+                                <th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="especialidad: ${especialidades}">
+                                <!-- Ver Detalle -->
+                                <td class="text-center" sec:authorize="hasRole('ROLE_USER')">
+                                    <a th:href="@{/especialidades/verEspecialidad/} + ${especialidad.id}" class="btn-action-link">
+                                        <i class="fa-solid fa-circle-info fa-lg"></i>
+                                    </a>
+                                </td>
+
+                                <!-- Código -->
+                                <td>
+                                    <span class="badge badge-clinico" th:text="${especialidad.especialidadCodigo}"></span>
+                                </td>
+
+                                <!-- Nombre -->
+                                <td th:text="${especialidad.especialidadNombre}" class="fw-bold text-dark text-uppercase"></td>
+
+                                <!-- Acciones Admin -->
+                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
+                                    <div class="d-flex justify-content-center gap-4">
+                                        <a th:href="@{/especialidades/formEspecialidad/} + ${especialidad.id}" class="btn-action-link" title="Editar">
+                                            <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                        </a>
+                                        <a th:href="@{/especialidades/eliminarEspecialidad/} + ${especialidad.id}" 
+                                           class="btn-action-link btn-delete-link" 
+                                           th:onclick="return confirm('¿Está seguro que desea eliminar la especialidad seleccionada?');" title="Eliminar">
+                                            <i class="fa-solid fa-trash-can fa-lg"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINADOR -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <p class="small text-muted mb-0">Configuración global de especialidades SIGAT</p>
+                    <nav th:replace="~{paginator-nav :: paginator}"></nav>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layout/layout :: footer}"></footer>
+</body>
+</html>

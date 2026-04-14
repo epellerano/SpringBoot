@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript"> 
+		// Función para cargar especialidades al seleccionar un profesional 	  
+		function cargarEspecialidades() {
+
+			//verificamos el indice del combobox profesional -----------------------
+			var indexProf = document.getElementById("profesional").selectedIndex;
+			// ----------------------------------------------------------------------
+
+			if (indexProf != 0) {
+				var profesionalId = $("#profesional").val();//Obtenemos el IdProf del comboBox en la vista 
+				if (profesionalId == "") { //donde se esta ejecutando este script mediante id="profesional".
+					limpiarDatosCompletos();
+					//mostramos una Alerta personalizada.
+					Swal.fire({
+						icon : "error",
+						title : "Lo sentimos.. Algo Salió mal..",
+						text : "No se encontro el Id del Profesional!",
+						//imageUrl : "/images/thumbs-down.jpg"
+					});
+					$("#especialidad").empty().prop("disabled", true);
+					return;
+				} //Usamos la funcion del controlador: @ResponseBody List<Especialidad> findByIdProfInVinculacion
+				//para obtener las especialidades vinculadas.
+				$
+						.get(
+								"/turnos/cargar-especialidades/"
+										+ profesionalId,
+								{
+									profesionalId : profesionalId
+								},
+								function(data) {
+									$("#especialidad").empty().prop("disabled",
+											false);
+									//$("#especialidad").append(new Option("Selecciona una especialidad", ""));     
+
+									// Iterar sobre las especialidades y establecer la especialidad 
+									// seleccionada en el comboBox
+									$
+											.each(
+													data,
+													function(index,
+															especialidad) {
+														var selected = especialidad.id === "${especialidad.id}" ? "selected"
+																: "";
+														$("#especialidad")
+																.append(
+																		new Option(
+																				especialidad.especialidadNombre,
+																				especialidad.id,
+																				false,
+																				selected));
+													});
+									//MARCAMOS EL CHECK BOX
+									marcarCheckProfesionalEspecialidad();
+									//verificar si existen especialidades vinculadas.
+									existeEspecialidad();
+									//foco en Buscar Paciente 
+									focusPacienteApeyNom();
+								});
+			} else {
+				//deshabilitamos combobox especialidad 
+				document.getElementById('especialidad').innerHTML = "";
+				document.getElementById('especialidad').disabled = true;
+			}
+		}
+		
+		//FUNCION FOCU PACIENTE APELLIDO Y NOMBRE
+	    function focusPacienteApeyNom(){
+	     //foco en busqueda de paciente por apellido.
+	     var pacienteApeNom = document.getElementById('buscar_pacienteApeNom'); 
+	     pacienteApeNom.focus();
+	    }
+
+		// OTRAS FUNCIONES ********************************************************************************
+
+		//Funcion para verificar si existen especialidades vinculadas del profesional seleccionado.
+		function existeEspecialidad() {
+			$(document)
+					.ready(
+							function() {
+								var profesionalId = $("#profesional").val();
+								//alert("profId: " + profesionalId);
+								var profesionalNombre = $(
+										'#profesional option:selected').text()
+								$
+										.ajax({
+											type : 'GET',
+											url : "/turnos/cargar-especialidades/"
+													+ profesionalId,
+											dataType : 'json',
+											success : function(lista) {
+												//console.log("OK");
+
+												// validas si la lista es nula			            
+												if (lista == "") {
+													limpiarDatosCompletos();
+													// Mostramos un mensaje de Alerta Personalizado.
+													Swal
+															.fire({
+																icon : "error",
+																title : "Lo sentimos.. Algo Salió mal..",
+																//imageUrl : "/images/thumbs-down.jpg",
+																text : "No Existen especialidades Vinculadas para el Profesional: \n"
+																		+ profesionalNombre
+																				.toUpperCase()
+															});
+													//document.getElementById("btnConfirmar").disabled = true;
+													//DESMARCAMOS EL CHECK BOX
+													desmarcarCheckProfesionalEspecialidad();
+													// mostramos imagen por defecto del Medico en Turnos Alta.
+													mostrarImagenMysql(profesionalId);
+													/* if(lista.lenght > 0){
+													    $.each(lista, function(i, item){
+													        console.log("item: " + item);
+													    });
+													} */
+													
+												} else {
+													//Mostramos la imagen del medico.
+													mostrarImagenMysql(profesionalId);
+													//limpiamos todo
+													limpiarDatosCompletos();
+													//mostramos Info semanal, Horarios, turnos y sobreturnos ocupados
+													const btnMostrar = document.getElementById('btnMostrar');
+													btnMostrar.click();													
+												}
+											},
+											// aquí capturas cualquier error que venga del backend
+											error : function(XMLHttpRequest,
+													textStatus, error) {
+												//alert("status: " + textStatus);
+												//mostramos una Alerta personalizada.
+												Swal
+														.fire({
+															icon : "error",
+															title : "Lo sentimos.. Algo Salió mal..",
+															text : "Debe seleccionar un Profesional!",
+															//imageUrl : "/images/thumbs-down.jpg"
+														});
+											}
+										});
+
+							});
+		}
+		
+		
+		
+		function mostrarImagenMysql(profId) {
+		    const img = document.getElementById('fotoMedico');
+		    const defaultIcon = document.getElementById('fotoDefault');
+
+		    fetch(`/api/turnosLibresController/obtener-imagen/` + profId)
+		        .then(response => response.text())
+		        .then(nombreArchivo => {
+		            // Verificamos si el nombre de archivo es válido (no vacío ni nulo)
+		            if (nombreArchivo && nombreArchivo.trim().length > 0) {
+		                // 1. Cargamos la ruta de la foto
+		                img.src = `/uploads/${nombreArchivo}`;
+		                // 2. Mostramos la imagen y ocultamos el ícono gris
+		                img.style.display = 'block';
+		                defaultIcon.style.display = 'none';
+		            } else {
+		                // 1. Si no hay foto, ocultamos la etiqueta img
+		                img.style.display = 'none';
+		                // 2. Mostramos el contenedor con el ícono de FontAwesome
+		                defaultIcon.style.display = 'flex';
+		            }
+		        })
+		        .catch(error => {
+		            console.error('Error al obtener la imagen:', error);
+		            // En caso de error, aseguramos que se vea el ícono por defecto
+		            img.style.display = 'none';
+		            defaultIcon.style.display = 'flex';
+		        });
+		}
+
+		
+		function limpiarDatosCompletos(){
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("horariosAtencion");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+				Tabla.deleteRow(x);
+			}
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("turnosLibresTodos");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+				Tabla.deleteRow(x);
+			}
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("turnosOcupadosTodos");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+				Tabla.deleteRow(x);
+			}
+			
+			//continuamos
+			document.getElementById("buscar_pacienteApeNom").value = "";
+			document.getElementById("buscar_pacienteDni").value = "";
+			document.getElementById("pacienteId").value = "";
+			document.getElementById("pacientedniId").value = "";
+			document.getElementById("Observacion").value = "";
+			// destildamos checks
+			document.getElementById("isCheckPaciente").checked = false;
+			document.getElementById("isCheckTurCanceladosMedico").checked = false;
+			document.getElementById("isCheckSobreturnos").checked = false;
+			//document.getElementById("isCheckTurnoSeleccionado").checked = false;
+			
+			//la foto
+			// 1. Ocultamos la etiqueta <img> (la que cargó el usuario)
+		    document.getElementById('fotoMedico').style.display = 'none';		    
+		    // 2. Mostramos el div que contiene el ícono fa-user-md
+		    // Usamos 'flex' para que las clases de Bootstrap (align-items-center) sigan funcionando
+		    document.getElementById('fotoDefault').style.display = 'flex';
+		    // 3. (Opcional) Limpiamos el src de la imagen para que no quede basura
+		    document.getElementById('fotoMedico').src = '';
+			
+		}
+		
+		
+
+		function desmarcarCheckProfesionalEspecialidad() {
+			//deshabilitamos el chek validar pacientes
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Desmarca la casilla de verificación
+			checkbox.checked = false;
+		}
+
+		function marcarCheckProfesionalEspecialidad() {
+			const checkbox = document.getElementById('isCheckProfEsp');
+			// Marca la casilla de verificación
+			checkbox.checked = true;
+			//redirect focus
+			document.getElementById('btnConfirmar').focus();
+		}		
+
+		//ejecutamos la funcion cuando cargue la pagina	
+		$(document).ready(function() {
+		    // 1. Leemos los valores preseleccionados
+		    var pId = $("#profIdPre").val();
+		    var eId = $("#especIdPre").val();
+		
+		    // 2. Si detectamos un médico preseleccionado
+		    if (pId && pId !== "") {
+		        $("#profesional").val(pId);
+		        
+		        // Ejecutamos tu función original de carga
+		        cargarEspecialidades();
+		
+		        // 3. Esperamos a que el combo de especialidades se llene
+		        setTimeout(function() {
+		            if (eId && eId !== "") {
+		                $("#especialidad").val(eId);
+		                
+		                // Ejecutamos tus funciones de validación e imagen
+		                marcarCheckProfesionalEspecialidad();
+		                existeEspecialidad();
+		                focusPacienteApeyNom();
+		            }
+		        }, 1000); // 1 segundo de espera es lo más seguro para no fallar
+		
+		    } else {
+		        // Comportamiento original si no hay preselección
+		        document.getElementById('profesional').selectedIndex = 0;			
+		    }
+		});
+	</script>
+</body>
+</html>

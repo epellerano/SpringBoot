@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head}"></head>
+<body>
+	<header th:replace="~{layout/layout :: header}"></header>
+	<div class="container py-4">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<!-- <h2>Planilla Horaria del Profesional</h2> -->
+				<h1>
+					<a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+						class="btn btn-primary btn-xs">Volver al listado</a>
+				</h1>
+				<!--  DATOS DEL PROFESIONAL Y ESPECIALIDAD -->
+				<ul class="list-group"
+					th:each="plaDetCompleta : ${planillaDetCompleta}">
+					
+					
+					<li
+						class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms me-auto">
+							<div class="fw-bold">Apellido y Nombre</div>
+							<p class="list-group"
+								th:text="${plaDetCompleta.planillacabecera.profesional.apellido} + ' ' + ${plaDetCompleta.planillacabecera.profesional.nombre}"></p>
+						</div>
+					</li>
+
+					<li
+						class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms me-auto">
+							<div class="fw-bold">Codigo del Profesional</div>
+							<p class="list-group"
+								th:text="${plaDetCompleta.planillacabecera.profesional.codigo}"></p>
+						</div>
+					</li>
+
+					<li
+						class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms me-auto">
+							<div class="fw-bold">Especialidad Vinculada</div>
+							<p class="list-group"
+								th:text="${plaDetCompleta.planillacabecera.especialidad.especialidadNombre}"></p>
+						</div>
+					</li>
+				
+					<li
+						class="list-group-item d-flex justify-content-between align-items-start">
+						<div class="ms me-auto">
+							<div class="fw-bold">Codigo de Especialidad</div>
+							<p class="list-group"
+								th:text="${plaDetCompleta.planillacabecera.especialidad.especialidadCodigo}"></p>
+						</div>
+					</li>
+					
+				</ul>
+				</div>
+				<!-- <table class="table table-responsive" id="rangoMysql" border="1">
+					<thead>
+						<tr>
+							<th>Dia</th>
+							<th>Fecha/Hora</th>
+
+							Otros campos de turno
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="plaDet : ${planilladetalle}">
+							<td th:text="${#dates.format(plaDet.rangoFechaHora, 'EEEE')}"></td>
+							<td
+								th:text="${#dates.format(plaDet.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+
+							Mostrar otros campos de turno
+						</tr>
+					</tbody>
+				</table> -->
+
+				<div class="card-body">
+					<!-- border-bottom -->
+					<h5 class="text-success pb-0 mx-2 text-danger" style="font-family: Arial">Rango
+						Horario Obtenido</h5>
+
+					<div class="card">
+						<!-- <div class="card-body"> -->
+						<div class="table-responsive"
+							style="height: 294px; overflow-y: auto">
+							<table class="table table-responsive" id="rangoMysql">
+								<thead>
+									<tr>
+										<th class="text-black-50" style="position: sticky; top: 0px">DIA ATENCION</th>
+										<th class="text-black-50" style="position: sticky; top: 0px">RANGO FECHA
+											Y HORA</th>
+											<th class="text-black-50" style="position: sticky; top: 0px">ESTADO [TURNO ALTA]</th>
+										<th class="text-black-50" style="position: sticky; top: 0px">OBSERVACIONES</th>
+										<!-- <td></td> -->
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="plaDet : ${planilladetalle}">
+										<td th:text="${#dates.format(plaDet.rangoFechaHora, 'EEEE').toUpperCase()}"></td>
+										<td	th:text="${#dates.format(plaDet.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+										<td	th:text="${plaDet.Estado.nombre}"></td>
+										<td	th:text="${plaDet.Observacion}"></td>
+
+										<!-- Mostrar otros campos de turno -->
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- </div> -->
+					</div>
+				</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			</div>
+		</div>
+	<!-- </div> -->
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+</body>
+</html>

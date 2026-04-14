@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+
+		//Convertimos a español los dias de la semana de moment.
+		function ObtenerDiaEspañol(date) {
+			const days = ['Dom', 'Lun', 'Mar', 'Miér', 'Jue', 'Vier', 'Sáb'];
+			return days[moment(date).day()];
+		}
+
+		//Funcion para limpiar campos Fechas.
+		function clearDateFechas() {
+			document.getElementById('fechaInicio').value = '';
+			document.getElementById('fechaFinal').value = '';
+		}
+
+		//FUNCION Para permitir solo un checkbox seleccionado de dos en turnos y sobreturnos ocupados..
+		function uncheckOther(checkbox) {
+			if (checkbox.id === 'isCheckReporteFechas' && checkbox.checked) {
+				document.getElementById('isCheckReporteVigente').checked = false;
+				document.getElementById('isCheckReporteHistorico').checked = false;
+				//habilitar fechas
+				document.getElementById('fechaInicio').disabled = false;
+				document.getElementById('fechaFinal').disabled = false;
+				//alert("funcion sin realizar");
+			} else if (checkbox.id === 'isCheckReporteVigente' && checkbox.checked) {
+				document.getElementById('isCheckReporteFechas').checked = false;
+				document.getElementById('isCheckReporteHistorico').checked = false;
+				//deshabilitar fechas
+				document.getElementById('fechaInicio').disabled = true;
+				document.getElementById('fechaFinal').disabled = true;
+				//Limpiar campos Fechas.
+				clearDateFechas();
+				//alert("funcion sin realizar");
+			} else if (checkbox.id === 'isCheckReporteHistorico' && checkbox.checked) {
+				document.getElementById('isCheckReporteVigente').checked = false;
+				document.getElementById('isCheckReporteFechas').checked = false;
+				//Limpiar campos Fechas.
+				clearDateFechas();
+				//deshabilitar fechas
+				document.getElementById('fechaInicio').disabled = true;
+				document.getElementById('fechaFinal').disabled = true;
+				//Limpiar campos Fechas.
+				clearDateFechas();
+				//alert("funcion sin realizar");
+			}
+			else {
+				//deshabilitar fechas
+				document.getElementById('fechaInicio').disabled = true;
+				document.getElementById('fechaFinal').disabled = true;
+			}
+		}
+
+		//function manejar los resportes en Table HTML segun lo seleccionado
+		function renderizarReporte() {
+			// 1. Obtener el estado del checkbox
+			const miCheckbox = document.getElementById('isCheckReporteFechas');
+			const checkEstaSeleccionado = miCheckbox.checked;
+
+			// 2. Obtener el valor del radio button seleccionado
+			const radios = document.querySelectorAll('input[name="reportes"]');
+			let valorRadio = '';
+			for (const radio of radios) {
+				if (radio.checked) {
+					valorRadio = radio.value;
+					break;
+				}
+			}
+
+			// 3. Usar switch para tomar decisiones de que reporte mostrar.
+			switch (true) {
+				case (checkEstaSeleccionado && valorRadio === 'turnoCancelado'):
+					//console.log('Checkbox marcado y Opción 1 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'sobreturnoCancelado'):
+					//console.log('Checkbox marcado y Opción 2 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'planillaCancelada'):
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'movimiento'):
+					mostrarMovimientosFechas();
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'planilla'):
+					mostrarPlanillasActivasFechas();
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'turno'):
+					mostrarTurnosFechas();
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'sobreturno'):
+					mostrarSobreTurnosFechas();
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				case (valorRadio === 'vinculacion'):
+					mostrarVinculaciones();
+					//console.log('Checkbox no marcado y Opción 3 seleccionada.');
+					break;
+				// Puedes agregar más casos para las otras combinaciones
+				default:
+				//console.log('Ninguna de las combinaciones anteriores.');
+			}
+		}
+
+		//Funcion Mostrar en la Tabla Reportes los Turnos Ocupados por (profId-EspecId-fechaIni-FechaFin).		
+		function mostrarTurnosFechas() {
+			//Variables				 
+			const profId = $("#profesional").val();
+			const EspecId = $("#especialidad").val();
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+			//Limpiamos las filas
+			clearTableTr();
+			//Continuamos
+
+			$.ajax({
+				url: "/api/reportesRestController/reporte-turnos-ocupados-fechas/" + profId + "/" + EspecId + "/" + fechaIniFormateada + "/" + fechaFinFormateada,
+				method: "GET",
+				dataType: "json",
+				success: function (datos) {
+					moment.locale('es');
+
+					// Si hay datos
+					if (datos && datos.length > 0) {
+
+						// habilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = false;
+
+						//agregamos encabezado o actualizamos si ya habia otro.
+						var cabeceras = ['FECHA ALTA', 'PROFESIONAL', 'ESPECIALIDAD', 'PACIENTE', 'DNI', 'TELEFONO', 'FECHA A PRESENTARSE'];
+						actualizarEncabezado(cabeceras);
+
+						// Construir las filas y celdas de la tabla
+						var $tbody = $("#tablaReportes tbody");
+						datos.forEach(function (dato) {
+							moment.locale('es');
+							var $tr = $("<tr>");
+							$tr.append("<td>" + moment(dato.fechaCreacion).format('DD/MM/YYYY HH:mm') + "</td>");
+							$tr.append("<td>" + dato.profesional.apellido + " " + dato.profesional.nombre + "</td>");
+							$tr.append("<td>" + dato.especialidad.especialidadCodigo + " - " + dato.especialidad.especialidadNombre + "</td>");
+							$tr.append("<td>" + dato.paciente.apellido + " " + dato.paciente.nombre + "</td>");
+							$tr.append("<td>" + dato.paciente.dni + "</td>");
+							$tr.append("<td>" + dato.paciente.telefono + "</td>");
+							$tr.append("<td Style='color: green'>" + ObtenerDiaEspañol(dato.planilladetalle.rangoFechaHora) + ' ' + moment(dato.planilladetalle.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>");
+
+							$tbody.append($tr);
+						});
+					} else {
+						// Mostrar mensaje si no hay datos
+						$("#tablaReportes tbody").html("<tr><td colspan='100'>No se encontraron datos de Turnos.</td></tr>");
+						// deshabilitar boton imprimir PDF
+						document.getElementById('btnImprimirPdf').disabled = true;
+					}
+				},
+				error: function (xhr, status, error) {
+
+					// deshabilitar boton imprimir PDF
+					document.getElementById('btnImprimirPdf').disabled = true;
+					// Mostrar mensaje de error
+					$("#mensaje-carga").html("Error al cargar los datos de Turnos: " + error)
+				}
+			});
+		}
+
+		//Funcion Mostrar en la Tabla Reportes los Sobreturnos Ocupados por (profId-EspecId-fechaIni-FechaFin).		
+		function mostrarSobreTurnosFechas() {
+			//Variables				 
+			const profId = $("#profesional").val();
+			const EspecId = $("#especialidad").val();
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+			//Limpiamos las filas
+			clearTableTr();
+			//Continuamos
+
+			$.ajax({
+				url: "/api/reportesRestController/reporte-sobreturnos-ocupados-fechas/" + profId + "/" + EspecId + "/" + fechaIniFormateada + "/" + fechaFinFormateada,
+				method: "GET",
+				dataType: "json",
+				success: function (datos) {
+					moment.locale('es');
+
+					// Si hay datos
+					if (datos && datos.length > 0) {
+
+						// habilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = false;
+
+						//agregamos encabezado o actualizamos si ya habia otro.
+						var cabeceras = ['FECHA ALTA', 'PROFESIONAL', 'ESPECIALIDAD', 'PACIENTE', 'DNI', 'TELEFONO', 'FECHA A PRESENTARSE'];
+						actualizarEncabezado(cabeceras);
+
+						// Construir las filas y celdas de la tabla
+						var $tbody = $("#tablaReportes tbody");
+						datos.forEach(function (dato) {
+							moment.locale('es');
+							var $tr = $("<tr>");
+							$tr.append("<td>" + moment(dato.fechaCreacion).format('DD/MM/YYYY HH:mm') + "</td>");
+							$tr.append("<td>" + dato.profesional.apellido + " " + dato.profesional.nombre + "</td>");
+							$tr.append("<td>" + dato.especialidad.especialidadCodigo + " - " + dato.especialidad.especialidadNombre + "</td>");
+							$tr.append("<td>" + dato.paciente.apellido + " " + dato.paciente.nombre + "</td>");
+							$tr.append("<td>" + dato.paciente.dni + "</td>");
+							$tr.append("<td>" + dato.paciente.telefono + "</td>");
+							$tr.append("<td Style='color: green'>" + ObtenerDiaEspañol(dato.rangoFechaHora) + ' ' + moment(dato.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>");
+
+							$tbody.append($tr);
+						});
+					} else {
+						// Mostrar mensaje si no hay datos
+						$("#tablaReportes tbody").html("<tr><td colspan='100'>No se encontraron datos de Sobreturnos.</td></tr>");
+						// deshabilitar boton imprimir PDF
+						document.getElementById('btnImprimirPdf').disabled = true;
+					}
+				},
+				error: function (xhr, status, error) {
+					// deshabilitar boton imprimir PDF
+					document.getElementById('btnImprimirPdf').disabled = true;
+					// Mostrar mensaje de error
+					$("#mensaje-carga").html("Error al cargar los datos de Sobreturnos: " + error)
+				}
+			});
+		}
+
+		//Funcion Mostrar en la Tabla Reportes las Planillas Activas por (profId-EspecId-fechaIni-FechaFin).		
+		function mostrarPlanillasActivasFechas() {
+			//Variables				 
+			const profId = $("#profesional").val();
+			const EspecId = $("#especialidad").val();
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+			//Limpiamos las filas
+			clearTableTr();
+			//Continuamos
+
+			$.ajax({
+				url: "/api/reportesRestController/reporte-planillas-activas-fechas/" + profId + "/" + EspecId + "/" + fechaIniFormateada + "/" + fechaFinFormateada,
+				method: "GET",
+				dataType: "json",
+				success: function (datos) {
+					moment.locale('es');
+
+					// Si hay datos
+					if (datos && datos.length > 0) {
+						//alert("hay datos de planillas");
+
+						// habilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = false;
+
+						//agregamos encabezado o actualizamos si ya habia otro.
+						var cabeceras = ['PROFESIONAL', 'ESPECIALIDAD', 'DIA', 'FECHA INI', 'FECHA FIN', 'DESDE', 'HASTA', 'MIN', 'DESDE', 'HASTA', 'MIN', 'ESTADO'];
+						actualizarEncabezado(cabeceras);
+
+						// Construir las filas y celdas de la tabla
+						var $tbody = $("#tablaReportes tbody");
+						datos.forEach(function (dato) {
+							moment.locale('es');
+							var $tr = $("<tr>");
+							$tr.append("<td>" + dato.profesional.apellido + " " + dato.profesional.nombre + "</td>");
+							$tr.append("<td>" + dato.especialidad.especialidadCodigo + " - " + dato.especialidad.especialidadNombre + "</td>");
+							$tr.append("<td>" + dato.dia.nombre + "</td>");
+							$tr.append("<td>" + moment(dato.fechaInicio).format('DD/MM/YYYY') + "</td>");
+							$tr.append("<td>" + moment(dato.fechaFinal).format('DD/MM/YYYY') + "</td>");
+							$tr.append("<td>" + dato.horaInicialR1 + "</td>");
+							$tr.append("<td>" + dato.horaFinalR1 + "</td>");
+							$tr.append("<td>" + dato.intervaloR1 + "</td>");
+							$tr.append("<td>" + dato.horaInicialR2 + "</td>");
+							$tr.append("<td>" + dato.horaFinalR2 + "</td>");
+							$tr.append("<td>" + dato.intervaloR2 + "</td>");
+							$tr.append("<td Style='color: green'>" + dato.estado.nombre + "</td>");
+
+							$tbody.append($tr);
+						});
+					} else {
+						// Mostrar mensaje si no hay datos
+						$("#tablaReportes tbody").html("<tr><td colspan='100'>No se encontraron datos de Planillas..</td></tr>");
+						// Deshabilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = true;
+					}
+				},
+				error: function (xhr, status, error) {
+					// Deshabilitar boton Imprimir PDF.
+					document.getElementById('btnImprimirPdf').disabled = true;
+					// Mostrar mensaje de error
+					$("#mensaje-carga").html("Error al cargar los datos de Planillas: " + error)
+				}
+			});
+		}
+
+		//Funcion Mostrar en la Tabla Reportes los Movimientos por (profId-EspecId-fechaIni-FechaFin).		
+		function mostrarMovimientosFechas() {
+			//Variables				 
+			const profId = $("#profesional").val();
+			const EspecId = $("#especialidad").val();
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+			//Limpiamos las filas
+			clearTableTr();
+			//Continuamos
+
+			$.ajax({
+				url: "/api/reportesRestController/reporte-movimientos-fechas/" + profId + "/" + EspecId + "/" + fechaIniFormateada + "/" + fechaFinFormateada,
+				method: "GET",
+				dataType: "json",
+				success: function (datos) {
+					moment.locale('es');
+
+					// Si hay datos
+					if (datos && datos.length > 0) {
+						//alert("hay datos de planillas");
+						
+						// habilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = false;
+
+						//agregamos encabezado o actualizamos si ya habia otro.
+						var cabeceras = ['FECHA CREACION', 'PROFESIONAL', 'ESPECIALIDAD', 'HORA INICIAL', 'HORA FINAL', 'TOTAL MAÑANA', 'HORA INICIAL', 'HORA FINAL', 'TOTAL TARDE', 'TOTAL HORAS TRABAJADAS'];
+						actualizarEncabezado(cabeceras);
+
+						// Construir las filas y celdas de la tabla
+						var $tbody = $("#tablaReportes tbody");
+						datos.forEach(function (dato) {
+							moment.locale('es');
+							var $tr = $("<tr>");
+							$tr.append("<td>" + moment(dato.createAt).format('DD/MM/YYYY') + "</td>");
+							$tr.append("<td>" + dato.profesional.apellido + " " + dato.profesional.nombre + "</td>");
+							$tr.append("<td>" + dato.especialidad.especialidadCodigo + " - " + dato.especialidad.especialidadNombre + "</td>");
+							//$tr.append("<td>" + dato.dia.nombre + "</td>");
+							//$tr.append("<td>" + moment(dato.fechaInicio).format('DD/MM/YYYY') + "</td>");
+							//$tr.append("<td>" + moment(dato.fechaFinal).format('DD/MM/YYYY') + "</td>");
+							$tr.append("<td>" + dato.horaIniManana + "</td>");
+							$tr.append("<td>" + dato.horaFinManana + "</td>");
+							$tr.append("<td>" + dato.totalManana + "</td>");
+							$tr.append("<td>" + dato.horaIniTarde + "</td>");
+							$tr.append("<td>" + dato.horaFinTarde + "</td>");
+							$tr.append("<td>" + dato.totalTarde + "</td>");
+							$tr.append("<td Style='color: green'>" + dato.totalGeneral + "</td>");
+
+							$tbody.append($tr);
+						});
+					} else {
+						// deshabilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = true;
+						// Mostrar mensaje si no hay datos
+						$("#tablaReportes tbody").html("<tr><td colspan='100'>No se encontraron datos de Movimientos..</td></tr>");
+					}
+				},
+				error: function (xhr, status, error) {
+					// deshabilitar boton Imprimir PDF.
+					document.getElementById('btnImprimirPdf').disabled = true;
+					// Mostrar mensaje de error
+					$("#mensaje-carga").html("Error al cargar los datos de Movimientos: " + error)
+				}
+			});
+		}
+
+		//Funcion Mostrar en la Tabla Reportes las Vinculaciones por (profId).		
+		function mostrarVinculaciones() {
+			//Variables				 
+			const profId = $("#profesional").val();
+			//Limpiamos las filas
+			clearTableTr();
+			//Continuamos
+
+			$.ajax({
+				url: "/api/reportesRestController/reporte-vinculacion/" + profId,
+				method: "GET",
+				dataType: "json",
+				success: function (datos) {
+					moment.locale('es');
+
+					// Si hay datos
+					if (datos && datos.length > 0) {
+						//alert("hay datos de vinculacion");
+						
+						// habilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = false;
+
+						//agregamos encabezado o actualizamos si ya habia otro.
+						var cabeceras = ['PROFESIONAL', 'ESPECIALIDADES VINCULADAS', 'OBSERVACION DEL PROFESIONAL'];
+						actualizarEncabezado(cabeceras);
+
+						// Construir las filas y celdas de la tabla
+						var $tbody = $("#tablaReportes tbody");
+						datos.forEach(function (dato) {
+							moment.locale('es');
+							var $tr = $("<tr>");
+							$tr.append("<td>" + dato.profesional.apellido + " " + dato.profesional.nombre + "</td>");
+							$tr.append("<td>" + dato.especialidad.especialidadCodigo + " - " + dato.especialidad.especialidadNombre + "</td>");
+							$tr.append("<td Style='color: green'>" + dato.observacion + "</td>");
+
+							$tbody.append($tr);
+						});
+					} else {
+						// deshabilitar boton Imprimir PDF.
+						document.getElementById('btnImprimirPdf').disabled = true;
+						// Mostrar mensaje si no hay datos
+						$("#tablaReportes tbody").html("<tr><td colspan='100'>No se encontraron datos de Vinculacion..</td></tr>");
+					}
+				},
+				error: function (xhr, status, error) {
+					// deshabilitar boton Imprimir PDF.
+					document.getElementById('btnImprimirPdf').disabled = true;
+					// Mostrar mensaje de error
+					$("#mensaje-carga").html("Error al cargar los datos de Vinculacion: " + error)
+				}
+			});
+		}
+
+
+
+		// FUNCIONES PARA IMPRIMIR REPORTE EN PDF **************************************************************
+
+		//function manejar los resportes en PDF segun lo seleccionado
+		function imprimirReportePdf() {
+			// 1. Obtener el estado del checkbox
+			const miCheckbox = document.getElementById('isCheckReporteFechas');
+			const checkEstaSeleccionado = miCheckbox.checked;
+
+			// 2. Obtener el valor del radio button seleccionado
+			const radios = document.querySelectorAll('input[name="reportes"]');
+			let valorRadio = '';
+			for (const radio of radios) {
+				if (radio.checked) {
+					valorRadio = radio.value;
+					break;
+				}
+			}
+
+			// 3. Usar switch para tomar decisiones de que reporte mostrar.
+			switch (true) {
+				case (checkEstaSeleccionado && valorRadio === 'turnoCancelado'):
+
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'sobreturnoCancelado'):
+
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'planillaCancelada'):
+
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'movimiento'):
+				reporteMovimientosPdf();
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'vinculacion'):
+					reporteVinculacionesByProfPdf();
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'planilla'):
+					reportePlanillasActivasPdf();
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'turno'):
+					reporteTurnosOcupadosPdf();
+					break;
+				case (checkEstaSeleccionado && valorRadio === 'sobreturno'):
+					reporteSobreturnosOcupadosPdf();
+					break;
+				// Puedes agregar más casos para las otras combinaciones
+				default:
+				//console.log('Ninguna de las combinaciones anteriores.');
+			}
+		}
+
+		function reporteTurnosOcupadosPdf() {
+			//alert("llego a reporte pdf");
+			// Get values from select options and date inputs
+			var profId = document.getElementById("profesional").value;
+			var especId = document.getElementById("especialidad").value;
+			//var fechaInicio = document.getElementById("fechaInicio").value;
+			//var fechaFinal = document.getElementById("fechaFinal").value;
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+
+			// Construct the URL with query parameters
+			// Ensure values are not empty if they are mandatory
+			var url = "/reportes/turnos-ocupados-fechas-pdf" +
+				"?profId=" + encodeURIComponent(profId) +
+				"&especId=" + encodeURIComponent(especId) +
+				"&fechaIni=" + encodeURIComponent(fechaIniFormateada) +
+				"&fechaFin=" + encodeURIComponent(fechaFinFormateada);
+
+			// Redirect the user to the constructed URL
+			//window.location.href = url;						
+			// Open the constructed URL in a new tab/window
+			window.open(url, '_blank');
+
+			//mostramos alerta exitosa
+
+			/*	Swal.fire({
+					title: '¡Éxito!',
+					text: 'La descarga se completó correctamente..',
+					icon: 'success',
+					confirmButtonText: 'Aceptar'
+				}); */
+			Swal.fire({
+				title: 'Descargando el archivo...',
+				html: 'Espere por favor...',
+				timer: 1500, // 1,5 segundos
+				timerProgressBar: true, // Muestra la barra
+				showConfirmButton: true, // Muestra botón OK
+				confirmButtonText: 'Aceptar',
+				allowOutsideClick: false, // Opcional: no cierra al hacer clic fuera
+				didOpen: () => {
+					Swal.showLoading() // Opcional: muestra icono de carga
+					// Cambiar color de la barra a verde
+					const b = Swal.getHtmlContainer().querySelector('b');
+					const timerBar = document.querySelector('.swal2-timer-progress-bar');
+					if (timerBar) {
+						timerBar.style.backgroundColor = 'green';
+					}
+				}
+			}).then((result) => {
+				/* Se ejecuta al finalizar los 3s o al hacer clic en OK */
+				if (result.dismiss === Swal.DismissReason.timer) {
+					//console.log('Cerrado por tiempo');
+					Swal.fire('Descarga Satisfactoria', 'Su archivo se encuentra en la carpeta de Descargas..', 'success');
+				}
+			});
+		}
+
+		function reporteSobreturnosOcupadosPdf() {
+			//alert("llego a reporte pdf");
+			// Get values from select options and date inputs
+			var profId = document.getElementById("profesional").value;
+			var especId = document.getElementById("especialidad").value;
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+
+			// Construct the URL with query parameters
+			// Ensure values are not empty if they are mandatory
+			var url = "/reportes/sobreturnos-ocupados-fechas-pdf" +
+				"?profId=" + encodeURIComponent(profId) +
+				"&especId=" + encodeURIComponent(especId) +
+				"&fechaIni=" + encodeURIComponent(fechaIniFormateada) +
+				"&fechaFin=" + encodeURIComponent(fechaFinFormateada);
+
+			// Redirect the user to the constructed URL
+			//window.location.href = url;						
+			// Open the constructed URL in a new tab/window
+			window.open(url, '_blank');
+
+			//mostramos alerta exitosa
+			Swal.fire({
+				title: 'Descargando el archivo...',
+				html: 'Espere por favor...',
+				timer: 1500, // 1,5 segundos
+				timerProgressBar: true, // Muestra la barra
+				showConfirmButton: true, // Muestra botón OK
+				confirmButtonText: 'Aceptar',
+				allowOutsideClick: false, // Opcional: no cierra al hacer clic fuera
+				didOpen: () => {
+					Swal.showLoading() // Opcional: muestra icono de carga
+					// Cambiar color de la barra a verde
+					const b = Swal.getHtmlContainer().querySelector('b');
+					const timerBar = document.querySelector('.swal2-timer-progress-bar');
+					if (timerBar) {
+						timerBar.style.backgroundColor = 'green';
+					}
+				}
+			}).then((result) => {
+				/* Se ejecuta al finalizar los 3s o al hacer clic en OK */
+				if (result.dismiss === Swal.DismissReason.timer) {
+					//console.log('Cerrado por tiempo');
+					Swal.fire('Descarga Satisfactoria', 'Su archivo se encuentra en la carpeta de Descargas..', 'success');
+				}
+			});
+		}
+
+		function reportePlanillasActivasPdf() {
+			//alert("llego a reporte pdf");
+			// Get values from select options and date inputs
+			var profId = document.getElementById("profesional").value;
+			var especId = document.getElementById("especialidad").value;
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+
+			// Construct the URL with query parameters
+			// Ensure values are not empty if they are mandatory
+			var url = "/reportes/planillas-activas-fechas-pdf" +
+				"?profId=" + encodeURIComponent(profId) +
+				"&especId=" + encodeURIComponent(especId) +
+				"&fechaIni=" + encodeURIComponent(fechaIniFormateada) +
+				"&fechaFin=" + encodeURIComponent(fechaFinFormateada);
+
+			// Redirect the user to the constructed URL
+			//window.location.href = url;						
+			// Open the constructed URL in a new tab/window
+			window.open(url, '_blank');
+
+			//mostramos alerta exitosa
+			Swal.fire({
+				title: 'Descargando el archivo...',
+				html: 'Espere por favor...',
+				timer: 1500, // 1,5 segundos
+				timerProgressBar: true, // Muestra la barra
+				showConfirmButton: true, // Muestra botón OK
+				confirmButtonText: 'Aceptar',
+				allowOutsideClick: false, // Opcional: no cierra al hacer clic fuera
+				didOpen: () => {
+					Swal.showLoading() // Opcional: muestra icono de carga
+					// Cambiar color de la barra a verde
+					const b = Swal.getHtmlContainer().querySelector('b');
+					const timerBar = document.querySelector('.swal2-timer-progress-bar');
+					if (timerBar) {
+						timerBar.style.backgroundColor = 'green';
+					}
+				}
+			}).then((result) => {
+				/* Se ejecuta al finalizar los 3s o al hacer clic en OK */
+				if (result.dismiss === Swal.DismissReason.timer) {
+					//console.log('Cerrado por tiempo');
+					Swal.fire('Descarga Satisfactoria', 'Su archivo se encuentra en la carpeta de Descargas..', 'success');
+				}
+			});
+		}
+
+		function reporteMovimientosPdf() {
+			//alert("llego a reporte pdf");
+			// Get values from select options and date inputs
+			var profId = document.getElementById("profesional").value;
+			var especId = document.getElementById("especialidad").value;
+			//tratamiento para la fecha inicial
+			const fechaIni = document.getElementById('fechaInicio');
+			const fechaIniToDate = new Date(fechaIni.valueAsDate);
+			const fechaIniFormateada = fechaIniToDate.toISOString().split('T')[0];
+			//tratamiento para la fecha final
+			const fechaFin = document.getElementById('fechaFinal');
+			const fechaFinToDate = new Date(fechaFin.valueAsDate);
+			const fechaFinFormateada = fechaFinToDate.toISOString().split('T')[0];
+
+			// Construct the URL with query parameters
+			// Ensure values are not empty if they are mandatory
+			var url = "/reportes/movimientos-fechas-pdf" +
+				"?profId=" + encodeURIComponent(profId) +
+				"&especId=" + encodeURIComponent(especId) +
+				"&fechaIni=" + encodeURIComponent(fechaIniFormateada) +
+				"&fechaFin=" + encodeURIComponent(fechaFinFormateada);
+
+			// Redirect the user to the constructed URL
+			//window.location.href = url;						
+			// Open the constructed URL in a new tab/window
+			window.open(url, '_blank');
+
+			//mostramos alerta exitosa
+			Swal.fire({
+				title: 'Descargando el archivo...',
+				html: 'Espere por favor...',
+				timer: 1500, // 1,5 segundos
+				timerProgressBar: true, // Muestra la barra
+				showConfirmButton: true, // Muestra botón OK
+				confirmButtonText: 'Aceptar',
+				allowOutsideClick: false, // Opcional: no cierra al hacer clic fuera
+				didOpen: () => {
+					Swal.showLoading() // Opcional: muestra icono de carga
+					// Cambiar color de la barra a verde
+					const b = Swal.getHtmlContainer().querySelector('b');
+					const timerBar = document.querySelector('.swal2-timer-progress-bar');
+					if (timerBar) {
+						timerBar.style.backgroundColor = 'green';
+					}
+				}
+			}).then((result) => {
+				/* Se ejecuta al finalizar los 3s o al hacer clic en OK */
+				if (result.dismiss === Swal.DismissReason.timer) {
+					//console.log('Cerrado por tiempo');
+					Swal.fire('Descarga Satisfactoria', 'Su archivo se encuentra en la carpeta de Descargas..', 'success');
+				}
+			});
+		}
+		
+		function reporteVinculacionesByProfPdf() {
+					//alert("llego a reporte pdf");
+					// Get values from select options and date inputs
+					var profId = document.getElementById("profesional").value;
+					
+					// Construct the URL with query parameters
+					// Ensure values are not empty if they are mandatory
+					var url = "/reportes/vinculaciones-profesional-pdf" +
+						"?profId=" + encodeURIComponent(profId);
+
+					// Redirect the user to the constructed URL
+					//window.location.href = url;						
+					// Open the constructed URL in a new tab/window
+					window.open(url, '_blank');
+
+					//mostramos alerta exitosa
+					Swal.fire({
+						title: 'Descargando el archivo...',
+						html: 'Espere por favor...',
+						timer: 1500, // 1,5 segundos
+						timerProgressBar: true, // Muestra la barra
+						showConfirmButton: true, // Muestra botón OK
+						confirmButtonText: 'Aceptar',
+						allowOutsideClick: false, // Opcional: no cierra al hacer clic fuera
+						didOpen: () => {
+							Swal.showLoading() // Opcional: muestra icono de carga
+							// Cambiar color de la barra a verde
+							const b = Swal.getHtmlContainer().querySelector('b');
+							const timerBar = document.querySelector('.swal2-timer-progress-bar');
+							if (timerBar) {
+								timerBar.style.backgroundColor = 'green';
+							}
+						}
+					}).then((result) => {
+						/* Se ejecuta al finalizar los 3s o al hacer clic en OK */
+						if (result.dismiss === Swal.DismissReason.timer) {
+							//console.log('Cerrado por tiempo');
+							Swal.fire('Descarga Satisfactoria', 'Su archivo se encuentra en la carpeta de Descargas..', 'success');
+						}
+					});
+				}
+
+		//******************************************************************************************************
+
+
+
+
+		function actualizarEncabezado(titulos) {
+			const tabla = document.getElementById("tablaReportes");
+
+			// 1. Eliminar encabezado existente (thead)
+			let thead = tabla.querySelector("thead");
+			if (thead) {
+				thead.remove(); // O thead.innerHTML = "";
+			}
+
+			// 2. Crear nuevo thead
+			thead = tabla.createTHead();
+			// 3. Agregar clase table-secondary al thead
+			thead.className = 'table-secondary';
+			const fila = thead.insertRow();
+
+			// 3. Crear celdas th dinámicamente
+			titulos.forEach(titulo => {
+				const th = document.createElement("th");
+				th.textContent = titulo;
+				fila.appendChild(th);
+			});
+		}
+
+
+		function clearTableTr() {
+			// Obtén la referencia a la tabla por su ID
+			const tabla = document.getElementById('tablaReportes');
+			// Esto conservará el encabezado si está en <thead>			
+			const filas = tabla.getElementsByTagName('tr');
+			for (let i = filas.length - 1; i > 0; i--) { // Itera hacia atrás para no afectar el índice
+				filas[i].remove();
+			}
+
+			// Para borrar todas las filas, incluyendo el encabezado:
+			//tabla.querySelectorAll('tr').forEach(tr => tr.remove());
+		}
+
+		//AL INICIAR LA PAGINA
+
+		//deshabilitar fechas
+		document.getElementById('fechaInicio').disabled = true;
+		document.getElementById('fechaFinal').disabled = true;
+		// deshabilitar boton imprimir PDF
+		document.getElementById('btnImprimirPdf').disabled = true;
+	</script>
+</body>
+
+</html>

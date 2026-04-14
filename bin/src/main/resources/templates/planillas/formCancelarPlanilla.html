@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/layout :: head}"></head>
+<body>
+	<header th:replace="~{layout/layout :: header}"></header>
+	<div class="container-fluid p-2">
+		<div class="card bg-light">
+			<!-- <div class="card-header" th:text="${titulo}"></div> -->
+			<div class="card-body">
+				<form id="myFormCancelarPlanilla">
+					<div
+						style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;">
+
+						<h4 th:text="${titulo}" class="text-danger"
+							style="font-family: Arial; font-size: 20px"></h4>
+
+						<div class="col-sm-2"
+							style="padding: 1px; position: absolute; top: 7px; right: 15px; width: 265px;">
+							<input class="form-control bg-light float-right text-danger"
+								type="text" id="fechaHora"
+								style="height: 34px; border: 0; outline: 0; box-shadow: none;"
+								name="fechaHora" readonly>
+						</div>
+					</div>
+					<!-- ESPACIO DESPUES DE LA LINEA ------->
+					<h1 class="text-secondary pb-3"></h1>
+					<!-------------------------------------->
+
+					<!-- <form th:action="@{/turnos/cancelar}" th:object="${cancelacionForm}" method="post"> -->
+
+					<!-- Fila 1: Profesional y Especialidad -->
+					<div class="mb-3 row">
+						<!-- label para Buscar Profesional-->
+						<div class="col-sm-2" style="display: flex; align-items: center;">
+							<img th:src="@{/images/search-doctor.png}" width="17" height="17"
+								style="margin-right: 10px;"> <span for="profesional">Selección
+								del Medico:</span>
+						</div>
+
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select class="form-select" id="profesional" name="profesional"
+								style="height: 35px; font-size: 15px"
+								th:onchange="cargarEspecialidades()">
+								<!-- Renderizar opciones desde el controlador -->
+								<option value="" disabled>Seleccione una opción...</option>
+
+								<option th:each="profesional : ${profesionales}"
+									th:value="${profesional.id}"
+									th:text="${profesional.codigo} + ' - ' + ${profesional.apellido} + ' ' + ${profesional.nombre}">
+							</select>
+						</div>
+
+						<!-- label para Buscar Especialidad-->
+						<div class="col-sm-2" style="display: flex; align-items: center;">
+							<img th:src="@{/images/search-doctor.png}" width="17" height="17"
+								style="margin-right: 10px;"> <span for="especialidad">Especialidad
+								Asociada:</span>
+						</div>
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select id="especialidad" name="especialidad" class="form-select"
+								style="height: 35px; font-size: 15px"
+								th:onclick="existeEspecialidad()"
+								th:onchange="focusTipoCancelacion();">
+								<!-- <option th:each="especialidad : ${especialidades}"
+										th:value="${especialidad.id}"
+										th:text="${especialidad.especialidadNombre}"></option> -->
+							</select>
+
+
+						</div>
+
+						<div class="col-sm"
+							style="display: flex; align-items: center; text-align: center;">
+							<label class="col-sm text-secondary"><input
+								class="form-check-input" type="checkbox" id="isCheckProfEsp"
+								name="isCheckProfEsp" value="true" disabled="disabled"
+								style="width: 15px; height: 15px;"> <img
+								th:src="@{/images/verify.png}" width="12" height="12"
+								style="margin-right: 60px; margin-top: -5px;"></label>
+						</div>
+
+						<div class="col-sm">
+							<img id="fotoMedico" class="full-height-image"
+								style="position: absolute; top: 15; right: 0; width: 180px; height: 125px; resize: none; margin-right: 15px; margin-top: -14px;"></img>
+						</div>
+
+					</div>
+
+					<!-- Fila 2: Tipo y Motivo -->
+					<div class="mb-2 row">
+						<!-- label para tipo cancelacion-->
+						<div class="col-sm-2" style="display: flex; align-items: center;">
+							<img th:src="@{/images/cancelLabel-24.png}" width="17"
+								height="17" style="margin-right: 10px;"> <span
+								for="tipoCancelacion">Tipo Cancelacion:</span>
+						</div>
+
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select class="form-select" id="tipoCancelacion"
+								name="tipoCancelacion" style="height: 35px; font-size: 15px"
+								th:onchange="deshabilitarElementos()">
+								<!-- Renderizar opciones desde el controlador -->
+								<option value="">Seleccione una opcion..</option>
+								<option value="PorFecha">Por Fecha</option>
+								<option value="PorFechaHora">Por Fecha y Hora</option>
+							</select>
+						</div>
+
+						<!-- label para motivo cancelacion-->
+						<div class="col-sm-2" style="display: flex; align-items: center;">
+							<img th:src="@{/images/cancelLabel-24.png}" width="17"
+								height="17" style="margin-right: 10px;"> <span
+								for="motivoCancelacion">Motivo de Cancelacion:</span>
+						</div>
+						<div class="col-sm-3">
+							<!-- ancho del campo -->
+							<select id="motivoCancelacion" name="motivoCancelacion"
+								class="form-select" style="height: 35px; font-size: 15px"
+								th:onchange="focusFechaInicio();">
+								<option value="">Seleccione una opcion..</option>
+								<option value="PorSeminario">Por Seminario</option>
+								<option value="PorConvencion">Por Convencion</option>
+								<option value="PorParoGeneral">Por Paro General</option>
+								<option value="PorEnfermedad">Por Enfermedad</option>
+								<option value="PorCirujia">Por Cirugia</option>
+								<option value="PorOtroMotivo">Por Otro Motivo</option>
+
+							</select>
+
+
+						</div>
+					</div>
+
+					<!-- ESPACIO DESPUES DE LA LINEA -------------------------------------------------------------------------------->
+					<div
+						style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%; margin-top: 40px;"></div>
+					<h1 class="text-secondary pb-0"></h1>
+					<!--------------------------------------------------------------------------------------------------------------->
+
+					<!-- Fila 3: Fechas y Horas -->
+					<div class="row g-3 align-items-center mb-4"
+						style="margin-top: -15px;">
+						<div class="col-md-1" style="display: flex; align-items: center;">
+							<!-- <label class="col-form-label" for="fechaInicio">Fecha Inicio</label> -->
+							<img th:src="@{/images/calendarSpan-24.png}" width="17"
+								height="17" style="margin-right: 10px;"> <span
+								for="fechaInicio">Fecha Inicio:</span>
+						</div>
+						<div class="col-md-2">
+							<input type="date" class="form-control form-control">
+						</div>
+						<div class="col-md-1 text-end"
+							style="display: flex; align-items: center;">
+							<!-- <label class="col-form-label" for="fechaFinal">Fecha Final</label> -->
+							<img th:src="@{/images/calendarSpan-24.png}" width="17"
+								height="17" style="margin-right: 10px;"> <span
+								for="fechaFinal">Fecha Final:</span>
+						</div>
+						<div class="col-md-2">
+							<input type="date" class="form-control form-control">
+						</div>
+						<div class="col-md-1 text-end"
+							style="display: flex; align-items: center;">
+							<!-- <label class="col-form-label" for="horaInicio">Hora Inicio</label> -->
+							<img th:src="@{/images/timeSpan-24.png}" width="17" height="17"
+								style="margin-right: 10px;"> <span for="horaInicio">Hora
+								Inicio:</span>
+						</div>
+						<div class="col-md-2">
+							<input type="time" class="form-control form-control" id="horaInicio">
+						</div>
+						<div class="col-md-1 text-end"
+							style="display: flex; align-items: center;">
+							<!-- <label class="col-form-label" for="horaFinal">Hora Final</label> -->
+							<img th:src="@{/images/timeSpan-24.png}" width="17" height="17"
+								style="margin-right: 10px;"> <span for="horaFinal">Hora
+								Final:</span>
+						</div>
+						<div class="col-md-2">
+							<input type="time" class="form-control form-control-sm" id="horaFinal">
+						</div>
+					</div>
+
+					<!-- ESPACIO DESPUES DE LA LINEA -------------------------------------------------------------------------------->
+					<div
+						style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%; margin-top: -15px; margin-bottom: 20px;"></div>
+					<h1 class="text-secondary pb-0"></h1>
+					<!--------------------------------------------------------------------------------------------------------------->
+
+
+					<!-- Sección de Listas (Representando las cajas de la imagen) -->
+					<div class="row g-4">
+						<div class="col-md-3">
+							<h6 class="text-success"
+								style="font-family: Arial; font-size: 16px;">Turnos Libres</h6>
+							<div class="border bg-white"
+								style="height: 210px; overflow-y: auto;">
+								<!-- th:each para datos -->
+							</div>
+						</div>
+						<div class="col-md-5">
+							<h6 class="text-success"
+								style="font-family: Arial; font-size: 16px;">Turnos
+								Ocupados</h6>
+							<div class="border bg-white"
+								style="height: 210px; overflow-y: auto;">
+								<!-- th:each para datos -->
+							</div>
+						</div>
+						<div class="col-md-4">
+							<h6 class="text-success"
+								style="font-family: Arial; font-size: 16px;">Sobreturnos</h6>
+							<div class="border bg-white"
+								style="height: 210px; overflow-y: auto;">
+								<!-- th:each para datos -->
+							</div>
+						</div>
+					</div>
+
+					<!-- Botones Inferiores -->
+					<div class="d-grid gap-1" Style="margin-top: 29px;">
+						<h4></h4>
+						<div id="full" class="d-flex mb-2" style="height: 50px;">
+							<button type="button"
+								class="btn btn-primary btn-lg flex-fill me-2"
+								th:onclick="......()">Buscar Datos</button>
+							<button type="button" id="btnCancelarTurnos"
+								class="btn btn-primary btn-lg flex-fill me-2"
+								th:onclick="....()">Cancelar Turnos</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<!-- </form> -->
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script
+		th:replace="planillas/js/load-combobox-vinculacion-cancelar-turnos :: javascript"></script>
+	<script
+		th:replace="planillas/js/funcionesParaCancelarPlanillas :: javascript"></script>
+		
+</body>
+</html>

@@ -1,0 +1,154 @@
+/* PARA LA VISTA formTurno.html */
+
+/* PARA LA VISTA formTurno.html */
+#myForm span[for="profesional"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="especialidad"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="paciente"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="Observacion"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="fechaInicial"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="fechaFinal"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm label[for="isCheckFechas"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+/* RESALTAR FILA EN TABLE AL HACER CLICK */
+#myForm .selected-row {
+	background-color: darkorchid; /* Estilo para la fila seleccionada */
+	color: White;
+}
+
+/* IMPEDIR SLECCIONAR ELEMENTO */
+#myForm .table {
+	user-select: none;
+}
+
+#myForm tbody[for="horariosTbody"] {
+	font-size: 14px;
+}
+
+#myForm tbody[for="turnosLibresTbody"] {
+	font-size: 14px;
+}
+
+/* OCULTAR COLUMNAS DE TABLE HTML */
+.ocultar-columna {
+	display: none;
+}
+
+/* VERIFICAR DUPLICADOS DE FECHA Y HORA */
+.fila-con-misma-fecha {
+	background-color: yellow;
+}
+
+.swal2-border-custom {
+  border: 5px solid mediumpurple;
+  border-radius: 10px;
+  width:660px;
+}
+
+
+/* PARRAFO SIN ZOOM */
+.zoom-paragraph {
+	/* ... estilos base ... */
+	position: relative; /* Importante para que el zoom no afecte a otros */
+	transition: transform 0.3s ease-out;
+	border: 2px solid rgba(0, 0, 0, 0.5);
+	border-radius: 5px;
+	height: 80px; /* Alto inicial */
+	width: 600px; /* Ancho inicial */
+		
+}
+
+/* cursor por una mano */
+.lupa-icono:hover {
+    cursor: pointer;
+}
+
+span[for="banderaIconoVerde"]:hover {
+    cursor: pointer;
+}
+
+span[for="banderaIconoRojo"]:hover {
+    cursor: pointer;
+}
+
+/* cursor por una mano */
+#myForm [for="eliminar-icono"]:hover{
+	cursor: pointer;
+}
+
+/* cursor por una mano */
+.radio:hover {
+    cursor: pointer;
+}
+
+/* PARRAFO CON ZOOM CON MOUSE POR ENCIMA DEL ELEMENTO    .zoom-paragraph:not(:empty):hover { */
+/* .zoom-paragraph:not(:empty):hover{
+	z-index: 10; Asegura que el párrafo ampliado esté por encima
+	position: absolute;
+	transform: scale(1.0);
+	transform-origin: top center; O cualquier otro punto
+	border: 2px solid rgba(0, 0, 0, 0); Borde se hace transparente
+	height: 250px; Alto final
+} */
+
+/* #form textarea[for="fechaHoraTurno"] {
+  font-family: sans-serif;
+  color: #fff; 
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  animation: flickerAnimation 1.8s infinite alternate;
+}
+   
+@keyframes flickerAnimation {
+     0%, 19.9% {
+    opacity: 0.7;
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  }
+  20%, 24.9% {
+    opacity: 1;
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  }
+  25%, 49.9% {
+    opacity: 0.7;
+     text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  }
+  50%, 54.9% {
+    opacity: 1;
+     text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  }
+   55%, 100% {
+    opacity: 0.7;
+    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #0ff, 0 0 70px #0ff, 0 0 80px #0ff, 0 0 100px #0ff, 0 0 150px #0ff;
+  } */

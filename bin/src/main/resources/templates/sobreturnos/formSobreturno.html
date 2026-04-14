@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+</head>
+
+<body>
+	<header th:replace="layout/layout :: header "></header>
+	<div class="container py-1 mx-2">
+		<div class="card bg-light" style="width: 115%;">
+
+			<!-- <div class="card-header" th:text="${titulo}"></div> -->
+			<div class="card-body">
+				<!-- TITULO con LINEA Y ESPACIO DESPUES-->
+				<div
+					style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;">
+
+					<h4 th:text="${titulo}" class="text-danger"
+						style="font-family: Arial; font-size: 20px"></h4>
+
+					<div class="col-sm-2"
+						style="padding: 1px; position: absolute; top: 7px; right: 15px; width: 265px;">
+						<input class="form-control bg-light float-right text-danger"
+							type="text" id="fechaHora"
+							style="height: 34px; border: 0; outline: 0; box-shadow: none;"
+							name="fechaHora" readonly>
+					</div>
+				</div>
+				<!-- ESPACIO DESPUES DE LA LINEA ------->
+				<h1 class="text-secondary pb-0"></h1>
+				<!-------------------------------------->
+
+
+				<div class="modal-body">
+					<form id="myForm" th:action="@{/sobreturnos/formSobreturno}"
+						th:object="${sobreturno}" method="post">
+
+						<div class="mb-3 row">
+							<!-- label para Buscar Profesional-->
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/search-doctor.png}" width="17"
+									height="17" style="margin-right: 10px;"> <span
+									for="profesional">Selección del Medico:</span>
+							</div>
+
+							<div class="col-sm-3">
+								<!-- ancho del campo -->
+								<select class="form-select" id="profesional" name="profesional"
+									style="height: 35px; font-size: 15px"
+									th:onchange="cargarEspecialidades()">
+									<!-- Renderizar opciones desde el controlador -->
+									<option value="" disabled>Seleccione una opción...</option>
+
+									<option th:each="profesional : ${profesionales}"
+										th:value="${profesional.id}"
+										th:text="${profesional.codigo} + ' - ' + ${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+								</select>
+							</div>
+
+							<!-- label para Buscar Especialidad-->
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/search-doctor.png}" width="17"
+									height="17" style="margin-right: 10px;"> <span
+									for="especialidad">Especialidad Asociada:</span>
+							</div>
+							<div class="col-sm-3">
+								<!-- ancho del campo -->
+								<select id="especialidad" name="especialidad"
+									class="form-select" style="height: 35px; font-size: 15px"
+									th:onclick="existeEspecialidad()"
+									th:onchange="focusPacienteApeyNom();">
+									<!-- <option th:each="especialidad : ${especialidades}"
+										th:value="${especialidad.id}"
+										th:text="${especialidad.especialidadNombre}"></option> -->
+								</select>
+
+
+							</div>
+
+							<div class="col-sm"
+								style="display: flex; align-items: center; text-align: center; display: none">
+								<label class="col-sm text-secondary"><input
+									class="form-check-input" type="checkbox" id="isCheckProfEsp"
+									name="isCheckProfEsp" value="true" disabled="disabled"
+									style="width: 15px; height: 15px;"> <img
+									th:src="@{/images/verify.png}" width="12" height="12"
+									style="margin-right: 10px; margin-top: -5px;"></label>
+							</div>
+
+							<div class="col-sm">
+								<img id="fotoMedico" class="full-height-image"
+									style="position: absolute; top: 0; right: 0; width: 190px; height: 125px; resize: none;"></img>
+							</div>
+
+						</div>
+
+
+
+						<!-- BUSQUEDA DEL PACIENTE --------------------------------------------------- -->
+						<div class="mb-2 row" style="margin-top: -7px;">
+							<!-- label para Paciente Apellido-->
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/lupa.png}" width="16" height="16"
+									style="margin-right: 10px;"> <span for="paciente">Paciente
+									Apellido:</span>
+							</div>
+
+							<div class="col-sm-3">
+								<!-- Autocomplete Pacientes Ape y Nom ------------------------------------>
+								<input type="hidden" id="pacienteId" name="pacienteId" /> <input
+									type="text" id="buscar_pacienteApeNom"
+									name="buscar_pacienteApeNom" class="form-control"
+									style="user-select: none; height: 35px; font-size: 15px"
+									th:onclick="clearInput()" />
+
+								<!-- fin autocomplete ------------------------------------------>
+							</div>
+
+							<!-- label para Paciente Documento-->
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/lupa.png}" width="16" height="16"
+									style="margin-right: 10px;"> <span for="paciente">Paciente
+									Documento:</span>
+							</div>
+
+							<div class="col-sm-3">
+								<!-- Autocomplete Pacientes dni -------------------------------->
+								<input type="hidden" id="pacientedniId" name="pacientedniId" />
+								<input type="text" id="buscar_pacienteDni"
+									name="buscar_pacienteDni" class="form-control user-select-none"
+									th:onclick="clearInput()"
+									style="user-select: none; height: 35px; font-size: 15px" />
+								<!-- fin autocomplete ------------------------------------------>
+							</div>
+
+							<div class="col-sm"
+								style="display: flex; align-items: center; text-align: center; display: none">
+								<label class="col-sm text-secondary"><input
+									class="form-check-input" type="checkbox" id="isCheckPaciente"
+									name="isCheckPaciente" value="true" disabled="disabled"
+									style="width: 15px; height: 15px;"> <img
+									th:src="@{/images/verify.png}" width="12" height="12"
+									style="margin-right: 10px; margin-top: -5px;"></label>
+							</div>
+
+						</div>
+						<!-- FIN BUSQUEDA DEL PACIENTE--------------------------------------------------->
+
+						<!-- OBSERVACION AL TURNO--------------------------------------------------->
+						<div class="mb-2 row" style="margin-top: 0px;">
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/observation.png}" width="16" height="16"
+									style="margin-right: 10px;"> <span for="Observacion">S.Turno
+									Observacion:</span>
+							</div>
+
+							<div class="col-sm-3">
+								<input type="text" id="Observacion" name="Observacion"
+									maxlength="68" class="form-control text-uppercase"
+									th:field="*{Observacion}" autocomplete="off"
+									style="user-select: none; height: 35px; font-size: 15px" /> <small
+									class="form-text text-danger"
+									th:if="${#fields.hasErrors('Observacion')}"
+									th:errors="*{Observacion}"></small>
+							</div>
+							<div class="col-sm-2" style="display: flex; align-items: center;">
+								<img th:src="@{/images/ticketTurno.png}" width="22" height="22"
+									style="margin-right: 10px;"> <span for="Observacion">Resumen
+									Sobreturno:</span>
+							</div>
+
+							<!-- <div class="col-sm-3">
+								<button type="button" class="btn btn-secondary btn-xs" id="btnConfirmar"
+									style="text-align: center; width: 294px; height: 35px; padding: 1px;"
+									th:onclick="mostrarResumenSobreTurno()">Ver Resumen</button>
+							</div> -->
+
+							<div class="col-sm-3">
+								<div class="d-flex gap-2 justify-content-center">
+									<button type="button" class="btn btn-secondary btn-xs"
+										id="btnConfirmar"
+										style="text-align: center; width: 180px; color: white; height: 35px; padding: 1px;"
+										th:onclick="mostrarResumenSobreTurno()">
+										<img th:src="@{/images/binoculars-24.png}" width="18"
+											height="18" style="margin-left: -5px; margin-right: 8px;">Resumen
+									</button>
+									<a class="btn btn-secondary btn-xs"
+										th:href="@{/sobreturnos/listarSobreturno}" type="button"
+										id="btnBuscarSobreturnos"
+										style="user-select: none; padding: 4px; align-items: center; width: 280px; height: 35px; color: white;"><img
+										th:src="@{/images/lupa.png}" width="18" height="18"
+										style="margin-left: -5px; margin-right: 8px;">Buscar
+										Sobreturno</a>
+								</div>
+							</div>
+						</div>
+
+						<!-- <div class="col-sm">
+
+									<textarea src="tu-imagen.jpg" alt="Descripción de la imagen"
+										class="full-height-image" style="position: absolute; top: 0; right: 0;"></textarea>
+
+								</div> -->
+
+
+						<!-- TITULO con LINEA Y ESPACIO DESPUES------------------------------------------------------------------------------>
+						<div class="text-secondary"
+							style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;"></div>
+						<h1 class="text-secondary pb-0"></h1>
+						<!------------------------------------------------------------------------------------------------------------------->
+
+						<!-- HORARIOS -->
+						<div class="row">
+
+							<div class="row my-0">
+								<div class="col-sm-3">
+									<!-- espacio vertical -->
+									<!-- border-bottom -->
+									<h6 class="text-success pb-0 mx-1"
+										style="font-family: Arial; font-size: 14px;">Informacion
+										semanal</h6>
+
+									<div class="card" style="height: 250px; width: 295px;">
+										<!-- <div class="card-body"> -->
+										<div class="table-responsive"
+											style="height: 250px; width: 293px; overflow-y: auto">
+											<table class="table table-responsive" id="horariosAtencion"
+												for="horariosAtencion">
+												<thead>
+													<tr style="font-size: 12px;">
+														<th class="text-body"
+															style="position: sticky; top: 0px; display: none;">PC_ID</th>
+														<th class="text-body"
+															style="position: sticky; top: 0px; background-color: whitesmoke;">DIA</th>
+														<!-- <th class="text-black-50" style="position: sticky; top: 0px">ID_PLACAB</th> -->
+														<th class="text-body"
+															style="position: sticky; top: 0px; background-color: whitesmoke;">HORARIOS
+															DE ATENCION</th>
+													</tr>
+												</thead>
+												<tbody id="horariosAtencionTableBody" for="horariosTbody">
+													<!-- Aquí se insertarán las filas de la tabla -->
+												</tbody>
+											</table>
+										</div>
+										<!-- </div> -->
+									</div>
+
+									<fieldset>
+										<div class="text"
+											style="display: flex; margin-left: 12px; color: MediumSeaGreen; Height: 20px; font-size: 14px;">
+											<div
+												style="margin-right: 10px; height: 10px; margin-bottom: 0px">
+												<label for="radioLunes" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Lunes">Lu</label>
+												<input type="radio" class="radio" name="dia" value="lunes"
+													id="radioLunes">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioMartes" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Martes">Ma</label>
+												<input type="radio" class="radio" name="dia" value="martes"
+													id="radioMartes">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioMiercoles" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Miercoles">Mi</label>
+												<input type="radio" class="radio" name="dia"
+													value="miercoles" id="radioMiercoles">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioJueves" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Jueves">Ju</label>
+												<input type="radio" class="radio" name="dia" value="jueves"
+													id="radioJueves">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioViernes" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Viernes">Vi</label>
+												<input type="radio" class="radio" name="dia" value="viernes"
+													id="radioViernes">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioSabado" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Sabado">Sa</label>
+												<input type="radio" class="radio" name="dia" value="sabado"
+													id="radioSabado">
+											</div>
+											<div style="margin-right: 10px;">
+												<label for="radioDomingo" data-bs-toggle="tooltip"
+													data-bs-placement="top" title="Turnos Libres del Domingo">Do</label>
+												<input type="radio" class="radio" name="dia" value="domingo"
+													id="radioDomingo">
+											</div>
+											<div style="margin-right: 10px;">
+												<label class="text-danger" for="radioTodos"
+													data-bs-toggle="tooltip" data-bs-placement="top"
+													title="Turnos Libres Totales">Todos</label> <input
+													type="radio" class="radio" name="dia" value="todos"
+													id="radioTodos" style="margin-left: 14px;">
+											</div>
+										</div>
+									</fieldset>
+									<!-- FIN CheckBox------------------------------------------------------------ -->
+								</div>
+
+								<div class="col-sm-3" style="margin-left: -20px;">
+									<!-- border-bottom -->
+									<h6 class="text-success pb-0 mx-1"
+										style="font-family: Arial; font-size: 14px;">
+										Sobreturnos Disponibles <input class="form-check-input"
+											type="checkbox" id="isCheckTurnoSeleccionado"
+											name="isCheckTurnoSeleccionado" disabled="disabled"
+											style="width: 12px; height: 12px;">
+									</h6>
+
+									<div class="card">
+										<!-- al seleccionar un horario le pasamos el id a los hidden -->
+										<input type="hidden" id="planillaDetId" name="planillaDetId" />
+										<input type="hidden" id="planillaCabId" name="planillaCabId" />
+										<input type="hidden" id="rangoFechaHora" name="rangoFechaHora" />
+										<div class="table-responsive"
+											style="height: 250px; overflow-y: auto">
+											<table class="table table-responsive" id="turnosLibresTodos">
+												<thead>
+													<tr style="font-size: 12px;">
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">PD</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">PC</th>
+														<th class="text-body"
+															style="position: sticky; top: 0px; background-color: whitesmoke;">SOBRETURNOS
+															LIBRES</th>
+														<th class="text-body"
+															style="position: sticky; top: 0px; background-color: whitesmoke;">&nbsp;&nbsp;SUGERIDO</th>
+														
+													</tr>
+												</thead>
+												<tbody id="turnosLibresTableBody">
+													<!-- Aquí se insertarán las filas de la tabla -->
+
+												</tbody>
+											</table>
+										</div>
+										<!-- </div> -->
+
+									</div>
+
+									<div class="col-sm"
+										style="display: flex; margin-top: 5px; align-items: center; text-align: left; font-size: 14px;">
+										<label class="col-sm text-secondary"><input
+											class="form-check-input" type="checkbox"
+											id="isCheckTurCanceladosMedico"
+											name="isCheckTurCanceladosMedico" value="true"
+											style="width: 18px; height: 18px;"
+											th:onclick="checkMostrarTurnosCancelados(this)"> Ver
+											sobreturnos cancelados por el Médico</label>
+									</div>
+								</div>
+
+								<div class="col-sm-6" style="margin-left: 20px; margin-top: -4px;">
+
+									<!--OBSERVACIONES PROFESIONAL -------------------------------------------------------------------------------------------------------->
+
+									<h6 class="text-success mt-1"
+										style="font-family: Arial; font-size: 14px;">
+										Observaciones del Profesional&nbsp;&nbsp;<img
+											class="iconoZoom" th:src="@{/images/bubble-message.png}"
+											alt="message" width="16" height="16">
+									</h6>
+
+									<div class="col-sm-1" style="width: 730px;">
+
+										<p class="zoom-paragraph" id="observaciones"
+											style="width: 730px; background-color: whitesmoke; color: ButtonText; overflow-y: auto; overflow-wrap: break-word; border: 1px solid silver;"></p>
+									</div>
+
+									<!---FIN OBSERVACIONES-------------------------------------------------------------------------------------------------------------------->
+
+									<!-- border-bottom -->
+									<h6 class="text-success mb-1"
+										style="font-family: Arial; font-size: 14px;">Sobreturnos
+										Ocupados</h6>
+
+									<div class="card" style="width: 730px;" id="div-a-ocultar">
+										<!-- <div class="card-body"> -->
+										<div class="table-responsive"
+											style="height: 128px; width: 728px; overflow-y: auto">
+											<table class="table table-responsive"
+												id="sobreturnosOcupadosTodos">
+												<thead>
+													<tr style="font-size: 12px;">
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">SID</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">PACID</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">PROFID</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">ESPID</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">NOMBRE
+															DEL PACIENTE</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">FECHA
+															Y HORA SOBRETURNO</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;">OBSERVACION</th>
+														<th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;"><i
+															class="fa fa-solid fa-address-card"
+															data-bs-toggle='tooltip' data-bs-placement='top'
+															title='Ver Detalle || Reimprimir || Eliminar!'
+															style='font-size: 13px;'></i></th>
+														<!-- <th class="text-body"
+															style="position: sticky; height: 5px; top: 0px; background-color: whitesmoke;"><i
+															class='fa fa-trash' data-bs-toggle='tooltip'
+															data-bs-placement='top' title='Eliminar Sobreturno!'
+															style='font-size: 13px;'></i></th> -->
+													</tr>
+												</thead>
+												<tbody id="sobreturnosOcupadosTableBody">
+													<!-- Aquí se insertarán las filas de la tabla -->
+												</tbody>
+											</table>
+										</div>
+										<!-- </div> -->
+									</div>
+
+									<!-- <div class="col-sm"
+										style="display: flex; align-items: center; text-align: right; font-size: 14px;"> -->
+									<!-- <div class="col-sm mt-0"
+									style="display: flex; align-items: center; text-align: left; font-size: 14px;">
+									<label class="col-sm text-secondary"><input
+										class="form-check-input" type="checkbox"
+										id="isCheckSobreturnos" name="isCheckSobreturnos" value="true"
+										style="width: 18px; height: 18px;"
+										th:onclick="uncheckOther(this)"> Mostrar sobreturnos</label>
+									&nbsp;&nbsp; 
+									
+									<label class="col-sm text-secondary"><input
+										class="form-check-input" type="checkbox"
+										id="isCheckTurCanceladosPaciente"
+										name="isCheckTurCanceladosPaciente" value="true"
+										style="width: 18px; height: 18px;"
+										th:onclick="uncheckOther(this)"> Mostrar Sobreturnos cancelados:</label>
+								</div> -->
+
+									<!-- Buscar Sobreturnos ------------------------------------>
+									<!-- <div class="col-sm"
+										style="display: flex; margin-top: 5px; align-items: center; text-align: left; font-size: 14px;">
+										
+										<img th:src="@{/images/lupa.png}" width="16" height="16"
+											style="margin-right: 7px;"> <label
+											class="col-sm-5 text-secondary">Buscar Sobreturnos
+											por Apellido | Dni:</label> <a
+											class="btn btn-secondary btn-lg"
+											th:href="@{/sobreturnos/listarSobreturno}" type="button"
+											id="btnBuscarSobreturnos"
+											style="user-select: none; padding: 0px; margin-top: 3px; 
+											align-items: center; margin-left: 2px; width: 75px; height: 24px; 
+											font-size: 14px; color: white;"											
+											>Buscar</a>										
+									</div> -->
+									<!-- fin buscar sobreturno ------------------------------------------>
+									<!-- </div> -->
+								</div>
+								<!-- pegar aqui tabla de block de notas -->
+
+							</div>
+						</div>
+						<!-- FIN HORARIOS --------------------------------------------------------------- -->
+
+
+						<div id="full" class="d-flex mb-2" style="margin-top: 25px;">
+							<!--th:onclick="existePlanillaActiva()"  verifica planillaActiva y campos del formulario. -->
+							<button type="submit"
+								class="btn btn-success btn-lg flex-fill me-1" id="btnConfirmar"
+								th:onmouseover="existePlanillaActiva()" th:onclick="validarMinutos();">Guardar
+								sobreturno</button>
+							<button type="button" id="btnMostrar"
+								th:onclick="listarRangoPlanillaDet()" hidden=true;>mostrar
+								turnos libres</button>
+						</div>
+
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script
+		th:replace="sobreturnos/js/load-combobox-vinculacion-sobreturnos :: javascript"></script>
+	<script
+		th:replace="sobreturnos/js/autocomplete-pacientes :: javascript"></script>
+	<script
+		th:replace="sobreturnos/js/funcionesParaSobreturnos :: javascript"></script>
+	<!-- <script>
+		 window.onload = function() {
+			// Deshabilitamos el botón cuando cargue la pagina
+			//document.getElementById('btnConfirmar').disabled = true;
+		}; 		
+	</script> -->
+
+	<script>
+		document
+				.getElementById("myForm")
+				.addEventListener(
+						"submit",
+						function(event) {
+							// Validaciones básicas
+							//const isCheckPaciente = document.getElementById("isCheckPaciente").value;
+							if (document.getElementById('isCheckPaciente').checked === false
+									|| document
+											.getElementById('isCheckProfEsp').checked === false) {
+								//mostramos una Alerta personalizada.
+								Swal
+										.fire({
+											icon : "error",
+											title : "Lo sentimos.. Algo Salió mal..",
+											html : "Datos Incompletos.<br>Verifique todos los campos por favor...",
+										//imageUrl : "/images/thumbs-down.jpg"
+										});
+								event.preventDefault(); // Detiene el envío
+								return;
+							}
+							if (document
+									.getElementById('isCheckTurnoSeleccionado').checked === false) {
+								//mostramos una Alerta personalizada.
+								Swal
+										.fire({
+											icon : "error",
+											title : "Lo sentimos.. Algo Salió mal..",
+											html : "Datos Incompletos.<br>Seleccione un Horario por favor...",
+										//imageUrl : "/images/thumbs-down.jpg"
+										});
+								event.preventDefault(); // Detiene el envío
+								return;
+							}
+
+							// Si pasas las validaciones básicas, puedes continuar con la lógica AJAX
+							// Ejemplo:
+							// event.preventDefault(); // Evita el envío por defecto
+							// enviarFormularioAjax(this); // Función para enviar con AJAX
+						});
+
+		function enviarFormularioAjax(form) {
+			// ... Lógica para enviar el formulario mediante AJAX ...
+		}
+	</script>
+
+
+</body>
+</html>

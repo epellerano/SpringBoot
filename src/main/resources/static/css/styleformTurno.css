@@ -1,0 +1,176 @@
+/* PARA LA VISTA formTurno.html */
+#myForm span[for="profesional"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="especialidad"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="paciente"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="Observacion"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="fechaInicial"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm span[for="fechaFinal"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myForm label[for="isCheckFechas"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+/* RESALTAR FILA EN TABLE AL HACER CLICK */
+#myForm .selected-row {
+	background-color: darkorchid; /* Estilo para la fila seleccionada */
+	color: White;
+}
+
+/* IMPEDIR SLECCIONAR ELEMENTO */
+#myForm .table {
+	user-select: none;
+}
+
+#myForm tbody[for="horariosTbody"] {
+	font-size: 14px;
+}
+
+#myForm tbody[for="turnosLibresTbody"] {
+	font-size: 14px;
+}
+
+/* VERIFICAR DUPLICADOS DE FECHA Y HORA */
+.fila-con-misma-fecha {
+	background-color: yellow;
+}
+
+.swal2-border-custom {
+  border: 5px solid mediumpurple;
+  border-radius: 10px;
+  width:660px;
+}
+
+
+/* PARRAFO SIN ZOOM */
+.zoom-paragraph {
+	/* ... estilos base ... */
+	position: relative; /* Importante para que el zoom no afecte a otros */
+	transition: transform 0.3s ease-out;
+	border: 2px solid rgba(0, 0, 0, 0.5);
+	border-radius: 5px;
+	height: 80px; /* Alto inicial */
+	width: 600px; /* Ancho inicial */
+		
+}
+
+/* cursor por una mano */
+.lupa-icono:hover {
+    cursor: pointer;
+}
+
+span[for="banderaIconoVerde"]:hover {
+    cursor: pointer;
+}
+
+span[for="banderaIconoRojo"]:hover {
+    cursor: pointer;
+}
+
+/* cursor por una mano */
+#myForm [for="eliminar-icono"]:hover{
+	cursor: pointer;
+}
+
+/* cursor por una mano */
+.radio:hover {
+    cursor: pointer;
+}
+
+/* FILA CANCELADA - Tachado y Grisado */
+.fila-cancelada {
+    text-decoration: line-through !important;
+    color: #CE1126 !important;
+    background-color: #f8f9fa !important;
+    cursor: help !important; /* Muestra el signo de pregunta */
+}
+
+/* EL CÍRCULO ROJO - Se aplica a las celdas para que funcione */
+.fila-cancelada td {
+    cursor: not-allowed !important; 
+    pointer-events: none; /* Bloquea el clic */
+}
+
+.ocultar-columna {
+    display: none !important;
+}
+
+/* Estilo del Pop-up de Observaciones del Profesional */
+/* centro de pantalla */
+#popupObservacionesFull {
+    display: none;
+    position: fixed; /* Fixed para que ignore el scroll y use la pantalla */
+    z-index: 10000;  /* Por encima de TODO */
+    top: 50%;        /* Al medio vertical */
+    left: 50%;       /* Al medio horizontal */
+    transform: translate(-50%, -50%); /* El truco mágico para centrarlo exacto */
+    
+    background-color: #ffffff;
+    border: 3px solid #17a2b8; /* Un poquito más grueso para resaltar */
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5); /* Sombra profunda profesional */
+    
+    width: 792px;  /* Tu medida de preferencia */
+    height: 370px; /* Tu medida de preferencia */
+    pointer-events: none; /* Para que el mouse no parpadee al tocarlo */
+}
+
+.popover-header-full {
+    background: #17a2b8;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center; /* Título centrado */
+    font-size: 15px;
+    border-bottom: 1px solid #138496;
+}
+
+.popover-body-full {
+    padding: 25px;
+    font-size: 16px; /* Letra un poco más grande para lectura cómoda */
+    color: #333;
+    line-height: 1.6;
+    overflow-y: auto;
+    height: 310px; /* Ajuste según el alto total */
+    white-space: pre-wrap;
+}
+
+/* El archivo JS "autocomplete-pacientes" crea esa clase .ui-autocomplete en tu página. */
+/* y este codigo Fuerza al menú a estar sobre todo y evita que se desplace mal con el scroll */
+.ui-autocomplete {
+    z-index: 2000 !important;
+    position: absolute !important;
+}
+
+
+

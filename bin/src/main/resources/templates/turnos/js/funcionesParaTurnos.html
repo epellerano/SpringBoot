@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript"> 
+	
+	var rangoFechaHoraSeleccionada = document.getElementById('rangoFechaHora'); // variable global para utilizarla en otra funcion.
+	
+	// Función para mostrar rangoFecha_Hora almacenados en la BD mediante el metodo (mostrar-planilla-detalle). 
+			
+			//Convertimos a español los dias de la semana de moment.
+			function ObtenerDiaEspañol(date) {
+  			const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  			return days[moment(date).day()];
+}
+	
+			 function listarRangoPlanillaDet() {
+				 
+				 //Variables
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();	
+				 //alert("profid: " + profId + " / " + "especId: " + EspecId);
+				 //Continuamos
+				  $.ajax({
+	                    url: "/api/turnosLibresController/between/" + profId + "/" + EspecId,
+	                    type: "GET",
+	                    success: function(data) {
+	                        $("#turnosLibresTableBody").empty();
+	                        data.forEach(function(turno) {
+	                        	// Seguimos.
+	                            var row = "<tr>" +
+	                                        "<td>" + turno.id + "</td>" +
+	                                        "<td>" + turno.planillacabecera.id+ "</td>" +
+	                                        "<td>" + ObtenerDiaEspañol(turno.rangoFechaHora).toUpperCase() + '  ' + moment(turno.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>" +	                                        
+	                                        //"<td class='text-secondary'>" + turno.box+ "</td>" +
+	                                        "</tr>";
+	                            $("#turnosLibresTableBody").append(row);	                            
+	                        });
+	                        
+	                     	// Oculta las 2 primeras columnas después de agregar los datos.
+	                        $("#turnosLibresTodos tbody tr").each(function() {
+	                          $(this).find("td:nth-child(1)").addClass("ocultar-columna"); // PlanillaDetalle_id
+	                          $(this).find("td:nth-child(2)").addClass("ocultar-columna"); // PlanillaCabecera_id
+	                        });
+
+	                        // Oculta los 2 primeros encabezados de las columnas.
+	                        $("#turnosLibresTodos thead th:nth-child(1)").addClass("ocultar-columna");
+	                        $("#turnosLibresTodos thead th:nth-child(2)").addClass("ocultar-columna");
+	                        
+	                      //Listamos los Horarios de atencion del medico.
+	                        listarHorariosAtencion();
+	                      //Listamos las Observaciones
+	                      obtenerObservaciones();	                        
+	                      //Listamos los turnos ocupados
+	                      listarTurnosOcupados();
+	                    
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });    	                
+			 }
+			 
+			function listarRangoPlanillaDetDiaId(diaId) {
+				 
+				 //Variables
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();	
+				 //alert("profid: " + profId + " / " + "especId: " + EspecId);
+				 //Continuamos
+				  $.ajax({
+	                    url: "/api/turnosLibresController/between-dia-id/" + profId + "/" + EspecId+ "/" + diaId,
+	                    type: "GET",
+	                    success: function(data) {
+	                        $("#turnosLibresTableBody").empty();
+	                        data.forEach(function(turno) {
+	                        	// Seguimos.
+	                            var row = "<tr>" +
+	                                        "<td>" + turno.id + "</td>" +
+	                                        "<td>" + turno.planillacabecera.id+ "</td>" +
+	                                        "<td>" + ObtenerDiaEspañol(turno.rangoFechaHora).toUpperCase() + '  ' + moment(turno.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>" +	                                        
+	                                        //"<td class='text-secondary'>" + turno.box+ "</td>" +
+	                                        "</tr>";
+	                            $("#turnosLibresTableBody").append(row);	                            
+	                        });
+	                        
+	                     	// Oculta las 2 primeras columnas después de agregar los datos.
+	                        $("#turnosLibresTodos tbody tr").each(function() {
+	                          $(this).find("td:nth-child(1)").addClass("ocultar-columna"); // PlanillaDetalle_id
+	                          $(this).find("td:nth-child(2)").addClass("ocultar-columna"); // PlanillaCabecera_id
+	                        });
+
+	                        // Oculta los 2 primeros encabezados de las columnas.
+	                        $("#turnosLibresTodos thead th:nth-child(1)").addClass("ocultar-columna");
+	                        $("#turnosLibresTodos thead th:nth-child(2)").addClass("ocultar-columna");
+	                        
+	                      //Listamos los Horarios de atencion del medico.
+	                      
+	                      //Listamos las Observaciones
+	                      obtenerObservaciones();	                        
+	                      //Listamos los turnos ocupados
+	                      listarTurnosOcupados();  
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });    	                
+			 }			 
+			 
+	
+			 function listarHorariosAtencion() {
+				 //Variables				 
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();
+				 
+				 //Continuamos
+				 $.ajax({
+	                    url: "/api/turnosLibresController/horarios/" + profId + "/" + EspecId,
+	                    type: "GET",
+	                    success: function(data) {
+	                    	
+	                        $("#horariosAtencionTableBody").empty();
+	                        data.forEach(function(PlanillaCab) {
+	                        	
+	                        	//seguimos 
+	                            var row = "<tr>" +
+	                     			        //"<td>" + PlanillaCab.id+ "</td>" +
+	                         			    "<td>" + PlanillaCab.dia.nombre+ "</td>" +
+	                                        "<td>" + PlanillaCab.horaInicialR1 + " " + PlanillaCab.horaFinalR1 + "  |  " + PlanillaCab.horaInicialR2 + " " + PlanillaCab.horaFinalR2 + "</td>" +	                                        
+	                                        //"<td>" + moment(turno.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>" +
+	                                      "</tr>";
+	                            $("#horariosAtencionTableBody").append(row);
+	                        });
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });	           
+			 } 
+			 
+			 function listarHorariosAtencionDia_id(diaId) {
+				 //Variables				 
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();
+				 
+				 //Continuamos
+				 $.ajax({
+	                    url: "/api/turnosLibresController/horarios-dia-id/" + profId + "/" + EspecId+ "/" + diaId,
+	                    type: "GET",
+	                    success: function(data) {
+	                    	
+	                        $("#horariosAtencionTableBody").empty();
+	                        data.forEach(function(PlanillaCab) {
+	                        	
+	                        	//seguimos 
+	                            var row = "<tr>" +
+	                     			        //"<td>" + PlanillaCab.id+ "</td>" +
+	                         			    "<td>" + PlanillaCab.dia.nombre+ "</td>" +
+	                                        "<td>" + PlanillaCab.horaInicialR1 + " " + PlanillaCab.horaFinalR1 + "  |  " + PlanillaCab.horaInicialR2 + " " + PlanillaCab.horaFinalR2 + "</td>" +	                                        
+	                                        //"<td>" + moment(turno.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>" +
+	                                      "</tr>";
+	                            $("#horariosAtencionTableBody").append(row);
+	                        });
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });	           
+			 } 
+			 
+			 function listarTurnosOcupados() {			 
+				 //Variables				 
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();
+				 //Continuamos
+				 $.ajax({
+	                    url: "/api/turnosLibresController/turnos-ocupados/" + profId + "/" + EspecId,
+	                    method: "GET",
+	                    success: function(data) {
+	                    	//alert("success");
+	                        $("#turnosOcupadosTableBody").empty();
+	                        moment.locale('es-ar');
+	                        //Mostrar BOX si al Verificar si en Mysql box tiene datos.	                        
+	                        	data.forEach(function(turno) {
+	                        		let boxConcatenado = `${turno.planilladetalle.box}`;
+	                        		
+		                        	//seguimos
+		                            var row = "<tr>" +
+		                     			      "<td>" + turno.id+ "</td>" +
+		                     			      "<td>" + turno.paciente.id+ "</td>" +	                     			      
+		                     			      "<td>" + turno.planillacabecera.id+ "</td>" +
+		                     			      "<td>" + turno.planilladetalle.id+ "</td>" +
+		                     			      "<td style='color: blue;'>" + turno.paciente.apellido + " " + turno.paciente.nombre +  "</td>" +
+		                     			      "<td style='color: blue;'>" + ObtenerDiaEspañol(turno.planilladetalle.rangoFechaHora).toUpperCase() + '  ' + moment(turno.planilladetalle.rangoFechaHora).format('DD/MM/YYYY HH:mm')+ "</td>" +
+		                     			     "<td style='color: blue;'>"+ `<span style="color: MediumSeaGreen;">${boxConcatenado}</span>`+ "</td>" +
+		                     			      "<td style='color: blue;'>" + turno.observacion.substring(0, 4).toUpperCase()+ "..." + "</td>" +
+		                     			     //"<td style='color: blue;'>" + turno.planilladetalle.box+ "</td>" +
+		                     			      "<td><span class='lupa-icono' data-bs-toggle='tooltip' data-bs-placement='top' title='Ver Detalle || Reimprimir turno!' style='font-size: 16px;'>&#x1F50D;</span>" + "</td>" +
+		                                      "</tr>";		                                      
+		                            
+		                            $("#turnosOcupadosTableBody").append(row);	                            
+	                        		
+		                        });
+		                     // Oculta las 4 primeras columnas después de agregar los datos.
+		                        $("#turnosOcupadosTodos tbody tr").each(function() {
+		                          $(this).find("td:nth-child(1)").addClass("ocultar-columna"); // turno_id
+		                          $(this).find("td:nth-child(2)").addClass("ocultar-columna"); // Paciente_id
+		                          $(this).find("td:nth-child(3)").addClass("ocultar-columna"); // PlanillaCabecera_id
+		                          $(this).find("td:nth-child(4)").addClass("ocultar-columna"); // PlanillaDetalle_id
+		                        });
+
+		                        // Oculta los 4 primeros encabezados de las columnas.
+		                        $("#turnosOcupadosTodos thead th:nth-child(1)").addClass("ocultar-columna");
+		                        $("#turnosOcupadosTodos thead th:nth-child(2)").addClass("ocultar-columna");
+		                        $("#turnosOcupadosTodos thead th:nth-child(3)").addClass("ocultar-columna");
+		                        $("#turnosOcupadosTodos thead th:nth-child(4)").addClass("ocultar-columna");	                        
+	                        
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });	           
+			 }
+			 
+			 
+			//FUNCION PARA OBTENER LAS OBSERVACIONES DEL MEDICO.
+		
+			  function obtenerObservaciones() {
+				 //verificamos objeto vacio
+				 
+				 //Variables				 
+				 const profId = $("#profesional").val();
+				 const EspecId = $("#especialidad").val();	
+				 
+				 //Continuamos
+				 $.ajax({
+	                    url: "/api/turnosLibresController/obtener-observaciones/" + profId + "/" + EspecId,
+	                    type: "GET",
+	                    success: function(data) {
+	                    		  data.forEach(function(Vinculacion) { 
+	                    			  if(Vinculacion.observacion.trim() !== ""){
+	  	                        	//mostramos las observaciones del profesional en el parrafo. 
+	  	                        	$("#observaciones").html(Vinculacion.observacion);
+	                    			  }else{
+	                    				// Si esta vacio, muestra un texto de error en el <p>.
+	                    				document.getElementById('observaciones').style.textAlign = "center";
+	    	                    	      $("#observaciones").text("* NO EXISTEN OBSERVACIONES DEL PROFESIONAL *"); 
+	                    			  }
+	  	                        });
+	                        //$("#horariosAtencionTableBody").empty();	                      
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });
+			 }
+			
+			  function isEmpty(obj) {
+				  for (const prop in obj) {
+				    if (Object.hasOwn(obj, prop)) {
+				      return false;
+				    }
+				  }
+
+				  return true;
+				}
+			  
+			// FUNCION PARA REIMPRIMIR EL TURNO AL HACER CLICK SOLO EN LA LUPA.
+			  document.addEventListener('click', function(event) {
+			    // Verificar si el elemento clickeado tiene la clase 'lupa-icono'.
+			    if (event.target.classList.contains('lupa-icono')) {
+			      // Mostrar un mensaje al usuario
+			      // alert('¡Has hecho clic en el ícono de lupa!');
+			    //Obtenemos el valor de la fila al clickear la lupa.
+				    const filaClick = event.target.closest('tr');
+				    const celda = filaClick.querySelectorAll('td'); //turno_id --> celda[0].innerText
+				  //Mostramos el turno de acuerdo al turno_id
+				  reimprimirTurno(celda[0].innerText);
+			      // También puedes obtener información del elemento padre, por ejemplo:
+			      // const fila = event.target.closest('tr'); // Obtener la fila padre
+			      // console.log('Fila clickeada:', fila.rowIndex);
+			    }
+			  });
+			  
+		
+				  
+		//FUNCION PARA RESALTAR LA FILA DE TABLE Turnos LibresTodos al hacer click		
+		  document.addEventListener('DOMContentLoaded', function() {
+			  const tabla = document.getElementById('turnosLibresTodos');
+
+			  tabla.addEventListener('click', function(event) {
+				  if (event.target.closest('tr').parentNode.tagName !== 'THEAD') {
+				  // Remover resaltado anterior siempre y cuando no sea click en el Encabezado.
+				    const filas = tabla.querySelectorAll('td');
+				    filas.forEach(fila => {
+				      fila.classList.remove('selected-row');
+				    });
+				  }
+
+			    //Resaltar la fila actual
+			    const filaClickeada = event.target.closest('tr');
+			    if (filaClickeada  && filaClickeada.parentNode.tagName !== 'THEAD') {
+			        const celdas = filaClickeada.querySelectorAll('td');
+			        celdas.forEach(celda => {
+			            celda.classList.add('selected-row');			          
+			        });
+			      //Marcamos el checkBox
+			      marcarCheckTurnoSeleccionado();
+			      //Obtenemos el valor de la fila clickeada de acuerdo al indice establecido.
+				    const filaClick = event.target.closest('tr');
+				    const celda = filaClick.querySelectorAll('td');
+				    //enviamos el id de planillaDetalle y planillaCabecera a los Input type:hidden de formTurno.html			    
+  					const planillaDetId = document.getElementById('planillaDetId'); // Acceder al elemento de la vista.
+  					const planillaCabId = document.getElementById('planillaCabId'); // Acceder al elemento de la vista.
+  					const rangoFechaHora = document.getElementById('rangoFechaHora'); // Acceder al elemento de la vista.
+  					
+  					planillaDetId.setAttribute('value', celda[0].innerText); // id_planilladetalle
+  					planillaCabId.setAttribute('value', celda[1].innerText); // id_planillacabecera
+  					rangoFechaHora.setAttribute('value', celda[2].innerText); // Rango Fecha Hora
+  					rangoFechaHoraSeleccionada.setAttribute('value', celda[2].innerText); // Rango Fecha Hora para variable global
+  					
+				    //alert('Dato clickeado: ' + celda[0].innerText); //[0]id_planilladetalle  [1] id_planillacabecera
+			    }
+			    //ELSE
+			  });
+			});
+		
+		
+		//FUNCION PARA MOSTRAR TURNOS CANCELADOS DEL MEDICO
+		function checkMostrarTurnosCancelados(checkbox) {
+           if (checkbox.id === 'isCheckTurCanceladosMedico' && checkbox.checked) {
+               //funcion que muestra solo los turnos cancelados por el Medico.
+               alert("mostrando turnos cancelados por el medico.");
+           }else{
+        	 //funcion que muestra Turnos Libres
+               
+           }
+       }	
+		
+		//FUNCION Para permitir solo un checkbox seleccionado de dos en turnos y sobreturnos ocupados..
+		function uncheckOther(checkbox) {
+           if (checkbox.id === 'isCheckSobreturnos' && checkbox.checked) {
+               document.getElementById('isCheckTurCanceladosPaciente').checked = false;
+               //funcion que muestra solo los turnos cancelados a pacientes
+               alert("funcion sin realizar");
+           } else if (checkbox.id === 'isCheckTurCanceladosPaciente' && checkbox.checked) {
+               document.getElementById('isCheckSobreturnos').checked = false;
+             //funcion que muestra solo los sobreturnos
+               alert("funcion sin realizar");
+           }else{
+        	 //funcion que muestra Turnos y Sobreturnos ocupados
+               
+           }
+       }
+		
+		//FUNCION PARA DESMARCAR CHECK TURNO SELECCIONADO
+		function desmarcarCheckTurnoSeleccionado() {
+			//deshabilitamos el chek validar pacientes
+			const checkbox = document.getElementById('isCheckTurnoSeleccionado');
+			// Desmarca la casilla de verificación
+			checkbox.checked = false;
+		}
+		
+		//FUNCION PARA MARCAR CHECK TURNO SELECCIONADO
+		function marcarCheckTurnoSeleccionado() {
+			const checkbox = document.getElementById('isCheckTurnoSeleccionado');
+			// Marca la casilla de verificación
+			checkbox.checked = true;
+			//redirect focus
+			document.getElementById('btnConfirmar').focus();
+		}	
+		
+		// Actualizar planilla detalle a estado_id a 8 (Expirado) cuando con rango Vencido en el tiempo 
+		// y con estado_id en 3 (libre).
+		 function actualizarPlanillaDetalleExpirado() {	
+			 const estadoId = 8;
+			 //Continuamos
+			  $.ajax({
+                    url: "/api/turnosLibresController/actualizar-planilladetalle-expirado/" + estadoId,
+                    type: "GET",
+                    success: function(data) {
+                        	// Seguimos.
+                            //alert("Actualizado..");
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });    	       
+        }
+		
+		// Actualizar planilla cabecera a id_estado a 1 (INACTIVO) cuando con rango Vencido en el tiempo
+			 function actualizarPlanillaCabeceraInactivo() {			
+				 const estadoId = 1;
+				 //Continuamos
+				  $.ajax({
+	                    url: "/api/turnosLibresController/actualizar-planillacabecera-inactivo/" + estadoId,
+	                    type: "GET",
+	                    success: function(data) {
+	                        	// Seguimos.
+	                            //alert("Actualizado planilla cabecera..");
+	                    },
+	                    error: function(error) {
+	                        console.log(error);
+	                    }
+	                });    	       
+	        }
+		
+			//Mostrar datos del paciente y turno en Resumen
+			 function mostrarResumenTurno() {
+				// Variables
+				const profId = document.getElementById("profesional");
+				// Obtiene el índice de la opción seleccionada
+				const selectedIndex = profId.selectedIndex;
+				// Obtiene el texto de la opción seleccionada
+				const selectedTextProf = profId.options[selectedIndex].text;
+				  
+				const EspecId = document.getElementById("especialidad");
+				// Obtiene el índice de la opción seleccionada
+				const selectedIndexEsp = EspecId.selectedIndex;
+				// Obtiene el texto de la opción seleccionada
+				const selectedTextEsp = EspecId.options[selectedIndexEsp].text;
+				
+				const PacienteApeNom = $("#buscar_pacienteApeNom").val();
+				const PacienteDni = $("#buscar_pacienteDni").val();
+				const TurnoObservacion = $("#Observacion").val();
+				
+				//Continuamos	
+				const miChecProfEsp = document.getElementById("isCheckProfEsp");
+				const miCheckPaciente = document.getElementById("isCheckPaciente");
+				const miCheckTurnoSel = document.getElementById("isCheckTurnoSeleccionado");
+					if(miChecProfEsp.checked &&	miCheckPaciente.checked && miCheckTurnoSel.checked){
+						Swal.fire({
+							  title: `<h5 style='margin-bottom: -25px;text-decoration: underline;'>COMPROBANTE DEL TURNO ASIGNADO</h5>
+								     <p style='float: center;color: green; font-size: 22px;'>${rangoFechaHoraSeleccionada.value}</p><hr style='margin-bottom: -5px;'>`,					  
+							  html: `
+								<span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${selectedTextProf.toUpperCase()}</span><br>
+								<span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${selectedTextEsp.toUpperCase()}</span><br>
+								<hr>
+								<span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${PacienteApeNom.toUpperCase()}</span><br>
+								<span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${PacienteDni}</span><br>
+								<span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 30px; overflow-y: auto; border: 1px solid ghostwhite;'>${TurnoObservacion.toUpperCase()}</span><br>								
+								<hr>
+								<span style="font-family: Arial; font-size: 12px;">** Asistir 20 Minutos antes de su hora asignada **</span><br>
+								<span style="font-family: Arial; font-size: 12px;">Juan Francisco Segui 1331 - Grand Bourg</span><br>
+								<span style="font-family: Arial; font-size: 12px;">Telefonos: 02320-410000/411317/486666</span><br>							
+								<span style="font-family: Arial; font-size: 12px; text-decoration: underline;">www.centromedicosalud.com</span>
+								`,
+							  //icon: 'info', // O cualquier otro icono que desees
+							  imageUrl : "/images/turnoAlta-64.png",
+							  //showDenyButton: true,
+							  confirmButtonText: 'Cerrar Resumen',
+							  //denyButtonText: 'Salir',
+								  customClass: {
+								    popup: 'swal2-border-custom' //Style en styleformTurno.css
+								  }
+							})
+							.then((result) => {
+								if (result.isConfirmed) {
+									//Simulamos click en Boton Guardar
+									//const btnGuardar = document.getElementById('btnConfirmar');
+									//btnGuardar.click();
+								    //Swal.fire('GUARDADO', '', 'success')
+								  } else if (result.isDenied) {
+								    //Swal.fire('NO SE GUARDO', '', 'info')
+								  }
+							});
+					}else if(miChecProfEsp.checked && miCheckPaciente.checked && miCheckTurnoSel.checked == false){
+						Swal.fire({
+							  icon: "error",
+							  title: "Lo sentimos.. Algo Salió mal..",
+							  text: "Debe seleccionar un turno libre..!",
+							  //imageUrl : "/images/thumbs-down.jpg"
+							});
+					}
+				}
+			
+			//Mostrra datos del turno por id.
+			 function reimprimirTurno(turno_id) {
+				//alert("llego: " + turno_id);
+				//Continuamos
+				$.ajax({
+		        url: "/api/turnosLibresController/obtener-turno-id/" + turno_id,
+		  		method: "GET",
+		  		success: function(data) {
+	            	//alert("success");
+	                moment.locale('es-ar');
+	                data.forEach(function(turno) {
+				    
+	                   swal.fire({
+	                	   title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL TURNO ASIGNADO</h5>
+	                		   <p style='float: center;color: green; font-size: 22px;'>${ObtenerDiaEspañol(turno.planilladetalle.rangoFechaHora) + ' ' + moment(turno.planilladetalle.rangoFechaHora).format('DD/MM/YYYY HH:mm')}</p><hr style='margin-bottom: -5px;'>`,
+				      html: `
+				    	  <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${turno.profesional.apellido.toUpperCase() + ' ' + turno.profesional.nombre.toUpperCase()}</span><br>
+				    	  <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${turno.especialidad.especialidadCodigo + ' - ' + turno.especialidad.especialidadNombre.toUpperCase()}</span><br>
+				    	  <hr>
+				    	  <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${turno.paciente.apellido.toUpperCase() + ' ' + turno.paciente.nombre.toUpperCase()}</span><br>
+				    	  <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${turno.paciente.dni}</span><br>
+				    	  <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${turno.observacion.toUpperCase()}</span><br>
+				    	  <hr>
+				    	  <span style='font-family: Arial; font-size: 12px;'>Juan Francisco Segui 1331 - Grand Bourg || Telefonos: 02320-410000/411317/486666</span><br>
+				    	  <span style='font-family: Arial; font-size: 12px;'>** Asistir 20 Minutos antes de su hora asignada **</span><br>				    	  				    	  						
+				    	  <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>www.centromedicosalud.com</span>
+				      `,
+				      //icon: "info",
+				      imageUrl : '/images/termalPrinter-56.png',
+				      showDenyButton: true,
+				      confirmButtonText: 'Imprimir Turno',
+				      denyButtonText: 'Salir',
+				      customClass: {
+				      popup: 'swal2-border-custom' //Style en styleformTurno.css
+				      }
+				      })
+				      .then((result) => {
+				      if (result.isConfirmed) {
+				      //Reimprimimos en turno
+				      									
+				      Swal.fire('IMPRIMIENDO', '', 'success')
+				      } else if (result.isDenied) {
+				      Swal.fire('HASTA PRONTO', '', 'info')
+				      }
+				      });
+	                	
+	                });
+	                
+		  		},
+		  		error: function(error) {
+	                console.log(error);
+	            }
+	        });
+			}
+			
+			
+			//FUNCION PARA MOSTRAR HORARIO DEL MEDICO SEGUN QUE radioButton SE HACE CLICK.
+			// Seleccionar los radios buttons con el mismo nombre 'dia'
+		    const radiosDia = document.querySelectorAll('input[name="dia"]');
+			//const id_Dia=null;
+		    // Añadir un listener a cada radio button
+		    radiosDia.forEach(radio => {
+		        radio.addEventListener('change', function() {
+		            // Comprobar si el botón está marcado y su valor es 'lunes' o 'martes'
+		            if (this.checked) { // 'this' se refiere al radio button que disparó el evento
+		                if (this.value === "lunes") {
+		                	const diaId=2;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "martes") {
+		                	const diaId=3;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "miercoles") {
+		                	const diaId=4;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "jueves") {
+		                	const diaId=5;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "viernes") {
+		                	const diaId=6;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "sabado") {
+		                	const diaId=7;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                } else if (this.value === "domingo") {
+		                	const diaId=1;
+		                	listarHorariosAtencionDia_id(diaId);
+		                	listarRangoPlanillaDetDiaId(diaId);
+		                	desmarcarCheckTurnoSeleccionado();
+		                }else if (this.value === "todos") {
+		                	//listarHorariosAtencion();
+		                	listarRangoPlanillaDet();
+		                	desmarcarCheckTurnoSeleccionado();
+		                }
+		            }
+		        });
+		    });
+		    
+		    //FUNCION FOCU PACIENTE APELLIDO Y NOMBRE
+		    function focusPacienteApeyNom(){
+		     //foco en busqueda de paciente por apellido.
+             var pacienteApeNom = document.getElementById('buscar_pacienteApeNom'); 
+             pacienteApeNom.focus();
+		    }
+			
+        
+		//----FUNCION AL [AL CARGAR LA PAGINA] ---------------------------------
+		// Para tildar radioTodos
+		document.getElementById('radioTodos').checked = true;
+
+		//FUNCION PARA Fecha y Hora AL [CARGAR LA PAGINA]
+		function actualizarFechaHora() {		
+			const fechaHoraActual = new Date();
+			const opciones = {
+				weekday : 'long',
+				timeZone : 'America/Argentina/Buenos_Aires'
+			};
+			const diaSemana = fechaHoraActual.toLocaleDateString('es-AR',
+					opciones);
+			const fechaHoraFormateada = diaSemana.toUpperCase() + ' '
+					+ fechaHoraActual.toLocaleString();
+			document.getElementById("fechaHora").value = fechaHoraFormateada;
+		}
+
+		// Actualizar la fecha y hora cada segundo (FECHA Y HORA)
+		try {
+			setInterval(actualizarFechaHora, 1000);
+			} catch (error) {
+  				console.error("Se produjo un error en setInterval(actualizarFechaHora, 1000):", error);
+			}	
+		
+		// Inicializar la fecha y hora al cargar la página (FECHA Y HORA)
+		try {
+			actualizarFechaHora();
+			} catch (error) {
+  				console.error("Se produjo un error en actualizarFechaHora:", error);
+			}	
+		
+		//Desmarcamos check turno seleccionado (DESMARCAR CHECK)
+		try {
+			desmarcarCheckTurnoSeleccionado();
+			} catch (error) {
+  				console.error("Se produjo un error en desmarcarCheckTurnoSeleccionado:", error);
+			}
+			
+		// Actualizar masivo a Planilla Detalle a estado_id=8 (EXPIRADO).
+		try {
+			actualizarPlanillaDetalleExpirado();
+			} catch (error) {
+  				console.error("Se produjo un error en actualizarPlanillaDetalleExpirado:", error);
+			}	
+			
+		// Actualizar masivo a Planilla Cabecera a id_estado=1 (INACTIVO).
+		try {
+			actualizarPlanillaCabeceraInactivo();
+			} catch (error) {
+  				console.error("Se produjo un error en actualizarPlanillaCabeceraInactivo:", error);
+			}	
+			
+			// Oculta los 2 primeros encabezados de las columnas de turnos Libres..
+            $("#turnosLibresTodos thead th:nth-child(1)").addClass("ocultar-columna");
+            $("#turnosLibresTodos thead th:nth-child(2)").addClass("ocultar-columna");
+         	// Oculta los 4 primeros encabezados de las columnas de turnos Ocupados..
+            $("#turnosOcupadosTodos thead th:nth-child(1)").addClass("ocultar-columna");
+            $("#turnosOcupadosTodos thead th:nth-child(2)").addClass("ocultar-columna");
+            $("#turnosOcupadosTodos thead th:nth-child(3)").addClass("ocultar-columna");
+            $("#turnosOcupadosTodos thead th:nth-child(4)").addClass("ocultar-columna");
+		
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+<body>
+	<!-- ENCABEZADO DE PAGINA -->
+	<header th:replace="layout/layout :: header "></header>
+	<!-- CONTENIDO PRINCIPAL -->
+	<div class="container py-4">
+		<div class="card bg-light">
+			<!-- TITULO -->
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h1>
+					<a th:href="@{/pacientes/listarPaciente}"
+						class="btn btn-primary btn-xs">Volver al listado</a>
+				</h1>
+				<!-- MOSTRAMOS LA IMAGEN  Y th:src va a MvcConfig -->
+				<img class="img-thumbnail rounded float-start"
+					th:if="${#strings.length(paciente.foto) > 0}"
+					style="max-width: 25%;" th:src="@{'/uploads/' + ${paciente.foto}}"
+					th:alt="${paciente.foto}" />
+
+				<!-- AL LADO DE LA FOTO LOS DATOS DEL PACIENTE -->
+				<ul class="list-group">
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Apellido:</div>
+						<div><p class="list-group" th:text="${paciente.apellido}"></p></div>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Nombre:</div>
+						<p class="list-group" th:text="${paciente.nombre}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Email:</div>
+						<p class="list-group" th:text="${paciente.email}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Domicilio:</div>
+						<p class="list-group" th:text="${paciente.domicilio}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Localidad:</div>
+						<p class="list-group" th:text="${paciente.localidad}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Nº Socio:</div>
+						<p class="list-group" th:text="${paciente.numeroSocio}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Nº Dni:</div>
+						<p class="list-group" th:text="${paciente.dni}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Telefono:</div>
+						<p class="list-group" th:text="${paciente.telefono}"></p>
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Fecha Nac:</div>
+						<p class="list-group" th:text="${#dates.format(paciente.createAt, 'dd/MM/yyyy')}"></p>
+						
+					</li>
+					<li class="list-group-item d-flex justify-content-start">
+						<div class="fw-bold" style="width: 100px;">Estado:</div>
+						<p class="list-group" th:text="${paciente.estado}"></p>
+					</li>
+					
+					<!-- <li class="list-group-item" th:title="Estado"
+						th:text="${paciente.estado}"></li> -->
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- PIE DE PAGINA -->
+	<footer th:replace="layout/layout :: footer "></footer>
+</body>
+</html>

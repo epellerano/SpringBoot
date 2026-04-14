@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Confirmación de Sobreturno</title>
+</head>
+<body>
+	<h1>
+		Hola, <span th:text="${pacienteNombre}">Paciente</span>
+	</h1>
+	<p>
+		Te confirmamos tu sobreturno médico en <strong>Centro Medico
+			Cosalud</strong>.
+	</p>
+
+	<ul>
+		<li><strong>Médico:</strong> <span th:text="${medicoNombre}">Nombre
+				del Médico</span></li>
+		<li><strong>Especialidad:</strong> <span
+			th:text="${especialidad}">Especialidad</span></li>
+		<li><strong>Fecha:</strong> <span th:text="${fecha}">00/00/0000</span></li>
+		<li><strong>Hora:</strong> <span th:text="${hora}">00:00</span>
+			hs</li>
+		<li><strong>Tipo: </strong><span th:text="${tipo}">SOBRETURNO</span></li>
+	</ul>
+
+	<p>Por favor, asistir 15 minutos antes. ¡Te esperamos!</p>
+	<p>
+		<strong>Dirección: </strong> <span th:text="${direccion}"></span>
+	</p>
+	<p>
+		<strong>Teléfono: </strong> <span th:text="${telefono}"></span>
+	</p>
+</body>
+</html>

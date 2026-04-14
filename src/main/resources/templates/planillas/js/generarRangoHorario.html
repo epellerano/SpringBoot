@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+	
+		// Función para mostrar rangoFecha_Hora almacenados en la BD mediante el metodo (mostrar-planilla-detalle). 
+			function listarRangoPlanillaDet(){
+				
+				var profId = $("#profesional").val();
+				var EspecId = $("#especialidad").val();				
+				
+				 $.get("/planillacabecera/mostrar-planilla-detalle/" + profId + "/" + EspecId,
+				            function (data) {
+				                //alert('Welcome!' + profId + " / " + EspecId);			                        
+				              //limpiamos la tabla menos la cabecera.
+				    			var Tabla = document.getElementById("TablaMysql");
+				    			var rowCount = Tabla.rows.length;
+				    			for (var x=rowCount-1; x>0; x--) {
+				    			   Tabla.deleteRow(x);
+				    			}
+				    			//verificamos si data tiene datos para habilitar boton guardar.
+				    			/* if (data.length > 0)
+				    				{
+				    				 	document.getElementById('btnGuardar').disabled = false;
+				    				} */
+				    				
+				    			//Continuamos			    			
+				    			const table = document.getElementById("TablaMysql");
+				    			data.forEach(item => {
+				    			    //rango con nombre del dia
+				    			     //alert('Welcome!' + item);
+				    			    //rango sin nombre del dia             
+				    			    //console.log(`${item.DIA.toString().padStart(5)} | ${formatDate(item.FECHA)}`);
+				    				let row = table.insertRow();
+				    			      //let dia = row.insertCell(0);
+				    			      //dia.innerHTML = item.DIA;
+				    			      //let dia = row.insertCell(0);
+				    			      //dia.innerHTML =item;
+				    			      let fecha = row.insertCell(0);
+				    			      //fecha.innerHTML = ObtenerDia(item.FECHA).toString() + ' ' + formatDate(item.FECHA);
+				    			      fecha.innerHTML = item
+				    			});
+				            });
+			}
+
+
+		  
+		//Funcion que limpia el Rango Turno mañana
+		  function limpiarTM()
+		  {
+			  document.getElementById('horaInicialR1').value='00:00';
+			  document.getElementById('horaInicialR1').disabled = true;
+			  document.getElementById('horaFinalR1').value='00:00';
+			  document.getElementById('horaFinalR1').disabled = true;
+			  document.getElementById('intervaloR1').selectedIndex = 0;
+			  document.getElementById('intervaloR1').disabled = true;			  
+			  const checkMañana = document.getElementById('isCheckMañana');
+			  checkMañana.checked = false;
+			  //Continuamos
+			  if(document.getElementById('horaInicialR2').value.length != 0 && 
+				 document.getElementById('horaFinalR2').value.length != 0 && 
+				 document.getElementById("intervaloR2").value.length != 0){
+			  //Creamos y mostramos rango turno mañana.
+			  mostrarRangoTarde();
+			  }
+			  else
+			  {
+				// mensaje de confirmacion
+					/* Swal.fire({
+						  icon: "error",
+						  title: "Ups.. Algo salio mal.",
+						  text: "No existen datos para generar el rango horario!!"
+						}); */
+				//limpiamos la tabla menos la cabecera.
+				var Tabla = document.getElementById("rango");
+				var rowCount = Tabla.rows.length;
+				for (var x=rowCount-1; x>0; x--) {
+					Tabla.deleteRow(x);
+				}
+				//Deshabilitamos el boton guardar
+				document.getElementById('btnGuardar').disabled = true;
+				//limpiamos la tabla Comparacion con datos de MysQl.
+    			var Tabla = document.getElementById("TablaMysql");
+    			var rowCount = Tabla.rows.length;
+    			for (var x=rowCount-1; x>0; x--) {
+    			   Tabla.deleteRow(x);
+    			}
+			  }
+		  }
+		  
+		//Funcion que limpia el Rango Turno tarde
+		  function limpiarTT()
+		  {
+			  document.getElementById('horaInicialR2').value='00:00';
+			  document.getElementById('horaInicialR2').disabled = true;
+			  document.getElementById('horaFinalR2').value='00:00';
+			  document.getElementById('horaFinalR2').disabled = true;
+			  document.getElementById('intervaloR2').selectedIndex = 0;
+			  document.getElementById('intervaloR2').disabled = true;
+			  const checkTarde = document.getElementById('isCheckTarde');
+			  checkTarde.checked = false;
+			  //Continuamos
+			  if(document.getElementById('horaInicialR1').value.length != 0 && 
+				 document.getElementById('horaFinalR1').value.length != 0 && 
+				 document.getElementById("intervaloR1").value.length != 0){
+			  //Creamos y mostramos rango turno mañana.
+			  mostrarRangoMañana();
+			  }
+			  else
+			  {
+				// mensaje de confirmacion
+					/* Swal.fire({
+						  icon: "error",
+						  title: "Ups.. Algo salio mal.",
+						  text: "No existen datos para generar el rango horario!!"
+						}); */
+				//limpiamos la tabla menos la cabecera.
+				var Tabla = document.getElementById("rango");
+				var rowCount = Tabla.rows.length;
+				for (var x=rowCount-1; x>0; x--) {
+					Tabla.deleteRow(x);
+				}
+				//Deshabilitamos el boton guardar
+				document.getElementById('btnGuardar').disabled = true;				
+				//limpiamos la tabla Comparacion con datos de MysQl.
+    			var Tabla = document.getElementById("TablaMysql");
+    			var rowCount = Tabla.rows.length;
+    			for (var x=rowCount-1; x>0; x--) {
+    			   Tabla.deleteRow(x);
+    			}
+			  }
+			  
+		  }
+		
+	
+//FUNCION RANGO MAÑANA ***********************************************************************************************************************	
+		
+		function mostrarRangoMañana(){
+			// variables para las fechas
+			const fecInicio = new Date(document.getElementById('fechaInicio').value + ' ' + document.getElementById('horaInicialR1').value); 
+			const fecFin =  new Date(document.getElementById('fechaFinal').value + ' ' + document.getElementById('horaFinalR1').value); 
+
+			// Funcion que toma fechaIni y FechaFin + el inrervalo para crear el Rango HORARIO.
+			function* generateDates(start, end) {
+			    let current = new Date(start);
+			    while (current <= end) {
+			        yield new Date(current);
+			        current.setMinutes(current.getMinutes() + parseInt(document.getElementById("intervaloR1").value));
+			    }
+			}
+
+			// Function que genera HH:mm de la fecha.
+			function getTimePart(fecha){
+			    return fecha.getHours() * 60 + fecha.getMinutes();
+			}
+
+			// Funcion que obtiene el numero de dia (1 = Monday in JavaScript).
+			function idDia(fecha) {
+			    return fecha.getDay() === parseInt(document.getElementById("dia").value) -1;  
+			}
+
+			// Funcion que usa la funcion (generateDates y getTimePart) para guardarla en un array list.
+			const filteredDates = Array.from(generateDates(fecInicio, fecFin))
+			    .filter(fecha => 
+			   idDia(fecha) &&
+			        getTimePart(fecha) >= getTimePart(fecInicio) &&
+			        getTimePart(fecha) <= getTimePart(fecFin)
+			    );
+
+			// Funcion que ordena las fechas y crea los dias.
+			let currentDay = null;
+			let dia = 0;
+			const result = filteredDates
+			    .sort((a, b) => a - b)
+			    .map(fecha => {
+			        if (currentDay !== fecha.getDate()) {
+			            currentDay = fecha.getDate();
+			            dia++;
+			        }
+			        return {
+			            DIA: dia,
+			            FECHA: fecha
+			        };
+			    });
+			    
+			    function formatDate(fecha) {
+			    var hours = fecha.getHours();
+			    var minutes = fecha.getMinutes();
+			    var dia =  fecha.getDate(); //obtengo el numero del dia.
+			    var mes = (fecha.getMonth() + 1);
+			    //var ampm = hours >= 12 ? 'pm' : 'am';
+			    hours = hours % 24;
+			    hours = hours ? hours : 12; // the hour '0' should be '12'
+			    hours = hours < 10 ? '0' + hours : hours;
+			    minutes = minutes < 10 ? '0' + minutes : minutes;
+			    dia = dia < 10 ? '0' + dia : dia; //si el numero de dia es menor a 10 le agrego un cero.
+			    mes = mes < 10 ? '0' + mes : mes; //si el numero del mes es menor a 10 le agrego un cero.
+			    var strTime = hours + ':' + minutes; //+ ' ' + ampm;
+			    return dia + "/" + mes + "/" + fecha.getFullYear() + " " + strTime;
+			}
+
+			    //Funcion que obtiene el nombre del dia.
+				function ObtenerDia(fecha) {
+			    let fech = new Date(fecha);
+			    let day = fecha.toLocaleString('es-ES', {weekday: 'long'}).toUpperCase();
+			    return day;
+			    //console.log(day);
+			    
+			    }
+
+			// Output results
+			//console.log("DIA | FECHA");
+			//console.log("------|-------------------");
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("rango");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+			   Tabla.deleteRow(x);
+			}
+			//verificamos si result tiene datos para habilitar boton guardar.
+			if (result.length > 0)
+				{
+				 	//document.getElementById('btnGuardar').disabled = false;
+				}
+			//Continuamos
+			const table = document.getElementById("rango");
+			result.forEach(item => {
+			    //rango con nombre del dia
+			    //alert(`${item.DIA.toString().padStart(5)} | ${ObtenerDia(item.FECHA).toString()} ${formatDate(item.FECHA)}`);
+			    //rango sin nombre del dia             
+			    //console.log(`${item.DIA.toString().padStart(5)} | ${formatDate(item.FECHA)}`);
+				let row = table.insertRow();
+			      //let dia = row.insertCell(0);
+			      //dia.innerHTML = item.DIA;
+			      let dia = row.insertCell(0);
+			      dia.innerHTML =ObtenerDia(item.FECHA).toString();
+			      let fecha = row.insertCell(1);
+			      //fecha.innerHTML = ObtenerDia(item.FECHA).toString() + ' ' + formatDate(item.FECHA);
+			      fecha.innerHTML =formatDate(item.FECHA);
+			});
+			//Mostramos o no mensaje de confirmacion.
+			if (result.length > 0)
+			{
+				// mensaje de confirmacion
+				Swal.fire({
+					  icon: "success",
+					  title: "Felicitaciones..",
+					  text: "Rango del turno mañana creado con exito..!",
+					  //imageUrl: "/images/thumbs-up.jpg"
+					});
+				
+				//LLenamos la tabla con la Planilladetalle de la base de datos MysQl
+				listarRangoPlanillaDet();
+				document.getElementById('btnGuardar').disabled = false;
+			}
+		}
+		
+//FUNCION RANGO MAÑANA PERSONALIZADO EVITANDO MINUTOS EMPEZADOS EN :00 *****************************
+		
+		function mostrarRangoMañanaPersonalizado(){
+	
+			function ObtenerDiaEspañol(date) {
+				const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+				return days[moment(date).day()];
+			}
+			
+			function formatFechaToArg(date){
+		    	// Crear un objeto Moment a partir del String fecha
+		    	const dateString = date;
+		    	const momentObject = moment(dateString);
+		    	// Formato de salida
+		    	const formattedDate = momentObject.format('DD/MM/YYYY hh:mm');
+		    	return formattedDate;
+		    }
+			
+			// 1. variables para las fechas
+			const fechaInicioStr = new Date(document.getElementById('fechaInicio').value + ' ' + document.getElementById('horaInicialR1').value + ':00'); 
+			const fechaFinalStr =  new Date(document.getElementById('fechaFinal').value + ' ' + document.getElementById('horaFinalR1').value + ':00');			
+			//variable cantidad de boxes.
+			const CantBoxes = parseInt(document.getElementById('optionBox').value);
+			
+			function generateDates() {
+			    const startDate = new Date(fechaInicioStr);
+			    const endDate = new Date(fechaFinalStr);
+			    const startTime = new Date(fechaInicioStr);
+			    const endTime = new Date(fechaFinalStr);
+			    
+			    const dates = [];
+			    let currentDate = new Date(startDate);
+			    
+			    // Generamos las fechas con intervalos de 1 minuto.
+			    while (currentDate <= endDate) {
+			        dates.push(new Date(currentDate));
+			        currentDate.setMinutes(currentDate.getMinutes() + 1);
+			    }
+			    
+			    // Filter and process dates according to the SQL conditions
+			    const filteredDates = dates
+			        .filter(date => {
+			            const time = date.getTime();
+			            const minutes = date.getMinutes();
+			            const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+			            
+			            // donde la hora este entre startTime y endTime.
+			            const isValidTime = time >= startTime.getTime() && time <= endTime.getTime();
+			            
+			            // dia de la semana. // JavaScript: 1 = Lunes  // MySql 2 = Lunes
+			            const isDiaSemana= dayOfWeek === parseInt(document.getElementById("dia").value) -1;
+			            
+			            // Armamos los intervalos en minutos de acuerdo a la cantidad de boxes
+			            // y le sumamos 2 por los lugares restados al sacar :00 y :05
+			            const cantidadBoxes = minutes < CantBoxes +2;			            
+			            
+			            //Donde minutos sea != 00 y != 05
+			            const notZeroOrFive = minutes !== 0 && minutes !== 5;
+			            
+			            return isValidTime && isDiaSemana && cantidadBoxes && notZeroOrFive;
+			        })
+			        .map((date, index, array) => {
+			            // grupos de 1 minuto en  orden descendiente.
+			            const minutes = date.getMinutes();
+			            
+			            // Crea un mapa de valores de minutos únicos en orden descendente
+			            const uniqueMinutes = [...new Set(array.map(d => d.getMinutes()))]
+			                .sort((a, b) => b - a);
+			            
+			            const rank = uniqueMinutes.indexOf(minutes) + 1;
+			            
+			            return {
+			                FECHA: date,
+			                constant: 'PLANILLA PERSONALIZADA',
+			                BOX: rank
+			            };
+			        })
+			        .sort((a, b) => a.FECHA - b.FECHA); // ORDER BY fecha asc
+			    
+			    return filteredDates;
+			}
+
+			// Ejecutamos la funcion para obtener los resultados.
+			const result = generateDates();
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("rango");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+			   Tabla.deleteRow(x);
+			}
+			//verificamos si result tiene datos para habilitar boton guardar.
+			if (result.length > 0)
+				{
+				 	//document.getElementById('btnGuardar').disabled = false;
+				}
+			//Continuamos
+			const table = document.getElementById("rango");
+			result.forEach(item => {
+				let boxConcatenado = ` ---- Box Numero: ${item.BOX}`;	
+				//if (item.BOX !== undefined) {
+					/* let row = table.insertRow();
+				      let dia = row.insertCell(0);
+				      dia.innerHTML =ObtenerDiaEspañol(item.FECHA);
+				      let fecha = row.insertCell(1);
+				      fecha.innerHTML = formatFechaToArg(item.FECHA); */
+				 // }else{
+					  let row = table.insertRow();
+				      let dia = row.insertCell(0);
+				      dia.innerHTML =ObtenerDiaEspañol(item.FECHA);
+				      let fecha = row.insertCell(1);
+				      fecha.innerHTML = formatFechaToArg(item.FECHA) + `<span style="color: MediumSeaGreen;">${boxConcatenado}</span>`;
+				  //}
+				
+				  
+			      //let box = row.insertCell(2);
+			      //box.innerHTML =item.BOX;
+			});
+			//Mostramos o no mensaje de confirmacion.
+			if (result.length > 0)
+			{
+				// mensaje de confirmacion
+				Swal.fire({
+					  icon: "success",
+					  title: "Felicitaciones..",
+					  text: "Rango Personalizado creado con exito..!",
+					  //imageUrl: "/images/thumbs-up.jpg"
+					});
+				
+				//LLenamos la tabla con la Planilladetalle de la base de datos MysQl
+				listarRangoPlanillaDet();
+				document.getElementById('btnGuardar').disabled = false;
+			}
+			
+		}
+		
+		
+//FUNCION RANGO TARDE ***********************************************************************************************************************
+		
+		function mostrarRangoTarde(){
+			
+			// variables para las fechas del turno tarde
+			const fecInicio = new Date(document.getElementById('fechaInicio').value + ' ' + document.getElementById('horaInicialR2').value);
+			const fecFin =  new Date(document.getElementById('fechaFinal').value + ' ' + document.getElementById('horaFinalR2').value);
+
+			// Funcion que toma fechaIni y FechaFin + el inrervalo para crear el Rango HORARIO.
+			function* generateDates(start, end) {
+			    let current = new Date(start);
+			    while (current <= end) {
+			        yield new Date(current);
+			        current.setMinutes(current.getMinutes() + parseInt(document.getElementById("intervaloR2").value));
+			    }
+			}
+
+			// Function que genera HH:mm de la fecha.
+			function getTimePart(fecha){
+			    return fecha.getHours() * 60 + fecha.getMinutes();
+			}
+
+			// Funcion que obtiene el numero de dia (1 = Monday in JavaScript).
+			function idDia(fecha) {
+			    return fecha.getDay() === parseInt(document.getElementById("dia").value)-1;  
+			}
+
+			// Funcion que usa la funcion (generateDates y getTimePart) para guardarla en un array list.
+			const filteredDates = Array.from(generateDates(fecInicio, fecFin))
+			    .filter(fecha => 
+			   idDia(fecha) &&
+			        getTimePart(fecha) >= getTimePart(fecInicio) &&
+			        getTimePart(fecha) <= getTimePart(fecFin)
+			    );
+
+			// Funcion que ordena las fechas y crea los dias.
+			let currentDay = null;
+			let dia = 0;
+			const result = filteredDates
+			    .sort((a, b) => a - b)
+			    .map(fecha => {
+			        if (currentDay !== fecha.getDate()) {
+			            currentDay = fecha.getDate();
+			            dia++;
+			        }
+			        return {
+			            DIA: dia,
+			            FECHA: fecha
+			        };
+			    });
+			    
+			    function formatDate(fecha) {
+			    var hours = fecha.getHours();
+			    var minutes = fecha.getMinutes();
+			    var dia =  fecha.getDate(); //obtengo el numero del dia.
+			    var mes = (fecha.getMonth() + 1);
+			    //var ampm = hours >= 12 ? 'pm' : 'am';
+			    hours = hours % 24;
+			    hours = hours ? hours : 12; // the hour '0' should be '12'
+			    hours = hours < 10 ? '0' + hours : hours;
+			    minutes = minutes < 10 ? '0' + minutes : minutes;
+			    dia = dia < 10 ? '0' + dia : dia; //si el numero de dia es menor a 10 le agrego un cero.
+			    mes = mes < 10 ? '0' + mes : mes; //si el numero del mes es menor a 10 le agrego un cero.
+			    var strTime = hours + ':' + minutes; //+ ' ' + ampm;
+			    return dia + "/" + mes + "/" + fecha.getFullYear() + " " + strTime;
+			}
+			    
+			    //Funcion que obtiene el nombre del dia.
+				function ObtenerDia(fecha) {
+			    let fech = new Date(fecha);
+			    let day = fecha.toLocaleString('es-ES', {weekday: 'long'}).toUpperCase();
+			    return day;
+			    //console.log(day);
+			    
+			    }
+
+			// Output results
+			//console.log("DIA | FECHA");
+			//console.log("------|-------------------");
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("rango");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+			   Tabla.deleteRow(x);
+			}
+			//verificamos si result tiene datos para habilitar boton guardar.
+			if (result.length > 0)
+				{
+				 	//document.getElementById('btnGuardar').disabled = false;
+				}
+			
+			//Continuamos
+			const table = document.getElementById("rango");
+			result.forEach(item => {
+			    //rango con nombre del dia
+			    //alert(`${item.DIA.toString().padStart(5)} | ${ObtenerDia(item.FECHA).toString()} ${formatDate(item.FECHA)}`);
+			    //rango sin nombre del dia             
+			    //console.log(`${item.DIA.toString().padStart(5)} | ${formatDate(item.FECHA)}`);
+				let row = table.insertRow();
+			      //let dia = row.insertCell(0);
+			      //dia.innerHTML = item.DIA;
+			      let dia = row.insertCell(0);
+			      dia.innerHTML =ObtenerDia(item.FECHA).toString();
+			      let fecha = row.insertCell(1);
+			      //fecha.innerHTML = ObtenerDia(item.FECHA).toString() + ' ' + formatDate(item.FECHA);
+			      fecha.innerHTML =formatDate(item.FECHA);			   
+			});
+			
+			//Mostramos o no mensaje de confirmacion.
+			if (result.length > 0)
+			{
+				// mensaje de confirmacion
+				Swal.fire({
+					  icon: "success",
+					  title: "Felicitaciones..",
+					  text: "Rango del turno tarde creado con exito..!",
+					  //imageUrl: "/images/thumbs-up.jpg"
+					});
+				//LLenamos la tabla con la Planilladetalle de la base de datos MysQl
+				listarRangoPlanillaDet();
+				document.getElementById('btnGuardar').disabled = false;
+			}
+			
+		}
+		
+//FUNCION RANGO COMPLETO ***********************************************************************************************************************		
+		
+		
+		function mostrarRangoCompleto()
+		{
+			// Set up date configuration
+			const options = { weekday: 'long' };
+			const locale = 'en-US';
+
+			// Define date ranges
+			const fec_inicio = new Date(document.getElementById('fechaInicio').value + ' ' + document.getElementById('horaInicialR1').value);
+			const fec_fin = new Date(document.getElementById('fechaFinal').value + ' ' + document.getElementById('horaFinalR1').value);
+			const fec_inicio2 = new Date(document.getElementById('fechaInicio').value + ' ' + document.getElementById('horaInicialR2').value);
+			const fec_fin2 = new Date(document.getElementById('fechaFinal').value + ' ' + document.getElementById('horaFinalR2').value);
+			
+			
+			// Function to generate date series
+			function generateDateSeries(start, end, intervalMinutes) {
+			    let dates = [];
+			    let current = new Date(start);
+			    while (current <= end) {
+			        dates.push(new Date(current));
+			        current.setMinutes(current.getMinutes() + intervalMinutes);
+			    }
+			    return dates;
+			}
+
+			// Generate date series
+			const fechas = generateDateSeries(fec_inicio, fec_fin, parseInt(document.getElementById("intervaloR1").value));
+			const fechas2 = generateDateSeries(fec_inicio2, fec_fin2, parseInt(document.getElementById("intervaloR2").value));
+
+			// Funcion que obtiene el numero de dia (1 = Monday in JavaScript).
+			function idDia(date) {
+			    return date.getDay() === parseInt(document.getElementById("dia").value -1);  
+			}
+			
+			// Function to filter and format dates
+			function filterAndFormatDates(dates, startTime, endTime) {
+			    return dates.filter(date => {
+			        const day = idDia(date);//date.getDay();
+			        const time = date.toTimeString().slice(0, 8);
+			        return day && time >= startTime && time <= endTime;
+			    }).map(date => ({
+			        date: date,
+			        time: date.toTimeString().slice(0, 8)
+			    }));
+			}
+
+			// Filter and format both date series
+			const filteredFechas = filterAndFormatDates(fechas, fec_inicio.toTimeString().slice(0, 8), fec_fin.toTimeString().slice(0, 8));
+			const filteredFechas2 = filterAndFormatDates(fechas2, fec_inicio2.toTimeString().slice(0, 8), fec_fin2.toTimeString().slice(0, 8));
+
+			// Combine and sort results
+			const combinedResults = [...filteredFechas, ...filteredFechas2].sort((a, b) => a.date - b.date);
+
+			function formatDate(fecha) {
+						    var hours = fecha.getHours();
+						    var minutes = fecha.getMinutes();
+						    var dia =  fecha.getDate(); //obtengo el numero del dia.
+						    var mes = (fecha.getMonth() + 1);
+						    //var ampm = hours >= 12 ? 'pm' : 'am';
+						    hours = hours % 24;
+						    hours = hours ? hours : 12; // the hour '0' should be '12'
+						    hours = hours < 10 ? '0' + hours : hours;
+						    minutes = minutes < 10 ? '0' + minutes : minutes;
+						    dia = dia < 10 ? '0' + dia : dia; //si el numero de dia es menor a 10 le agrego un cero.
+						    mes = mes < 10 ? '0' + mes : mes; //si el numero del mes es menor a 10 le agrego un cero.
+						    var strTime = hours + ':' + minutes; //+ ' ' + ampm;
+						    return dia + "/" + mes + "/" + fecha.getFullYear() + " " + strTime;
+						}		
+			
+			
+			//Funcion que obtiene el nombre del dia.
+			function ObtenerDia(fecha) {
+		    let fech = new Date(fecha);
+		    let day = fecha.toLocaleString('es-ES', {weekday: 'long'}).toUpperCase();
+		    return day;
+		    //console.log(day);
+		    
+		    }
+			
+			//limpiamos la tabla menos la cabecera.
+			var Tabla = document.getElementById("rango");
+			var rowCount = Tabla.rows.length;
+			for (var x=rowCount-1; x>0; x--) {
+			   Tabla.deleteRow(x);
+			}
+			//verificamos si result tiene datos para habilitar boton guardar.
+			if (combinedResults.length > 0)
+				{
+				 	//document.getElementById('btnGuardar').disabled = false;
+				}
+			    
+			//Continuamos
+			const table = document.getElementById("rango");
+			combinedResults.forEach(item => {
+			    //rango con nombre del dia
+			    //alert(`${item.DIA.toString().padStart(5)} | ${ObtenerDia(item.FECHA).toString()} ${formatDate(item.FECHA)}`);
+			    //rango sin nombre del dia             
+			    //console.log(`${item.DIA.toString().padStart(5)} | ${formatDate(item.FECHA)}`);
+				let row = table.insertRow();
+			      //let dia = row.insertCell(0);
+			      //dia.innerHTML = item.DIA;
+			      let dia = row.insertCell(0);
+			      dia.innerHTML =ObtenerDia(item.date).toString();
+			      let fecha = row.insertCell(1);
+			      //fecha.innerHTML = ObtenerDia(item.FECHA).toString() + ' ' + formatDate(item.FECHA);
+			      fecha.innerHTML =formatDate(item.date);		
+			      
+			});
+			//mostramos o no mensaje de confirmacion.
+			if (combinedResults.length > 0)
+				{
+				// mensaje de confirmacion
+				Swal.fire({
+					  icon: "success",
+					  title: "Felicitaciones..",
+					  text: "Rango completo creado con exito..!",
+					  //imageUrl: "/images/thumbs-up.jpg"
+					});
+				//LLenamos la tabla con la Planilladetalle de la base de datos MysQl
+				listarRangoPlanillaDet();
+				document.getElementById('btnGuardar').disabled = false;
+				}			
+		}
+		
+		
+		// FUNCION PRINCIPAL generarRangoHorario() en Table Html.
+		// Utiliza: 
+		// mostrarRangoMañana();    --> utiliza: (listarRangoPlanillaDet()) almacenados en la BD.
+	    // mostrarRangoTarde();     --> utiliza: (listarRangoPlanillaDet()) almacenados en la BD.
+	    // mostrarRangoCompleto();  --> utiliza: (listarRangoPlanillaDet()) almacenados en la BD.	
+	    // mostrarRangoPersonalizado();
+				
+		function generarRangoHorario() {
+			if( document.getElementById('isCheckBoxes').checked == false){
+				
+		    	// PRIMER IF *****************************************************************
+				if(document.getElementById('fechaInicio').value.length != 0 && 
+				   document.getElementById('fechaFinal').value.length != 0 && 
+				   document.getElementById("dia").value.length != 0 &&
+				   document.getElementById("intervaloR2").value.length == 0 &&
+				   document.getElementById("intervaloR1").value.length != 0
+				   ){
+				   
+				   //Creamos y mostramos rango turno mañana.
+				   mostrarRangoMañana();
+				}
+				
+				// SEGUNDO IF *****************************************************************
+				if(document.getElementById('fechaInicio').value.length != 0 && 
+				   document.getElementById('fechaFinal').value.length != 0 && 
+				   document.getElementById("dia").value.length != 0 &&
+				   document.getElementById("intervaloR1").value.length == 0 &&
+				   document.getElementById("intervaloR2").value.length != 0
+				   ){
+				   
+				   //Creamos y mostramos rango turno tarde.
+				   mostrarRangoTarde();	
+				}
+				
+				
+				// TERCER IF *****************************************************************			
+				if(document.getElementById('fechaInicio').value.length != 0 && 
+						   document.getElementById('fechaFinal').value.length != 0 && 
+						   document.getElementById("dia").value.length != 0 &&
+						   document.getElementById("intervaloR1").selectedIndex != 0 &&
+						   document.getElementById("intervaloR2").selectedIndex != 0
+						   ){
+						   
+						   //Creamos y mostramos rango turno mañana y turno tarde.
+					       mostrarRangoCompleto();
+						}
+	    	}
+			
+			//RANGO PERSONALIZADO *********************************************************
+			if( document.getElementById('isCheckBoxes').checked === true){
+				
+				//PRIMER IF *****************************************************************
+				if(document.getElementById('fechaInicio').value.length != 0 && 
+				   document.getElementById('fechaFinal').value.length != 0 && 
+				   document.getElementById("dia").value.length != 0 &&
+				   document.getElementById("intervaloR2").value.length == 0 &&
+				   document.getElementById("intervaloR1").value.length != 0
+				   ){				   
+				   //Creamos y mostramos rango turno mañana.
+				   mostrarRangoMañanaPersonalizado();
+				}
+			}
+		}
+	    
+		function validarHHMM(entrada) {
+			  // Expresión regular para el formato HH:MM
+			  const regex = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+			  return regex.test(entrada);
+			}
+		
+	    
+	    function validarHora() {
+			  const hora = document.getElementById('horaInicialR1').value;
+			  //const mensaje = document.getElementById("mensaje");
+			  if (validarHHMM(hora)){
+			    //mensaje.textContent = "Formato válido";
+			    //mensaje.style.color = "green";
+			  } else {
+			    //seteamos a cero
+			    document.getElementById('horaInicialR1').value="00:00";
+				//mensaje de Error
+			    	Swal.fire({
+			  		  title: 'Lo sentimos.. Algo Salió mal..',
+			  		  text: 'La hora de Inicio Turno Mañana no tiene el formato hh:mm',
+			  		//imageUrl: "/images/thumbs-down.jpg",
+			  		  icon: 'error',			  		
+			  	    didClose: () => { $("#horaInicialR1").focus();}
+			  		});
+			  }
+			}
+	    
+	  //duplicamos valor en FechaFinal mientras escribimos la fechaInicial.
+		const fecha1 = document.getElementById('fechaInicio');
+		const fecha2 = document.getElementById('fechaFinal');
+		fecha1.addEventListener('input', function () {
+			fecha2.value = this.value; // Asigna el valor del primer input al segundo
+		});
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<script type="text/javascript" th:fragment="javascript">
+	
+	
+	//FUNCION QUE ESCUCHA CLIK EN TIPO DE CANCELACION Y DECIDE QUE MOSTRAR ----------
+	document.getElementById("tipoCancelacion").addEventListener("change", function() {
+	    let valorSeleccionado = this.value;
+		// Obtener input elements por su ID.
+		//const fechaInicio = document.getElementById('fechaInicio');
+		//const fechaFinal = document.getElementById('fechaFinal');
+
+	    // Validación
+	    if (valorSeleccionado == "PorFecha") {
+			//Limpiamos controles
+			//reset_date_native();
+			document.getElementById('horaInicio').value ='00:00';
+			document.getElementById('horaFinal').value ='00:00';
+	        //Deshabilitamos las Horas
+			document.getElementById('horaInicio').disabled = true;
+			document.getElementById('horaFinal').disabled = true;
+			
+	    } else {
+			//Limpiamos controles
+			//reset_date_native();
+			document.getElementById('horaInicio').value ='00:00';
+			document.getElementById('horaFinal').value ='00:00';
+			//Habilitamos las Horas
+			document.getElementById('horaInicio').disabled = false;
+			document.getElementById('horaFinal').disabled = false;
+			
+	    }
+	});
+	
+	
+	function reset_date_native() {
+	  var date_input = document.getElementById('fechaInicio');
+	  var date_input2 = document.getElementById('fechaFinal');
+
+	  //erase the input value
+	  date_input.value = '';
+	  date_input2.value = '';
+
+	  //prevent error on older browsers (aka IE8)
+	  if (date_input.type === 'date') {
+	    //update the input content (visually)
+	    date_input.type = 'text';
+	    date_input.type = 'date';
+		date_input2.type = 'text';
+		date_input2.type = 'date';
+	  }
+	}
+		
+		
+	
+	//AL [CARGAR LA PAGINA] *******************************************************************
+	
+	//FUNCION PARA Fecha y Hora
+			function actualizarFechaHora() {		
+				const fechaHoraActual = new Date();
+				const opciones = {
+					weekday : 'long',
+					timeZone : 'America/Argentina/Buenos_Aires'
+				};
+				const diaSemana = fechaHoraActual.toLocaleDateString('es-AR',
+						opciones);
+				const fechaHoraFormateada = diaSemana.toUpperCase() + ' '
+						+ fechaHoraActual.toLocaleString();
+				document.getElementById("fechaHora").value = fechaHoraFormateada;
+			}
+
+			// Actualizar la fecha y hora cada segundo (FECHA Y HORA)
+			try {
+				setInterval(actualizarFechaHora, 1000);
+				} catch (error) {
+	  				console.error("Se produjo un error en setInterval(actualizarFechaHora, 1000):", error);
+				}	
+			
+			// Inicializar la fecha y hora al cargar la página (FECHA Y HORA)
+			try {
+				actualizarFechaHora();
+				} catch (error) {
+	  				console.error("Se produjo un error en actualizarFechaHora:", error);
+				}	
+				
+				
+				//combobox profesional
+				document.getElementById('profesional').selectedIndex = 0;
+</script>
+</body>
+</html>

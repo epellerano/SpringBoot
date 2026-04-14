@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head ">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+</head>
+<style>
+/* Estética SIGAT: Centrado vertical y balance de pantalla */
+.viewport-container {
+	min-height: calc(100vh - 110px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 12px;
+	margin-bottom: 28px;
+}
+
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 100px;
+	height: 4px;
+	background-color: #198754;
+	border-radius: 2px;
+}
+
+/* Estilo de Selects e Inputs */
+.form-control, .form-select {
+	padding: 0.6rem 0.75rem;
+	border: 1px solid #ced4da;
+}
+
+.input-group-text {
+	background-color: #f8f9fa;
+	border: 1px solid #ced4da;
+	border-right: none;
+	color: #495057;
+}
+
+/* Ajuste para el área de texto */
+textarea.form-control {
+	resize: none; /* Evita que el usuario rompa el layout */
+	border-radius: 0 0.375rem 0.375rem 0;
+}
+</style>
+<body class="bg-light">
+
+    <header th:replace="layout/layout :: header "></header>
+
+    <div class="container viewport-container">
+        <div class="row justify-content-center w-100 m-0">
+            <div class="col-12 col-lg-10 col-xl-8">
+                
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-body p-4 p-md-5">
+                        
+                        <!-- TÍTULO CON ICONO DE VINCULACIÓN (ESTILO RELLENO) -->
+<div class="header-clinica d-flex align-items-center">
+    <!-- Contenedor con el mismo fondo verde profesional -->
+    <div class="d-flex align-items-center justify-content-center rounded-3 me-3" 
+         style="width: 80px; height: 80px; background-color: #e8f5e9;">
+        
+        <!-- Icono de Profesional con Check (Asignación completada) -->
+        <i class="bi bi-person-check-fill" 
+           style="font-size: 3rem; color: #2e7d32;"></i>
+    </div>
+
+    <div>
+        <h4 th:text="${titulo}" class="fw-bold text-dark mb-0"></h4>
+        <p class="text-muted mb-0 text-uppercase small" 
+           style="letter-spacing: 1px; font-size: 0.7rem; font-weight: 600;">
+           SIGAT • Asignación de Especialidades Médicas
+        </p>
+    </div>
+</div>
+
+
+                        <form th:action="@{/vinculaciones/formVinculacion}" th:object="${vinculacion}" method="post" id="formVinculacion">
+                            <div class="row g-4">
+                                
+                                <!-- Selección de Profesional -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small mb-1">Seleccionar Profesional</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-user-doctor"></i></span>
+                                        <select class="form-select" th:field="*{profesional.id}">
+                                            <option th:each="profesional : ${profesionales}"
+                                                    th:value="${profesional.id}"
+                                                    th:text="${profesional.apellido} + ' ' + ${profesional.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Selección de Especialidad -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-dark small mb-1">Especialidad a Vincular</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span>
+                                        <select class="form-select" th:field="*{especialidad.id}" id="especialidad">
+                                            <option th:each="especialidad : ${especialidades}"
+                                                    th:value="${especialidad.id}"
+                                                    th:text="${especialidad.especialidadNombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Observaciones -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-dark small mb-1">
+                                        Observaciones (Se visualizarán al otorgar turnos)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text align-items-start pt-2"><i class="fa-solid fa-comment-medical"></i></span>
+                                        <textarea class="form-control" th:field="*{Observacion}"
+                                                  id="Observacion" rows="5" maxlength="336"
+                                                  placeholder="Indique días, horarios específicos o requisitos del profesional..."
+                                                  th:errorclass="'form-control is-invalid'"></textarea>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('Observacion')}" th:errors="*{Observacion}"></div>
+                                </div>
+
+                                <!-- ACCIONES -->
+                                <div class="col-12 mt-4 pt-2">
+                                    <div class="d-flex gap-3">
+                                        <button type="submit" id="btnGuardar" class="btn btn-success btn-lg flex-grow-1 fw-bold shadow-sm">
+                                            <i class="fa-solid fa-link me-2"></i>GUARDAR VINCULACIÓN
+                                        </button>
+                                        <a th:href="@{/vinculaciones/listarVinculacion}" class="btn btn-outline-secondary btn-lg px-4 fw-bold">
+                                            VOLVER
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer "></footer>
+
+    <!-- Scripts de Autocomplete y Procesador de Texto -->
+    <script th:replace="vinculaciones/js/autocomplete-profesionales :: javascript"></script>
+    <script th:inline="javascript">
+        // Feedback visual al enviar
+        document.getElementById('formVinculacion').addEventListener('submit', function() {
+            const btn = document.getElementById('btnGuardar');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-2"></i> Procesando...';
+            btn.classList.add('disabled');
+        });
+
+        // Inicialización de TinyMCE (Si lo sigues necesitando en el campo Observacion)
+        tinymce.init({
+            selector : '#Observacion', /* Corregido para que coincida con el ID del campo */
+            plugins : "textcolor, table lists code",
+            toolbar : " undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor",
+            menubar: false,
+            height: 250
+        });
+    </script>
+</body>
+</html>

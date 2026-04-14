@@ -1,0 +1,121 @@
+/* PARA LA VISTA formTurno.html */
+
+/* PARA LA VISTA formCancelarPlanilla.html */
+#myFormCancelarPlanilla span[for="profesional"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="especialidad"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="tipoCancelacion"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="motivoCancelacion"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="fechaInicio"] {
+	color: teal;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="fechaFinal"] {
+	color: teal;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="horaInicio"] {
+	color: teal;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla span[for="horaFinal"] {
+	color: teal;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+#myFormCancelarPlanilla label[for="isCheckFechas"] {
+	color: teal;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+
+
+
+
+
+/* RESALTAR FILA EN TABLE AL HACER CLICK */
+#myFormCancelarPlanilla .selected-row {
+	background-color: darkorchid; /* Estilo para la fila seleccionada */
+	color: White;
+}
+
+/* IMPEDIR SLECCIONAR ELEMENTO */
+#myFormCancelarPlanilla .table {
+	user-select: none;
+}
+
+#myFormCancelarPlanilla tbody[for="horariosTbody"] {
+	font-size: 14px;
+}
+
+#myFormCancelarPlanilla tbody[for="turnosLibresTbody"] {
+	font-size: 14px;
+}
+
+/* OCULTAR COLUMNAS DE TABLE HTML */
+.ocultar-columna {
+	display: none;
+}
+
+/* VERIFICAR DUPLICADOS DE FECHA Y HORA */
+.fila-con-misma-fecha {
+	background-color: yellow;
+}
+
+/* BORDE DEL CUADRO MENSAJE SWALL */
+.swal2-border-custom {
+  border: 5px solid mediumpurple;
+  border-radius: 10px;
+  width:660px;
+}
+
+
+
+
+/* cursor por una mano */
+.lupa-icono:hover {
+    cursor: pointer;
+}
+/* cursor por una mano */
+span[for="banderaIconoVerde"]:hover {
+    cursor: pointer;
+}
+/* cursor por una mano */
+span[for="banderaIconoRojo"]:hover {
+    cursor: pointer;
+}
+/* cursor por una mano */
+#myForm [for="eliminar-icono"]:hover{
+	cursor: pointer;
+}
+/* cursor por una mano */
+.radio:hover {
+    cursor: pointer;
+}

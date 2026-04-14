@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="layout/layout :: head "></head>
+
+<style>
+/* Estilo para profesionalizar los botones pequeños sin usar height fijo */
+.custom-btn-mini {
+	padding: 4px 8px;
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	color: #546e7a !important; /* Gris profesional */
+	border-color: #ffc107; /* Amarillo Bootstrap */
+	transition: all 0.2s ease;
+}
+
+.custom-btn-mini:hover {
+	background-color: #fff9e6; /* Un fondo sutil al pasar el mouse */
+	color: #37474f !important;
+}
+
+.custom-btn-mini i {
+	font-size: 12px;
+}
+</style>
+
+<body style="overflow-y: auto; background-color: #f4f7f6;">
+	<header th:replace="layout/layout :: header "></header>
+
+	<div class="container-fluid py-1 px-2">
+		<!-- min-height ajustado para dar soporte al botón guardar -->
+		<div class="card shadow-sm border-0 mb-3"
+			style="min-height: 88vh; background: #ffffff;">
+
+			<div class="card-body p-2">
+				<!-- CABECERA -->
+				<div
+					class="d-flex justify-content-between align-items-center border-bottom mb-2 pb-1">
+					<h5 th:text="${titulo}" class="text-danger m-0 fw-bold flex-grow-1"
+						style="font-size: 16px;"></h5>
+					<input
+						class="form-control bg-light text-danger text-center fw-bold border-0 px-0 flex-shrink-0 me-3"
+						type="text" id="fechaHora" name="fechaHora" readonly
+						style="width: 230px; font-size: 14px; height: 25px; box-shadow: none; letter-spacing: 0.5px;">
+				</div>
+				<form id="myForm" th:action="@{/sobreturnos/formSobreturno}"
+					th:object="${sobreturno}" method="post">
+
+					<input type="hidden" id="profIdPre" th:value="${profIdPre}">
+					<input type="hidden" id="especIdPre" th:value="${especIdPre}">
+
+					<!-- BLOQUE SUPERIOR -->
+					<div
+						class="row g-2 mb-2 bg-light p-2 rounded border mx-0 align-items-center shadow-sm">
+						<!-- 1. Médico y Especialidad -->
+						<div class="col-md-3 border-end px-3">
+							<div class="d-flex align-items-center mb-1">
+								<img th:src="@{/images/search-doctor.png}" width="14"
+									class="me-2"> <select class="form-select form-select-sm"
+									id="profesional" name="profesional"
+									th:onchange="cargarEspecialidades()"
+									style="font-size: 14px; height: 30px;">
+									<option value="" disabled selected>Seleccione
+										Médico...</option>
+									<option th:each="p : ${profesionales}" th:value="${p.id}"
+										th:text="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"></option>
+								</select>
+							</div>
+							<div class="d-flex align-items-center">
+								<img th:src="@{/images/search-doctor.png}" width="14"
+									class="me-2"> <select id="especialidad"
+									name="especialidad" class="form-select form-select-sm"
+									th:onclick="existeEspecialidad()"
+									th:onchange="focusPacienteApeyNom();"
+									style="font-size: 14px; height: 30px;"></select>
+							</div>
+						</div>
+
+						<!-- 2. Paciente -->
+						<div class="col-md-3 border-end px-3">
+							<div class="d-flex align-items-center mb-1">
+								<img th:src="@{/images/lupa.png}" width="14" class="me-2">
+								<input type="hidden" id="pacienteId" name="pacienteId" /> <input
+									type="text" id="buscar_pacienteApeNom"
+									name="buscar_pacienteApeNom"
+									class="form-control form-control-sm"
+									placeholder="Apellido y Nombre"
+									style="font-size: 14px; height: 30px;"
+									th:onclick="clearInput()">
+							</div>
+							<div class="d-flex align-items-center">
+								<img th:src="@{/images/lupa.png}" width="14" class="me-2">
+								<input type="hidden" id="pacientedniId" name="pacientedniId" />
+								<input type="text" id="buscar_pacienteDni"
+									name="buscar_pacienteDni" class="form-control form-control-sm"
+									placeholder="Dni / Documento"
+									style="font-size: 14px; height: 30px;"
+									th:onclick="clearInput()">
+							</div>
+						</div>
+
+						<!-- 3. Observaciones y Botones -->
+						<div class="col-md-4 px-3">
+							<input type="text" id="Observacion" name="Observacion"
+								maxlength="68"
+								class="form-control form-control-sm text-uppercase mb-1"
+								th:field="*{Observacion}" placeholder="OBSERVACIÓN DEL TURNO..."
+								style="font-size: 12px; height: 30px;" autocomplete="off" />
+							<div class="d-flex gap-2">
+								<!-- BOTÓN DETALLES -->
+								<button type="button" id="btnObservacionesMedico"
+									class="btn btn-outline-warning d-flex align-items-center justify-content-center flex-fill custom-btn-mini"
+									onmouseover="mostrarPopUpObs(this)"
+									onmouseout="ocultarPopUpObs()">
+									<i class="fa-solid fa-circle-info me-2 text-secondary"></i> <span>DETALLES DEL
+										MÉDICO</span>
+								</button>
+
+								<!-- BOTÓN BUSCADOR -->
+								<a th:href="@{/sobreturnos/listarSobreturno}"
+									class="btn btn-outline-warning d-flex align-items-center justify-content-center flex-fill custom-btn-mini text-decoration-none">
+									<i class="fa-solid fa-magnifying-glass me-2 text-secondary"></i>
+									<span>BUSCAR SOBRETURNOS</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 4. Foto -->
+						<div class="col-md-2 d-flex justify-content-center border-start">
+							<div
+								style="width: 75px; height: 75px; border: 2px solid #17a2b8; border-radius: 50%; overflow: hidden; background: #e9ecef; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+								<img id="fotoMedico"
+									style="width: 100%; height: 100%; object-fit: cover; display: none;">
+								<div id="fotoDefault"
+									class="d-flex align-items-center justify-content-center h-100">
+									<i class="fa fa-user-md text-secondary"
+										style="font-size: 30px;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- TABLAS PARALELAS -->
+					<div class="row g-2">
+						<!-- PANEL IZQUIERDO -->
+						<div class="col-md-3">
+							<h6 class="text-success fw-bold small mb-1">HORARIOS
+								SEMANALES</h6>
+							<div class="card border shadow-none mb-1" style="height: 120px;">
+								<div class="table-responsive" style="height: 100%;">
+									<table class="table table-sm table-hover mb-0"
+										id="horariosAtencion">
+										<thead class="table-primary sticky-top">
+											<tr style="font-size: 12px;">
+												<th>DIA</th>
+												<th>HORARIOS</th>
+											</tr>
+										</thead>
+										<tbody id="horariosAtencionTableBody" style="font-size: 14px;"></tbody>
+									</table>
+								</div>
+							</div>
+
+							<!-- SELECTOR DÍAS -->
+							<div
+								class="d-flex justify-content-between mb-2 px-1 text-success fw-bold border rounded p-1 bg-light shadow-sm"
+								style="font-size: 12px;">
+								<span class="d-flex align-items-center gap-1">Lu<input
+									type="radio" name="dia" value="lunes" id="radioLunes"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Ma<input
+									type="radio" name="dia" value="martes" id="radioMartes"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Mi<input
+									type="radio" name="dia" value="miercoles" id="radioMiercoles"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Ju<input
+									type="radio" name="dia" value="jueves" id="radioJueves"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Vi<input
+									type="radio" name="dia" value="viernes" id="radioViernes"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Sa<input
+									type="radio" name="dia" value="sabado" id="radioSabado"
+									class="form-check-input m-0"></span> <span
+									class="d-flex align-items-center gap-1">Do<input
+									type="radio" name="dia" value="domingo" id="radioDomingo"
+									class="form-check-input m-0"></span> <span
+									class="text-danger d-flex align-items-center gap-1">Todos<input
+									type="radio" name="dia" value="todos" id="radioTodos"
+									class="form-check-input m-0"></span>
+							</div>
+
+							<!-- TABLA LIBRES (Ajustada 0,5 cm menos que el original) -->
+							<div class="card border shadow-none" style="height: 240px;">
+								<input type="hidden" id="planillaDetId" name="planillaDetId" />
+								<input type="hidden" id="planillaCabId" name="planillaCabId" />
+								<!-- CAMBIO AQUÍ: Este ID debe coincidir con el que busca tu JS para meter la fecha+hora limpia -->
+								<!-- <input type="hidden" id="rangoFechaHora" name="rangoFechaHora" /> -->
+								<input type="hidden" id="rangoFechaHoraSeleccionada"
+									name="rangoFechaHora" />
+
+								<div class="table-responsive" style="height: 100%;">
+									<table class="table table-sm table-hover mb-0"
+										id="turnosLibresTodos">
+										<thead class="table-primary sticky-top">
+											<tr style="font-size: 12px;">
+												<th>PD</th>
+												<th>PC</th>
+												<th>TURNOS DISPONIBLES</th>
+											</tr>
+										</thead>
+										<tbody id="turnosLibresTableBody" style="font-size: 14px;"></tbody>
+									</table>
+								</div>
+							</div>
+
+							<div
+								class="d-flex align-items-center justify-content-center gap-3 mt-2 bg-light border rounded p-1 shadow-sm">
+								<label
+									class="text-secondary fw-bold d-flex align-items-center gap-1 m-0"
+									style="cursor: pointer; font-size: 12px;"> <input
+									class="form-check-input m-0" type="checkbox"
+									id="isCheckTurCanceladosMedico" value="true"
+									style="width: 16px; height: 16px; cursor: pointer;">
+									Mostrar Turnos Cancelados
+								</label> <label
+									class="text-secondary fw-bold d-flex align-items-center gap-1 m-0"
+									style="cursor: pointer; font-size: 12px;"> <input
+									class="form-check-input m-0" type="checkbox" id="isCheckturnos"
+									name="isCheckturnos" value="true"
+									style="width: 16px; height: 16px; cursor: pointer;">
+									Mostrar Turnos Normales
+								</label>
+							</div>
+						</div>
+
+						<!-- PANEL DERECHO: TABLA OCUPADOS (Ajustada 0,5 cm menos que el original) -->
+						<div class="col-md-9">
+							<h6 class="text-success fw-bold small mb-1">SOBRETURNOS
+								OCUPADOS</h6>
+							<div class="card border shadow-none">
+								<div class="table-responsive"
+									style="height: 400px; overflow-y: auto;">
+									<table class="table table-sm table-hover mb-0"
+										id="sobreturnosOcupadosTodos">
+										<thead class="table-primary sticky-top">
+											<tr style="font-size: 11px;">
+												<th>SID</th>
+												<th>PACID</th>
+												<th>PROFID</th>
+												<th>ESPID</th>
+												<th>NOMBRE DEL PACIENTE</th>
+												<th>FECHA Y HORA</th>
+												<th>BOX</th>
+												<th>TIPO</th>
+												<th>DETALLE</th>
+											</tr>
+										</thead>
+										<tbody id="sobreturnosOcupadosTableBody"
+											style="font-size: 15px;"></tbody>
+									</table>
+								</div>
+							</div>
+
+							<div class="mt-2">
+								<button type="submit"
+									class="btn btn-success fw-bold w-100 shadow" id="btnConfirmar"
+									style="height: 45px; font-size: 16px;"
+									th:onmouseover="existePlanillaActiva()">
+									<i class="fa fa-save me-2"></i>GUARDAR TURNO SELECCIONADO
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<input class="form-check-input d-none" type="checkbox"
+						id="isCheckProfEsp" value="true" disabled> <input
+						class="form-check-input d-none" type="checkbox"
+						id="isCheckPaciente" value="true" disabled> <input
+						class="form-check-input d-none" type="checkbox"
+						id="isCheckTurnoSeleccionado" value="true" disabled>
+					<button class="d-none" type="button" id="btnMostrar"
+						th:onclick="listarRangoPlanillaDet()"></button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div id="popupObservacionesFull"
+		style="display: none; position: fixed; z-index: 10000; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 3px solid #17a2b8; border-radius: 8px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); width: 792px; height: 370px; pointer-events: none;">
+		<div
+			style="background: #17a2b8; color: white; padding: 10px; font-weight: bold; text-align: center; border-radius: 5px 5px 0 0;">
+			REGLAS Y PROCEDIMIENTOS DEL PROFESIONAL</div>
+		<div id="cuerpoPopUpFull"
+			style="padding: 20px; font-size: 15px; color: #333; line-height: 1.6; overflow-y: auto; height: 310px; white-space: pre-wrap;"></div>
+	</div>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script
+		th:replace="sobreturnos/js/load-combobox-vinculacion-sobreturnos :: javascript"></script>
+	<script
+		th:replace="sobreturnos/js/autocomplete-pacientes :: javascript"></script>
+	<script
+		th:replace="sobreturnos/js/funcionesParaSobreturnos :: javascript"></script>
+
+
+	<script>
+	document.getElementById("myForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Detenemos el envío normal para que no se borre la página
+
+        // 1. Tus validaciones básicas (Paciente / Profesional)
+        if (document.getElementById('isCheckPaciente').checked === false || 
+            document.getElementById('isCheckProfEsp').checked === false) {
+            Swal.fire({
+                icon: "error",
+                title: "Lo sentimos.. Algo Salió mal..",
+                html: "Datos Incompletos.<br>Verifique todos los campos por favor..."
+            });
+            return;
+        }
+
+        // 2. Validación de Horario Seleccionado
+        if (document.getElementById('isCheckTurnoSeleccionado').checked === false) {
+            Swal.fire({
+                icon: "error",
+                title: "Lo sentimos.. Algo Salió mal..",
+                html: "Datos Incompletos.<br>Seleccione un Horario por favor..."
+            });
+            return;
+        }
+
+        // 3. SI TODO ESTÁ BIEN, ENVIAMOS POR AJAX
+        enviarFormularioAjax(this);
+    });
+
+	function enviarFormularioAjax(form) {
+	    $.ajax({
+	        url: $(form).attr("action"),
+	        type: "POST",
+	        data: $(form).serialize(),
+	        success: function(response) {
+	            // El servidor respondió 200 OK (Se guardó en la BD)
+	            Swal.fire({
+	                icon: "success",
+	                title: "¡Logrado!",
+	                text: "Sobreturno guardado con éxito.", // Esto reemplaza al [[${mensaje}]] de éxito EN formSobreturno
+	                confirmButtonText: "Ir a la lista",
+	                allowOutsideClick: false
+	            }).then((result) => {
+	                // ESTA LÍNEA HACE LA REDIRECCIÓN MANUAL
+	                if (result.isConfirmed || result.isDismissed) {
+	                    window.location.href = "/sobreturnos/listarSobreturno";
+	                }
+	            });
+	        },
+	        error: function(xhr) {
+	            if (xhr.status === 409) {
+	                // Error de horario ocupado: NO REDIRIGE, se queda para que elija otro
+	                Swal.fire({
+	                    icon: "warning",
+	                    title: "Horario Ocupado",
+	                    text: "Este bloque Horario ya fue tomado por otro operador." // Esto reemplaza al [[${mensaje}]] de error EN formSobreturno
+	                });
+	            } else {
+	                Swal.fire({
+	                    icon: "error",
+	                    title: "Error",
+	                    text: "Hubo un problema al procesar el sobreturno."
+	                });
+	            }
+	        }
+	    });
+	}
+	</script>
+
+
+</body>
+</html>
