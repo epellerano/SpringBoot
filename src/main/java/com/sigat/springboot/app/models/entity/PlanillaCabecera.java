@@ -296,6 +296,7 @@ public class PlanillaCabecera implements Serializable {
 														// setters.
 		planilladetalle.setPlanillacabecera(null); // eliminamos de planilladetalle la PlanillaCabecera.
 	}
-
+	
+	//serial version
 	private static final long serialVersionUID = 1L;
 }
