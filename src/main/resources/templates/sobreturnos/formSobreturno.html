@@ -3,6 +3,42 @@
 <head th:replace="layout/layout :: head "></head>
 
 <style>
+
+/* BOTÓN GUARDAR ELITE */
+.btn-guardar-elite {
+	background-color: #10b981; /* Un verde esmeralda más sofisticado */
+	color: #ffffff;
+	border: none;
+	border-radius: 8px;
+	height: 45px;
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.btn-guardar-elite:hover {
+	background-color: #059669;
+	/* Verde un poco más oscuro al pasar el mouse */
+	transform: translateY(-1px);
+	box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+	color: #ffffff;
+}
+
+.btn-guardar-elite:active {
+	transform: translateY(0);
+}
+
+.btn-guardar-elite i {
+	font-size: 18px;
+}
+
 /* Estilo para profesionalizar los botones pequeños sin usar height fijo */
 .custom-btn-mini {
 	padding: 4px 8px;
@@ -21,6 +57,51 @@
 
 .custom-btn-mini i {
 	font-size: 12px;
+}
+
+/* DISEÑO DE BOTONES DE DÍAS ELITE */
+.day-selector-container input[type="radio"] {
+	display: none;
+}
+
+.day-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 28px;
+	font-size: 10px;
+	font-weight: 800;
+	color: #64748b; /* Gris azulado para días inactivos */
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-transform: uppercase;
+	margin: 0;
+	border: 1px solid transparent;
+}
+
+/* Estilo inicial para el botón TODOS (texto rojo, fondo blanco) */
+.day-btn-todos {
+	color: #ef4444;
+}
+
+.day-btn:hover {
+	background-color: #f8f9fa;
+}
+
+/* Estado cuando CUALQUIER día está seleccionado (Fondo Azul, Texto Blanco) */
+.day-selector-container input[type="radio"]:checked+.day-btn {
+	background-color: #0052cc;
+	color: #ffffff !important;
+	box-shadow: 0 2px 4px rgba(0, 82, 204, 0.2);
+}
+
+/* Estado específico para el botón TODOS cuando se activa */
+/* Cambia el fondo a rojo y fuerza el texto a blanco para que sea legible */
+.day-selector-container input[type="radio"]:checked+.day-btn-todos {
+	background-color: #ef4444 !important;
+	color: #ffffff !important;
+	box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 </style>
 
@@ -52,78 +133,147 @@
 					<!-- BLOQUE SUPERIOR -->
 					<div
 						class="row g-2 mb-2 bg-light p-2 rounded border mx-0 align-items-center shadow-sm">
-						<!-- 1. Médico y Especialidad -->
+						<!-- 1. Médico y Especialidad (formSobreturno) -->
 						<div class="col-md-3 border-end px-3">
-							<div class="d-flex align-items-center mb-1">
-								<img th:src="@{/images/search-doctor.png}" width="14"
-									class="me-2"> <select class="form-select form-select-sm"
-									id="profesional" name="profesional"
-									th:onchange="cargarEspecialidades()"
-									style="font-size: 14px; height: 30px;">
-									<option value="" disabled selected>Seleccione
-										Médico...</option>
-									<option th:each="p : ${profesionales}" th:value="${p.id}"
-										th:text="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"></option>
-								</select>
+							<!-- Profesional Soldado -->
+							<div class="mb-1">
+								<div class="input-group"
+									style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden;">
+									<!-- Icono soldado Elite -->
+									<span class="input-group-text bg-white border-0"
+										style="padding-right: 5px;"> <i class="fas fa-user-md"
+										style="font-size: 14px; color: #0052cc;"></i>
+									</span>
+
+									<!-- Buscador de Sobreturnos: Sin autocompletado y limpieza al clic -->
+									<input type="text" id="profesionalInputSobreturno"
+										class="form-control form-control-sm border-0 shadow-none"
+										list="profesionalesListSobr"
+										placeholder="Buscar Médico para Sobreturno..."
+										th:value="${profesionalSeleccionado != null} ? (${profesionalSeleccionado.codigo} + ' - ' + ${profesionalSeleccionado.apellido} + ' ' + ${profesionalSeleccionado.nombre}) : ''"
+										style="font-size: 14px; height: 100%;" autocomplete="off"
+										role="presentation" onclick="limpiarBuscadorSobreturno(this)"
+										oninput="sincronizarSobreturno(this)">
+
+									<datalist id="profesionalesListSobr">
+										<option th:each="p : ${profesionales}"
+											th:value="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"
+											th:data-id="${p.id}"></option>
+									</datalist>
+
+									<!-- Select original OCULTO para el Controller de Sobreturnos -->
+									<select id="profesional" name="profesional" class="d-none">
+										<option value="" disabled selected>Seleccione
+											Médico...</option>
+										<option th:each="p : ${profesionales}" th:value="${p.id}"
+											th:text="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"></option>
+									</select>
+								</div>
 							</div>
-							<div class="d-flex align-items-center">
-								<img th:src="@{/images/search-doctor.png}" width="14"
-									class="me-2"> <select id="especialidad"
-									name="especialidad" class="form-select form-select-sm"
-									th:onclick="existeEspecialidad()"
-									th:onchange="focusPacienteApeyNom();"
-									style="font-size: 14px; height: 30px;"></select>
+
+							<!-- Especialidad Soldada -->
+							<div>
+								<div class="input-group">
+									<span class="input-group-text bg-white"
+										style="height: 30px; border-right: none;"> <i
+										class="fas fa-stethoscope"
+										style="font-size: 14px; color: #0052cc;"></i>
+									</span> <select id="especialidad" name="especialidad"
+										class="form-select form-select-sm"
+										th:onclick="existeEspecialidad()"
+										th:onchange="focusPacienteApeyNom();"
+										style="font-size: 14px; height: 30px; border-left: none; box-shadow: none;">
+									</select>
+								</div>
 							</div>
 						</div>
 
-						<!-- 2. Paciente -->
+
+						<!-- 2. Paciente (formSobreturno) -->
 						<div class="col-md-3 border-end px-3">
-							<div class="d-flex align-items-center mb-1">
-								<img th:src="@{/images/lupa.png}" width="14" class="me-2">
-								<input type="hidden" id="pacienteId" name="pacienteId" /> <input
-									type="text" id="buscar_pacienteApeNom"
-									name="buscar_pacienteApeNom"
-									class="form-control form-control-sm"
-									placeholder="Apellido y Nombre"
-									style="font-size: 14px; height: 30px;"
-									th:onclick="clearInput()">
+							<!-- Búsqueda por Apellido y Nombre Soldada -->
+							<div class="mb-1">
+								<div class="input-group"
+									style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden;">
+									<span class="input-group-text bg-white border-0"
+										style="padding-right: 5px;"> <i class="fas fa-search"
+										style="font-size: 13px; color: #0052cc;"></i>
+									</span> <input type="hidden" id="pacienteId" name="pacienteId" /> <input
+										type="text" id="buscar_pacienteApeNom"
+										name="buscar_pacienteApeNom"
+										class="form-control form-control-sm border-0 shadow-none"
+										placeholder="Apellido y Nombre"
+										style="font-size: 14px; height: 100%;"
+										th:onclick="clearInput()">
+								</div>
 							</div>
-							<div class="d-flex align-items-center">
-								<img th:src="@{/images/lupa.png}" width="14" class="me-2">
+
+							<!-- Búsqueda por DNI soldada y con borde unificado y nivelado -->
+							<div class="input-group"
+								style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden;">
+								<!-- Icono soldado sin bordes propios -->
+								<span class="input-group-text bg-white border-0"
+									style="padding-right: 5px;"> <i class="fas fa-id-card"
+									style="font-size: 13px; color: #0052cc;"></i>
+								</span>
+
+								<!-- Input oculto para lógica -->
 								<input type="hidden" id="pacientedniId" name="pacientedniId" />
+
+								<!-- Input de texto alineado al 100% -->
 								<input type="text" id="buscar_pacienteDni"
-									name="buscar_pacienteDni" class="form-control form-control-sm"
+									name="buscar_pacienteDni"
+									class="form-control form-control-sm border-0 shadow-none"
 									placeholder="Dni / Documento"
-									style="font-size: 14px; height: 30px;"
+									style="font-size: 14px; height: 100%;"
 									th:onclick="clearInput()">
 							</div>
+
+
 						</div>
 
-						<!-- 3. Observaciones y Botones -->
+
+						<!-- 3. Observaciones y Botones (formSobreturno) -->
 						<div class="col-md-4 px-3">
-							<input type="text" id="Observacion" name="Observacion"
-								maxlength="68"
-								class="form-control form-control-sm text-uppercase mb-1"
-								th:field="*{Observacion}" placeholder="OBSERVACIÓN DEL TURNO..."
-								style="font-size: 12px; height: 30px;" autocomplete="off" />
-							<div class="d-flex gap-2">
+							<!-- Observación Soldada -->
+							<div class="mb-1">
+								<div class="input-group">
+									<span class="input-group-text bg-white"
+										style="height: 30px; border-right: none;"> <i
+										class="fas fa-comment-medical"
+										style="font-size: 14px; color: #0052cc;"></i>
+									</span> <input type="text" id="Observacion" name="Observacion"
+										maxlength="68"
+										class="form-control form-control-sm text-uppercase"
+										th:field="*{Observacion}"
+										placeholder="OBSERVACIÓN DEL TURNO..."
+										style="font-size: 12px; height: 30px; border-left: none; box-shadow: none;"
+										autocomplete="off" />
+								</div>
+							</div>
+
+							<!-- Botones de Acción Estilo Elite -->
+							<div class="d-flex gap-2 mt-1">
 								<!-- BOTÓN DETALLES -->
 								<button type="button" id="btnObservacionesMedico"
-									class="btn btn-outline-warning d-flex align-items-center justify-content-center flex-fill custom-btn-mini"
+									class="btn btn-outline-info d-flex align-items-center justify-content-center flex-fill"
+									style="height: 28px; font-size: 10px; font-weight: 700; color: #0891b2; border-color: #0891b2; letter-spacing: 0.5px; border-radius: 4px;"
 									onmouseover="mostrarPopUpObs(this)"
 									onmouseout="ocultarPopUpObs()">
-									<i class="fa-solid fa-circle-info me-2 text-secondary"></i> <span>DETALLES DEL
+									<i class="fa-solid fa-address-card me-2"></i> <span>DETALLES
 										MÉDICO</span>
 								</button>
 
-								<!-- BOTÓN BUSCADOR -->
+								<!-- BOTÓN BUSCADOR (Ajustado a sobreturnos) -->
 								<a th:href="@{/sobreturnos/listarSobreturno}"
-									class="btn btn-outline-warning d-flex align-items-center justify-content-center flex-fill custom-btn-mini text-decoration-none">
-									<i class="fa-solid fa-magnifying-glass me-2 text-secondary"></i>
-									<span>BUSCAR SOBRETURNOS</span>
+									class="btn btn-outline-info d-flex align-items-center justify-content-center flex-fill text-decoration-none"
+									style="height: 28px; font-size: 10px; font-weight: 700; color: #0891b2; border-color: #0891b2; letter-spacing: 0.5px; border-radius: 4px;">
+									<i class="fa-solid fa-magnifying-glass me-2"></i> <span>BUSCAR
+										SOBRETURNOS</span>
 								</a>
 							</div>
 						</div>
+
 
 						<!-- 4. Foto -->
 						<div class="col-md-2 d-flex justify-content-center border-start">
@@ -163,33 +313,50 @@
 
 							<!-- SELECTOR DÍAS -->
 							<div
-								class="d-flex justify-content-between mb-2 px-1 text-success fw-bold border rounded p-1 bg-light shadow-sm"
-								style="font-size: 12px;">
-								<span class="d-flex align-items-center gap-1">Lu<input
-									type="radio" name="dia" value="lunes" id="radioLunes"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Ma<input
-									type="radio" name="dia" value="martes" id="radioMartes"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Mi<input
-									type="radio" name="dia" value="miercoles" id="radioMiercoles"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Ju<input
-									type="radio" name="dia" value="jueves" id="radioJueves"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Vi<input
-									type="radio" name="dia" value="viernes" id="radioViernes"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Sa<input
-									type="radio" name="dia" value="sabado" id="radioSabado"
-									class="form-check-input m-0"></span> <span
-									class="d-flex align-items-center gap-1">Do<input
-									type="radio" name="dia" value="domingo" id="radioDomingo"
-									class="form-check-input m-0"></span> <span
-									class="text-danger d-flex align-items-center gap-1">Todos<input
-									type="radio" name="dia" value="todos" id="radioTodos"
-									class="form-check-input m-0"></span>
+								class="day-selector-container d-flex justify-content-between align-items-center mb-2 p-1 border rounded bg-white shadow-sm"
+								style="height: 38px; border-color: #e2e8f0 !important;">
+
+								<div class="d-flex w-100 justify-content-between">
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="lunes" id="radioLunes">
+										<label class="day-btn" for="radioLunes">LUN</label>
+									</div>
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="martes" id="radioMartes">
+										<label class="day-btn" for="radioMartes">MAR</label>
+									</div>
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="miercoles"
+											id="radioMiercoles"> <label class="day-btn"
+											for="radioMiercoles">MIÉ</label>
+									</div>
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="jueves" id="radioJueves">
+										<label class="day-btn" for="radioJueves">JUE</label>
+									</div>
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="viernes"
+											id="radioViernes"> <label class="day-btn"
+											for="radioViernes">VIE</label>
+									</div>
+									<div class="flex-fill px-1">
+										<input type="radio" name="dia" value="sabado" id="radioSabado">
+										<label class="day-btn" for="radioSabado">SÁB</label>
+									</div>
+									<div class="flex-fill px-1 border-end me-1">
+										<input type="radio" name="dia" value="domingo"
+											id="radioDomingo"> <label class="day-btn"
+											for="radioDomingo">DOM</label>
+									</div>
+
+									<div class="flex-fill ps-1">
+										<input type="radio" name="dia" value="todos" id="radioTodos"
+											checked> <label class="day-btn day-btn-todos"
+											for="radioTodos" style="color: #ef4444;">TODOS</label>
+									</div>
+								</div>
 							</div>
+
 
 							<!-- TABLA LIBRES (Ajustada 0,5 cm menos que el original) -->
 							<div class="card border shadow-none" style="height: 240px;">
@@ -215,24 +382,42 @@
 								</div>
 							</div>
 
+							<!-- PANEL DE CONTROL SOBRETURNOS (Simétrico y Elite) -->
 							<div
-								class="d-flex align-items-center justify-content-center gap-3 mt-2 bg-light border rounded p-1 shadow-sm">
-								<label
-									class="text-secondary fw-bold d-flex align-items-center gap-1 m-0"
-									style="cursor: pointer; font-size: 12px;"> <input
-									class="form-check-input m-0" type="checkbox"
-									id="isCheckTurCanceladosMedico" value="true"
-									style="width: 16px; height: 16px; cursor: pointer;">
-									Mostrar Turnos Cancelados
-								</label> <label
-									class="text-secondary fw-bold d-flex align-items-center gap-1 m-0"
-									style="cursor: pointer; font-size: 12px;"> <input
-									class="form-check-input m-0" type="checkbox" id="isCheckturnos"
-									name="isCheckturnos" value="true"
-									style="width: 16px; height: 16px; cursor: pointer;">
-									Mostrar Turnos Normales
-								</label>
+								class="d-flex align-items-center justify-content-center mt-2 w-100 shadow-sm"
+								style="height: 45px; background-color: #cfe2ff; border: 1px solid #b6d4fe; border-radius: 6px; padding: 0 15px; gap: 20px;">
+
+								<!-- Opción 1: Cancelados -->
+								<div
+									class="form-check form-switch m-0 p-0 d-flex align-items-center"
+									style="white-space: nowrap;">
+									<input class="form-check-input m-0" type="checkbox"
+										role="switch" id="isCheckTurCanceladosMedico" value="true"
+										style="width: 28px; height: 14px; cursor: pointer; float: none; border-color: #084298;">
+									<label class="fw-bold ms-2 mb-0"
+										for="isCheckTurCanceladosMedico"
+										style="cursor: pointer; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: #084298;">
+										Turnos Cancelados </label>
+								</div>
+
+								<!-- Divisor vertical minimalista -->
+								<div
+									style="width: 1px; height: 16px; background-color: #b6d4fe;"></div>
+
+								<!-- Opción 2: Turnos Normales -->
+								<div
+									class="form-check form-switch m-0 p-0 d-flex align-items-center"
+									style="white-space: nowrap;">
+									<input class="form-check-input m-0" type="checkbox"
+										role="switch" id="isCheckturnos" name="isCheckturnos"
+										value="true"
+										style="width: 28px; height: 14px; cursor: pointer; float: none; border-color: #084298;">
+									<label class="fw-bold ms-2 mb-0" for="isCheckturnos"
+										style="cursor: pointer; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; color: #084298;">
+										Turnos Normales </label>
+								</div>
 							</div>
+
 						</div>
 
 						<!-- PANEL DERECHO: TABLA OCUPADOS (Ajustada 0,5 cm menos que el original) -->
@@ -241,7 +426,7 @@
 								OCUPADOS</h6>
 							<div class="card border shadow-none">
 								<div class="table-responsive"
-									style="height: 400px; overflow-y: auto;">
+									style="height: 409px; overflow-y: auto;">
 									<table class="table table-sm table-hover mb-0"
 										id="sobreturnosOcupadosTodos">
 										<thead class="table-primary sticky-top">
@@ -264,11 +449,10 @@
 							</div>
 
 							<div class="mt-2">
-								<button type="submit"
-									class="btn btn-success fw-bold w-100 shadow" id="btnConfirmar"
-									style="height: 45px; font-size: 16px;"
-									th:onmouseover="existePlanillaActiva()">
-									<i class="fa fa-save me-2"></i>GUARDAR TURNO SELECCIONADO
+								<button type="submit" class="btn btn-guardar-elite w-100"
+									id="btnConfirmar" th:onmouseover="existePlanillaActiva()">
+									<i class="fa-solid fa-circle-check"></i> <span>Confirmar
+										y Guardar Registro</span>
 								</button>
 							</div>
 						</div>
@@ -371,6 +555,202 @@
 	        }
 	    });
 	}
+	
+	function sincronizarSobreturno(input) {
+	    const val = input.value;
+	    const options = document.querySelectorAll('#profesionalesListSobr option');
+	    const realSelect = document.getElementById('profesional');
+	    
+	    for (let opt of options) {
+	        if (opt.value === val) {
+	            realSelect.value = opt.getAttribute('data-id');
+	            
+	            // Disparamos evento para que se carguen especialidades y agenda de sobreturnos
+	            realSelect.dispatchEvent(new Event('change'));
+
+	            if (typeof cargarEspecialidades === "function") {
+	                cargarEspecialidades();
+	            }
+	            input.blur();
+	            break;
+	        }
+	    }
+	}
+
+	function limpiarBuscadorSobreturno(input) {
+	    input.value = '';
+	    const realSelect = document.getElementById('profesional');
+	    if (realSelect) {
+	        realSelect.value = "";
+	        // Notificamos el cambio para limpiar las tablas de abajo
+	        realSelect.dispatchEvent(new Event('change'));
+	    }
+	    
+	    // Limpieza de campos dependientes
+	    const especSelect = document.getElementById('especialidad');
+	    if (especSelect) especSelect.innerHTML = ""; 
+	    
+	    const fotoMedico = document.getElementById('fotoMedico');
+	    if (fotoMedico) fotoMedico.style.display = 'none';
+	    
+	    const fotoDefault = document.getElementById('fotoDefault');
+	    if (fotoDefault) fotoDefault.style.display = 'flex';
+	}
+	
+	//BOTON ALTA EXPRESS SOBRETURNOS UNIFICADO CON ICONOS SOLDADOS ELITE
+		$(document).ready(function() {
+		    // 1. ACOPLE VERTICAL ELITE SEGURO (CON TU PALABRA 'ALTA' Y SIN CONGELAR SWITCHES)
+		    let inputApeNom = $("#buscar_pacienteApeNom").closest(".input-group");
+		    let inputDni = $("#buscar_pacienteDni").closest(".input-group");
+		    let columnaPaciente = $("#buscar_pacienteApeNom").closest(".col-md-3");
+		    
+		    if (inputApeNom.length > 0 && inputDni.length > 0 && $("#btnAltaParticularExpress").length === 0) {
+		        // Quitamos el borde derecho original de la columna grande
+		        columnaPaciente.removeClass("border-end");
+		
+		        // Envolvemos SOLO a los dos buscadores en un mini contenedor flex vertical propio
+		        let contenedorBuscadores = $('<div class="d-flex flex-column justify-content-between" style="height: 64px; flex-grow: 1;"></div>');
+		        inputApeNom.before(contenedorBuscadores);
+		        contenedorBuscadores.append(inputApeNom).append(inputDni);
+		
+		        // Diseñamos el botón vertical con tu palabra "ALTA"
+		        let botonVerticalHtml = `
+		            <button type="button" id="btnAltaParticularExpress" class="btn btn-sm btn-primary d-flex flex-column align-items-center justify-content-center p-1" 
+		                    style="width: 32px; height: 64px; font-size: 9px; font-weight: 800; border-radius: 4px; letter-spacing: 0.5px; line-height: 1.1; flex-shrink: 0;"
+		                    data-bs-toggle="modal" data-bs-target="#modalAltaParticular" title="Alta Exprés Particular">
+		                <i class="fas fa-user-plus mb-1" style="font-size: 11px;"></i>
+		                <span>A</span><span>L</span><span>T</span><span>A</span>
+		            </button>
+		            <!-- Línea divisoria vertical de tu diseño corporativo -->
+		            <div id="lineaDivisoriaParticular" style="width: 1px; height: 75px; background-color: #dee2e6; flex-shrink: 0;" class="ms-1"></div>
+		        `;
+		
+		        // Agrupamos el mini bloque de buscadores junto al botón de forma horizontal limpia
+		        let wrapperPacienteElite = $('<div class="d-flex align-items-center gap-2 w-100"></div>');
+		        contenedorBuscadores.before(wrapperPacienteElite);
+		        wrapperPacienteElite.append(contenedorBuscadores).append(botonVerticalHtml);
+		    }
+		
+		    // 2. INYECTAMOS EL MODAL CON INPUTS ELITE SOLDADOS (FONT AWESOME INTEGRADO)
+		    let modalParticularHtml = `
+		    <div class="modal fade" id="modalAltaParticular" tabindex="-1" aria-labelledby="modalAltaParticularLabel" aria-hidden="true" style="z-index: 1055;">
+		      <div class="modal-dialog modal-dialog-centered modal-sm">
+		        <div class="modal-content" style="border-radius: 6px; overflow: hidden; border: 1px solid #dee2e6;">
+		          <div class="modal-header bg-success text-white py-2 px-3">
+		            <h6 class="modal-title" id="modalAltaParticularLabel" style="font-size: 13px; font-weight: bold; margin: 0;">
+		                <i class="fas fa-user-plus"></i> Alta Particular Exprés
+		            </h6>
+		            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 10px; box-shadow: none;"></button>
+		          </div>
+		          <div class="modal-body p-3" style="font-size: 13px; background: #ffffff;">
+		            <form id="formAltaParticularExpres">
+		              <div class="mb-2">
+		                <label class="form-label mb-0 fw-bold text-muted" style="font-size: 11px;">DNI / Documento</label>
+		                <div class="input-group" style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: white;">
+		                  <span class="input-group-text bg-white border-0" style="padding-right: 5px;"><i class="fas fa-id-card" style="font-size: 13px; color: #0052cc;"></i></span>
+		                  <input type="number" class="form-control form-control-sm border-0 shadow-none" id="partDni" required style="font-size: 13px; height: 100%;" />
+		                </div>
+		              </div>
+		              <div class="mb-2">
+		                <label class="form-label mb-0 fw-bold text-muted" style="font-size: 11px;">Apellido</label>
+		                <div class="input-group" style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: white;">
+		                  <span class="input-group-text bg-white border-0" style="padding-right: 5px;"><i class="fas fa-user" style="font-size: 13px; color: #0052cc;"></i></span>
+		                  <input type="text" class="form-control form-control-sm border-0 shadow-none" id="partApellido" required style="font-size: 13px; height: 100%; text-transform: uppercase;" />
+		                </div>
+		              </div>
+		              <div class="mb-2">
+		                <label class="form-label mb-0 fw-bold text-muted" style="font-size: 11px;">Nombre</label>
+		                <div class="input-group" style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: white;">
+		                  <span class="input-group-text bg-white border-0" style="padding-right: 5px;"><i class="fas fa-signature" style="font-size: 13px; color: #0052cc;"></i></span>
+		                  <input type="text" class="form-control form-control-sm border-0 shadow-none" id="partNombre" required style="font-size: 13px; height: 100%; text-transform: uppercase;" />
+		                </div>
+		              </div>
+		              <div class="mb-2">
+		                <label class="form-label mb-0 fw-bold text-muted" style="font-size: 11px;">Email (Comprobantes)</label>
+		                <div class="input-group" style="height: 30px; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; background: white;">
+		                  <span class="input-group-text bg-white border-0" style="padding-right: 5px;"><i class="fas fa-envelope" style="font-size: 13px; color: #0052cc;"></i></span>
+		                  <input type="email" class="form-control form-control-sm shadow-none" id="partEmail" required style="font-size: 13px; height: 100%;" />
+		                </div>
+		              </div>
+		              <div class="text-end mt-3">
+		                <button type="button" class="btn btn-sm btn-secondary py-1" data-bs-dismiss="modal" style="font-size: 12px; height: 28px;">Cancelar</button>
+		                <button type="submit" class="btn btn-sm btn-success py-1 fw-bold" style="font-size: 12px; height: 28px;"><i class="fas fa-save"></i> Registrar</button>
+		              </div>
+		            </form>
+		          </div>
+		        </div>
+		      </div>
+		    </div>`;
+		    
+		    if ($("#modalAltaParticular").length === 0) {
+		        $("body").append(modalParticularHtml);
+		    }
+		
+		    // 3. ESCUCHADOR DEL AJAX CON TU URL ORIGINAL RESPETADA AL 100%
+		    $(document).off("submit", "#formAltaParticularExpres").on("submit", "#formAltaParticularExpres", function(e) {
+		        e.preventDefault();
+		
+		        const datos = {
+		            dni: $("#partDni").val(),
+		            apellido: $("#partApellido").val(),
+		            nombre: $("#partNombre").val(),
+		            email: $("#partEmail").val()
+		        };
+		
+		        const tokenCsrf = $("input[name='_csrf']").val() || $("meta[name='_csrf']").attr("content");
+		        const headerCsrf = $("meta[name='_csrf_header']").attr("content") || "X-CSRF-TOKEN";
+		
+		        $.ajax({
+		            url: "/sobreturnos/formPacienteExpress", // <-- TU ENDPOINT DE SOBRETURNOS RESTAURADO
+		            method: "POST",
+		            data: datos,
+		            beforeSend: function(xhr) {
+		                if (tokenCsrf) {
+		                    xhr.setRequestHeader(headerCsrf, tokenCsrf);
+		                }
+		            },
+		            success: function(res) {
+		                let json = typeof res === "string" ? JSON.parse(res) : res;
+		                if (json.status === "success") {
+		                    $("#pacienteId").val(json.id);
+		                    $("#pacientedniId").val(json.id);
+		                    
+		                    $("#buscar_pacienteApeNom").val(datos.apellido.toUpperCase() + " " + datos.nombre.toUpperCase());
+		                    $("#buscar_pacienteDni").val(datos.dni);
+		
+		                    let checkPac = document.getElementById('isCheckPaciente');
+		                    if(checkPac) {
+		                        checkPac.checked = true;
+		                    }
+		
+		                    // Limpieza profunda anti-congelamiento de Bootstrap
+		                    $("#modalAltaParticular").modal("hide"); 
+		                    $(".modal-backdrop").remove();          
+		                    $("body").removeClass("modal-open");     
+		                    $("body").css("overflow", "auto");       
+		                    
+		                    document.getElementById("formAltaParticularExpres").reset();
+		
+		                    Swal.fire({
+		                        title: "¡Paciente Creado!",
+		                        text: "Ya quedó seleccionado de forma automática. Continuá con el sobreturno.",
+		                        icon: "success",
+		                        timer: 2000,
+		                        showConfirmButton: false
+		                    });
+		                }
+		            },
+		            error: function(xhr) {
+		                if (xhr.status === 409) {
+		                    Swal.fire("Atención", "Este DNI ya corresponde a un paciente registrado.", "warning");
+		                } else {
+		                    Swal.fire("Error", "No se pudo registrar el paciente en el servidor.", "error");
+		                }
+		            }
+		        });
+		    });
+		});
+
 	</script>
 
 

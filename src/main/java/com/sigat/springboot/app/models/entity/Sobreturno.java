@@ -81,6 +81,10 @@ public class Sobreturno implements Serializable {
 	@LastModifiedDate
 	@Column(name = "fecha_modificacion")
 	private LocalDateTime fechaModificacion;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "estado_id")
+	private Estado estado;
 
 	public Sobreturno() {}
 
@@ -101,6 +105,8 @@ public class Sobreturno implements Serializable {
 	public void setEspecialidad(Especialidad especialidad) { this.especialidad = especialidad; }	
 	public PlanillaCabecera getPlanillacabecera() { return planillacabecera; }
 	public void setPlanillacabecera(PlanillaCabecera planillacabecera) { this.planillacabecera = planillacabecera; }
+	public Estado getEstado() {return estado;}
+	public void setEstado(Estado estado) {this.estado = estado;}
 
 	// Getters y Setters Auditoría
 	public String getCreadoPor() { return creadoPor; }

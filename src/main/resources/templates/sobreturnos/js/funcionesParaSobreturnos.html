@@ -61,7 +61,7 @@
 				
 				 	// Continuamos
 				    $.ajax({
-				    	url: "/api/turnosLibresController/between/" + profId + "/" + EspecId,
+				    	url: "/api/turnosLibresController/betweensobreturnos/" + profId + "/" + EspecId,
 				        type: "GET",
 				        success: function(data) {
 				            $("#turnosLibresTableBody").empty();            
@@ -120,74 +120,60 @@
 		}
 
 
-function listarRangoPlanillaDetDiaId(diaId) {
-				 
-				 //Variables
-				 const profId = $("#profesional").val();
-				 const EspecId = $("#especialidad").val();
-				 // const mostrarCancelados = !$("#isCheckTurCanceladosMedico").is(":checked");
-				 const mostrarCancelados = $("#isCheckTurCanceladosMedico").is(":checked") === false;
+				function listarRangoPlanillaDetDiaId(diaId) {
+				    const profId = $("#profesional").val();
+				    const EspecId = $("#especialidad").val();
+				    
+				    // USAMOS LA LÓGICA DE LA FUNCIÓN QUE SÍ FUNCIONA (=== false)
+				    const mostrarCancelados = $("#isCheckTurCanceladosMedico").is(":checked") === false;
 
-   				 if (!profId || !EspecId) return;
+				    if (!profId || !EspecId) return;
 
-				 //Continuamos
-				  $.ajax({
-	                    url: "/api/turnosLibresController/between-dia-id/" + profId + "/" + EspecId+ "/" + diaId,
-	                    type: "GET",
-	                    success: function(data) {
-	                        $("#turnosLibresTableBody").empty();
-	                        if (data && Array.isArray(data)) {
-               data.forEach(function(turno) {
-                   // 1. CAPTURA SEGURA DE ESTADO (Si algo es null, asume 3)
-                   var estadoId = (turno.estado && turno.estado.id) ? turno.estado.id : 3;
-                   var esCancelado = (estadoId === 6);
+				    $.ajax({
+				        // Asegurate que esta URL sea la de sobreturnos
+				        url: "/api/turnosLibresController/betweensobreturnos-dia-id/" + profId + "/" + EspecId + "/" + diaId,
+				        type: "GET",
+				        success: function(data) {
+				            $("#turnosLibresTableBody").empty();
+				            if (data && Array.isArray(data)) {
+				                data.forEach(function(turno) {
+				                    var estadoId = (turno.estado && turno.estado.id) ? turno.estado.id : 3;
+				                    var esCancelado = (estadoId === 6);
 
-                   // Filtro de cancelados
-                   if (esCancelado && !mostrarCancelados) return;
+				                    // Si es cancelado y la variable mostrarCancelados es false, no lo mostramos
+				                    if (esCancelado && !mostrarCancelados) return;
 
-                   // 2. CAPTURA SEGURA DE FECHA
-                   var fechaValida = turno.rangoFechaHora || turno.fechaHora;
-                   if (!fechaValida) return; // Si no hay fecha, no podemos dibujar la fila
+				                    var fechaValida = turno.rangoFechaHora || turno.fechaHora;
+				                    if (!fechaValida) return;
 
-                   // 3. CAPTURA SEGURA DE IDs
-                   // Usamos || "---" para que si es null, no rompa el forEach.
-                   var idTurno = turno.id || "---";
-                   var idCabecera = (turno.planillacabecera && turno.planillacabecera.id) ? turno.planillacabecera.id : "---";
-                   
-                   // 4. CAPTURA SEGURA DE BOX
-                   var numBox = turno.box || (turno.planilladetalle && turno.planilladetalle.box) || 0;
-                   var textoBox = (numBox > 0) ? " <span style='color: MediumSeaGreen; font-weight: bold; margin-left: 10px;'> Box: " + numBox + "</span>" : "";
+				                    var claseFila = esCancelado ? "class='fila-cancelada'" : "";
+				                    
+				                    var row = "<tr " + claseFila + ">" +
+				                                "<td>" + (turno.id || "---") + "</td>" +
+				                                "<td>" + (turno.planillacabecera ? turno.planillacabecera.id : "---") + "</td>" +
+				                                "<td>" + 
+				                                    ObtenerDiaEspañol(fechaValida).toUpperCase() + '  ' + 
+				                                    moment(fechaValida).format('DD/MM/YYYY HH:mm') + 
+				                                "</td>" +
+				                              "</tr>";
+				                    
+				                    $("#turnosLibresTableBody").append(row);	                            
+				                });
 
-                   var claseFila = esCancelado ? "class='fila-cancelada'" : "";
+				                // Ocultar IDs (Igual que en la otra función)
+				                $("#turnosLibresTodos").find("tbody tr td:nth-child(1), thead th:nth-child(1)").addClass("ocultar-columna");
+				                $("#turnosLibresTodos").find("tbody tr td:nth-child(2), thead th:nth-child(2)").addClass("ocultar-columna");
+				            }
+				            if(typeof obtenerObservaciones === 'function') obtenerObservaciones();
+				            if(typeof listarSobreTurnosOcupados === 'function') listarSobreTurnosOcupados();
+				        },
+				        error: function(error) {
+				            console.log("Error en la petición:", error);
+				        }
+				    });    	                
+				}
 
-                   var row = "<tr " + claseFila + ">" +
-                               "<td>" + idTurno + "</td>" +
-                               "<td>" + idCabecera + "</td>" +
-                               "<td>" + 
-                                   ObtenerDiaEspañol(fechaValida).toUpperCase() + '  ' + 
-                                   moment(fechaValida).format('DD/MM/YYYY HH:mm') + 
-                                   textoBox + 
-                               "</td>" +
-                             "</tr>";
-                   
-                   $("#turnosLibresTableBody").append(row);	                            
-               });
 
-            // Ocultado de IDs (ESPECÍFICO para la tabla de la IZQUIERDA)
-               $("#turnosLibresTodos").find("tbody tr td:nth-child(1), thead th:nth-child(1)").addClass("ocultar-columna");
-               $("#turnosLibresTodos").find("tbody tr td:nth-child(2), thead th:nth-child(2)").addClass("ocultar-columna");
-           }
-
-           // Llamamos a las demás funciones
-           //if(typeof listarHorariosAtencion === 'function') listarHorariosAtencion();
-           if(typeof obtenerObservaciones === 'function') obtenerObservaciones();
-           if(typeof listarTurnosOcupados === 'function') listarTurnosOcupados();
-       },
-       error: function(error) {
-           console.log("Error en la petición:", error);
-       }
-   });    	                
-}
 			 
 	
 			//Funcion para listar los Horarios de atencion.
@@ -252,7 +238,7 @@ function listarRangoPlanillaDetDiaId(diaId) {
 			
 			
 			 
-			 function listarSobreTurnosOcupados() {	
+			 /* function listarSobreTurnosOcupados() {	
 				 //Variables				 
 				 const profId = $("#profesional").val();
 				 const EspecId = $("#especialidad").val();
@@ -313,7 +299,72 @@ function listarRangoPlanillaDetDiaId(diaId) {
 	                        console.log(error);
 	                    }
 	                });	           
-			 }
+			 } */
+			 
+			 function listarSobreTurnosOcupados() {	
+				    const profId = $("#profesional").val();
+				    const EspecId = $("#especialidad").val();
+
+				    if (!profId || !EspecId) return;
+
+				    $.ajax({
+				        url: "/api/sobreturnosLibresController/sobreturnos-ocupados/" + profId + "/" + EspecId,
+				        method: "GET",
+				        success: function(data) {
+				            $("#sobreturnosOcupadosTableBody").empty();
+				            moment.locale('es-ar');
+				            
+				            if (data && Array.isArray(data)) {
+				                data.forEach(function(sobreturno) {
+				                    
+				                    // --- EXTRACTOR DE BOX DESDE LA OBSERVACIÓN EN FRONTEND ---
+				                    let boxTexto = "---";
+				                    let obs = sobreturno.observacion ? String(sobreturno.observacion) : "";
+				                    
+				                    if (obs.includes("[BOX: ")) {
+				                        // Extraemos el número que está entre "[BOX: " y "]"
+				                        let inicio = obs.indexOf("[BOX: ") + 6;
+				                        let fin = obs.indexOf("]", inicio);
+				                        if (fin !== -1) {
+				                            let numeroBox = obs.substring(inicio, fin).trim();
+				                            // Armamos el texto estético (podes poner "BOX " + numeroBox o solo el número con la clase)
+				                            boxTexto = `<span class="text-success fw-bold">BOX ${numeroBox}</span>`;
+				                        }
+				                    }
+
+				                    let badgeNormal = `<span class="badge bg-primary" style="display: inline-block; width: 130px; text-align: center; font-size: 10px; padding: 4px 0; color: white; font-weight: bold; border-radius: 4px;">SOBRETURNO NORMAL</span>`;
+
+				                    var row = "<tr>" + 
+				                                "<td>" + sobreturno.id + "</td>" +
+				                                "<td>" + sobreturno.paciente.id + "</td>" +
+				                                "<td>" + sobreturno.profesional.id + "</td>" +
+				                                "<td>" + sobreturno.especialidad.id + "</td>" +
+				                                "<td style='color: blue;'>" + sobreturno.paciente.apellido + " " + sobreturno.paciente.nombre + "</td>" +
+				                                "<td style='color: blue;'>" + ObtenerDiaEspañol(sobreturno.rangoFechaHora).toUpperCase() + '  ' + moment(sobreturno.rangoFechaHora).format('DD/MM/YYYY HH:mm') + "</td>" +	                     			      
+				                                "<td style='color: MediumSeaGreen; text-align: left;'>" + boxTexto + "</td>" + // <-- INYECTA EL BOX CONVERTIDO AQUÍ
+				                                "<td style='text-align: left; vertical-align: middle;'>" + badgeNormal + "</td>" +
+				                                "<td><span class='lupa-icono' title='Ver Detalle' style='font-size: 16px; cursor:pointer;'>&#x1F50D;</span></td>" +
+				                              "</tr>";                                      
+				                    
+				                    $("#sobreturnosOcupadosTableBody").append(row);	                            
+				                });
+
+				                // Ocultado de columnas técnicas
+				                $("#sobreturnosOcupadosTodos tbody tr").each(function() {
+				                    $(this).find("td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4)").addClass("ocultar-columna");
+				                });
+				                $("#sobreturnosOcupadosTodos thead th:nth-child(1), #sobreturnosOcupadosTodos thead th:nth-child(2), #sobreturnosOcupadosTodos thead th:nth-child(3), #sobreturnosOcupadosTodos thead th:nth-child(4)").addClass("ocultar-columna");	 
+				            }
+				        },
+				        error: function(error) {
+				            console.log(error);
+				        }
+				    });	           
+				}
+
+
+
+
 			 
 			 
 			 //Eliminar el horario en sobreturnos libres si este se encuentra en Sobreturnos ocupados.

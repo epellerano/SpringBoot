@@ -18,6 +18,8 @@ public interface IProfesionalService {
 	public void save(Profesional profesional);
 
 	public Profesional findOne(Long id);
+	
+	public Page<Profesional> findByNombreOrApellidoOrCodigo(String term, Pageable pageable);
 
 	public void delete(Long id);
 
@@ -42,5 +44,8 @@ public interface IProfesionalService {
 
 	// metodo Existe la Matricula del profesional al actualizar menos este prof_id.
 	public Profesional findByProfesionalMatriculaUpdate(String profMatricula, Long profId);
+	
+	//Historia Clinica
+	public Profesional findByUsername(String username);
 
 }

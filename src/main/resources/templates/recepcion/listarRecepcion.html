@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}"></head>
+<style>
+/* 1. VIEWPORT Y CONTENEDORES PRINCIPALES */
+.viewport-recepcion {
+	height: calc(100vh - 100px);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	padding: 15px;
+}
+
+.search-recepcion-box {
+	background: white;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	padding: 15px;
+	margin-bottom: 15px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-unificada-container {
+	flex-grow: 1;
+	overflow-y: auto;
+	background: white;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+}
+
+/* 2. COMPONENTES DE ENTRADA (Inputs soldados con iconos) */
+.search-recepcion-box .input-group-text {
+    border-right: none !important;
+    background-color: #f8fafc;
+    color: #94a3b8;
+}
+
+.search-recepcion-box .form-control {
+    border-left: none !important;
+}
+
+.search-recepcion-box .form-control:focus {
+    box-shadow: none !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* 3. TABLA Y CABECERA FIJA */
+#tablaRecepcion thead th {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: #1e293b !important;
+	color: white !important;
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 12px;
+	border: none;
+}
+
+/* 4. COMPORTAMIENTO Y ESTADOS DE LAS FILAS */
+.fila-recepcion {
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.fila-recepcion:hover { 
+    background-color: #f8fafc !important; 
+}
+
+.row-selected { 
+    background-color: rgba(0, 82, 204, 0.08) !important; 
+}
+
+/* Fila deshabilitada general (Retirados/Atendidos) */
+.fila-deshabilitada { 
+    background-color: #f1f5f9 !important; 
+    opacity: 0.7; 
+}
+
+.fila-deshabilitada td { 
+    color: #94a3b8 !important; 
+}
+
+/* NUEVO: Fila Fantasma Exclusiva para Anulados/Cancelados (IDs 5 y 6) */
+.fila-anulada-fantasma {
+    background-color: #fff5f5 !important; /* Rojo pastel muy tenue */
+    opacity: 0.65; /* Atenuado para diferenciarlo al golpe de vista */
+    pointer-events: none; /* Bloquea clics accidentales en la fila */
+}
+
+.fila-anulada-fantasma td {
+    color: #cca3a3 !important; /* Texto en un tono rojizo desgastado */
+}
+
+/* 5. BOTONES Y FILTROS */
+.btn-xs { 
+    padding: 2px 10px; 
+    font-size: 0.7rem; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    border-radius: 6px; 
+}
+
+.btn-filtro.active { 
+    background-color: #1e293b !important; 
+    color: white !important; 
+}
+
+/* Comportamiento de iconos dentro de botones activos */
+.btn-filtro.active i {
+    filter: brightness(2); /* Brillo extra para colores success/warning */
+}
+
+.btn-filtro.active i.fa-circle.text-dark {
+    color: #ffffff !important; /* El punto negro de Retirados pasa a blanco puro */
+    text-shadow: 0 0 3px rgba(0,0,0,0.2); 
+}
+
+/* 6. BADGES ELITE */
+.badge-turno { 
+    background-color: #e0f2fe; 
+    color: #0369a1; 
+    border: 1px solid #bae6fd; 
+    font-size: 0.65rem; 
+    font-weight: 800; 
+    padding: 4px 8px; 
+}
+
+.badge-sobreturno { 
+    background-color: #fef3c7; 
+    color: #92400e; 
+    border: 1px solid #fde68a; 
+    font-size: 0.65rem; 
+    font-weight: 800; 
+    padding: 4px 8px; 
+}
+
+/* 7. ANIMACIONES */
+.pulse-medico { 
+    animation: shadow-pulse 2s infinite; 
+    font-weight: 800 !important; 
+}
+
+@keyframes shadow-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.8); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.pulse-medico-atender { 
+    animation: pulse-green 2s infinite; 
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+/* 8. UTILIDADES COMPLEMENTARIAS */
+.box-label { 
+    font-size: 0.65rem; 
+    letter-spacing: 0.5px; 
+    margin-bottom: 3px; 
+    display: block; 
+}
+
+.tabla-unificada-container::-webkit-scrollbar { 
+    width: 8px; 
+}
+
+.tabla-unificada-container::-webkit-scrollbar-thumb { 
+    background: #cbd5e1; 
+    border-radius: 10px; 
+}
+</style>
+
+
+
+<body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<div class="viewport-recepcion">
+
+		<!-- PANEL DE BÚSQUEDA Y ACCIONES MASIVAS -->
+		<div class="search-recepcion-box shadow-sm">
+
+			<!-- ====================================================================== -->
+			<!-- FILA SUPERIOR: SEGMENTADA POR ROL (PUNTO C) -->
+			<!-- ====================================================================== -->
+
+			<!-- VISTA EXCLUSIVA PARA EL MÉDICO: Minimalista con 2 inputs soldados -->
+			<th:block sec:authorize="hasRole('ROLE_MEDICO')">
+				<div class="row align-items-center g-3">
+					<div class="col-md-5">
+						<span class="box-label fw-bold text-primary">BUSQUEDA POR PACIENTE</span>
+						<div
+							class="input-group input-group-sm border border-primary rounded-2 overflow-hidden shadow-sm">
+							<span class="input-group-text bg-primary text-white border-0"><i
+								class="fa-solid fa-user"></i></span> <input type="text"
+								id="filtroApellido" class="form-control border-start-0"
+								placeholder="Nombre o apellido..." onkeyup="filtrarTablaElite()">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<span class="box-label fw-bold text-primary">BUSQUEDA POR DNI</span>
+						<div
+							class="input-group input-group-sm border border-primary rounded-2 overflow-hidden shadow-sm">
+							<span class="input-group-text bg-primary text-white border-0"><i
+								class="fa-solid fa-id-card"></i></span> <input type="text"
+								id="filtroDni" class="form-control border-start-0"
+								placeholder="N° Documento..." onkeyup="filtrarTablaElite()">
+						</div>
+					</div>
+					<div class="col-md-4 text-end">
+						<div class="d-flex gap-2 justify-content-end">
+							<!-- Tarjeta Celeste: Total Agenda -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border"
+								style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-color: #7dd3fc !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #0369a1 !important;">Total
+									Citas</span>
+								<h3 class="mb-0 fw-black"
+									style="line-height: 1; font-size: 1.5rem; color: #0369a1 !important;"
+									th:text="${totalAgenda}">0</h3>
+							</div>
+							<!-- Tarjeta Amarilla: En Espera -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border"
+								style="background: linear-gradient(135deg, #fff9db 0%, #fff3bf 100%); border-color: #ffec99 !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #856404 !important;">En
+									Espera</span>
+								<h3 class="mb-0 fw-black" id="contadorEspera"
+									style="line-height: 1; font-size: 1.5rem; color: #856404 !important;">0</h3>
+							</div>
+							<!-- Tarjeta Blanca: Anulados (Letra Roja) -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border me-2"
+								style="background: #ffffff; border-color: #ffc9c9 !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #dc3545 !important;">Anulados</span>
+
+								<!-- Conectado con la variable exacta del controlador (anuladosMedicoBD) -->
+								<h3 class="mb-0 fw-black" id="contadorAnulados"
+									th:text="${anuladosMedicoBD != null ? anuladosMedicoBD : 0}"
+									style="line-height: 1; font-size: 1.5rem; color: #dc3545 !important;">0</h3>
+							</div>
+
+
+						</div>
+					</div>
+				</div>
+			</th:block>
+
+			<!-- VISTA EXCLUSIVA PARA LA SECRETARÍA: Mantiene Escáner QR, Controles Globales y 3 Contadores Unificados -->
+			<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+				<div class="row align-items-end g-3 mb-4">
+					<!-- APELLIDO -->
+					<div class="col-md-2">
+						<span class="box-label fw-bold text-primary d-block mb-1"
+							style="font-size: 11px;">BUSQUEDA POR APELLIDO</span>
+						<div class="input-group input-group-sm">
+							<span class="input-group-text bg-white border-end-0"><i
+								class="fa-solid fa-user text-muted"></i></span> <input type="text"
+								id="filtroApellido" class="form-control border-start-0"
+								placeholder="Buscar Apellido..." onkeyup="filtrarTablaElite()">
+						</div>
+					</div>
+
+					<!-- DNI -->
+					<div class="col-md-2">
+						<span class="box-label fw-bold text-primary d-block mb-1"
+							style="font-size: 11px;">BUSQUEDA POR DNI</span>
+						<div class="input-group input-group-sm">
+							<span class="input-group-text bg-white border-end-0"><i
+								class="fa-solid fa-id-card text-muted"></i></span> <input type="text"
+								id="filtroDni" class="form-control border-start-0"
+								placeholder="Buscar Dni..." onkeyup="filtrarTablaElite()">
+						</div>
+					</div>
+
+					<!-- BÚSQUEDA GLOBAL / ESCÁNER QR -->
+					<div class="col-md-4">
+						<span class="box-label fw-bold text-primary d-block mb-1"
+							style="font-size: 11px;">BÚSQUEDA GLOBAL / ESCÁNER QR</span>
+						<div
+							style="display: flex; height: 31px; border: 1px solid #0d6efd; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+							<div
+								style="background-color: #0d6efd; color: white; display: flex; align-items: center; padding: 0 12px; font-size: 0.8rem;">
+								<i class="fas fa-search"></i>
+							</div>
+							<input type="text" id="buscadorMaestro" class="form-control"
+								style="flex-grow: 1; border: none !important; margin: 0; padding: 0 10px; font-size: 0.875rem; font-weight: 700; height: 100%; box-shadow: none !important;"
+								placeholder="Escanear QR o buscar..."
+								onkeyup="filtrarTablaElite()" autofocus autocomplete="off">
+							<div
+								style="background-color: #f8fafc; color: #0d6efd; display: flex; align-items: center; padding: 0 12px; border-left: 1px solid #0d6efd;">
+								<i class="fa-solid fa-qrcode fa-lg"></i>
+							</div>
+						</div>
+					</div>
+
+					<!-- BLOQUE UNIFICADO DE 3 CONTADORES (Medidas clonadas del Médico) -->
+					<div class="col-md-4 text-end">
+						<div class="d-inline-flex align-items-center gap-2">
+							<!-- 1. Tarjeta Amarilla: En Espera -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border"
+								style="background: linear-gradient(135deg, #fff9db 0%, #fff3bf 100%); border-color: #ffec99 !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #856404 !important;">En
+									Espera</span>
+								<h3 class="mb-0 fw-black" id="contadorEspera"
+									style="line-height: 1; font-size: 1.5rem; color: #856404 !important;">0</h3>
+							</div>
+
+							<!-- 2. Tarjeta Blanca: Anulados (Letra Roja) -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border"
+								style="background: #ffffff; border-color: #ffc9c9 !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #dc3545 !important;">Anulados</span>
+								<h3 class="mb-0 fw-black" id="contadorAnulados"
+									th:text="${anuladosTotalesBD != null ? anuladosTotalesBD : 0}"
+									style="line-height: 1; font-size: 1.5rem; color: #dc3545 !important;">0</h3>
+							</div>
+
+							<!-- 3. Tarjeta Azul: Total de Citas Activas -->
+							<div
+								class="d-inline-flex flex-column align-items-center justify-content-center px-2 py-1 rounded-3 shadow-sm border"
+								style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-color: #7dd3fc !important; min-width: 95px; height: 52px;">
+								<span class="fw-bold text-uppercase mb-0"
+									style="font-size: 0.5rem; letter-spacing: 0.5px; color: #0369a1 !important;">Total
+									Citas</span>
+								<h3 class="mb-0 fw-black" id="contadorTotalCitas"
+									th:text="${totalAgendaBD != null ? totalAgendaBD : 0}"
+									style="line-height: 1; font-size: 1.5rem; color: #0369a1 !important;">0</h3>
+							</div>
+						</div>
+					</div>
+				</div>
+			</th:block>
+
+
+			<!-- ====================================================================== -->
+			<!-- FILA INFERIOR: BOTONES DE FILTRO (PUNTO B Y C) -->
+			<!-- ====================================================================== -->
+
+			<!-- BOTONES SECRETARÍA (Todos los estados) -->
+			<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+				<div class="mt-3 p-2 bg-light rounded-3 d-flex justify-content-between align-items-center border">
+					<!-- EXTREMO IZQUIERDO: Filtros de Estado -->
+					<div class="d-flex gap-2 align-items-center">
+						<span class="small fw-bold text-muted me-2 ps-2">Vista General:</span>
+						<button class="btn btn-xs btn-white border shadow-sm btn-filtro active"
+							data-estado="TODOS" onclick="filtrarEstadoRapido('TODOS', this)">Todos</button>
+						<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+							data-estado="10" onclick="filtrarEstadoRapido('10', this)">
+							<i class="fa-solid fa-circle text-warning me-1"></i>En Sala
+						</button>
+						<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+							data-estado="9" onclick="filtrarEstadoRapido('9', this)">
+							<i class="fa-solid fa-circle text-success me-1"></i>Atendidos
+						</button>
+						<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+							data-estado="11" onclick="filtrarEstadoRapido('11', this)">
+							<i class="fa-solid fa-circle text-danger me-1"></i>Retirados
+						</button>
+					</div>
+			
+					<!-- EXTREMO DERECHO: Accesos rápidos y Anulación Masiva colocados en paralelo -->
+					<div class="d-flex gap-2 align-items-center pe-2">
+						<!-- Botón Nuevo Turno -->
+						<a th:href="@{/turnos/formTurno}" class="btn btn-xs btn-primary fw-bold shadow-sm px-3 py-1">
+							<i class="fa-solid fa-calendar-plus me-1"></i> NUEVO TURNO
+						</a>
+						
+						<!-- Botón Nuevo Sobreturno -->
+						<a th:href="@{/sobreturnos/formSobreturno}" class="btn btn-xs btn-warning fw-bold text-dark shadow-sm px-3 py-1" 
+						   style="background-color: #ffc107; border-color: #ffc107;">
+							<i class="fa-solid fa-circle-plus me-1"></i> NUEVO SOBRETURNO
+						</a>
+			
+						<!-- Contenedor Masivo (Aparece dinámicamente a la izquierda de tus accesos rápidos) -->
+						<div id="contenedorMasivo" style="display: none;">
+							<button class="btn btn-xs btn-danger fw-bold px-3 py-1 shadow-sm" onclick="ejecutarAnulacionMasiva()">
+								<i class="fa-solid fa-ban me-1"></i> ANULAR SELECCIONADOS
+							</button>
+						</div>
+					</div>
+				</div>
+			</th:block>
+
+
+			<!-- BOTONES MÉDICO (Solo 3 estados específicos) -->
+			<th:block sec:authorize="hasRole('ROLE_MEDICO')">
+				<div
+					class="mt-3 p-2 bg-light rounded-3 d-flex justify-content-start align-items-center border">
+					<span class="small fw-bold text-muted me-2 ps-2">MI
+						CONSULTORIO:</span>
+					<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+						data-estado="10" onclick="filtrarEstadoRapido('10', this)">
+						<i class="fa-solid fa-circle text-warning me-1"></i>En Sala
+					</button>
+					<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+						data-estado="9" onclick="filtrarEstadoRapido('9', this)">
+						<i class="fa-solid fa-circle text-success me-1"></i>Atendidos
+					</button>
+					<button class="btn btn-xs btn-white border shadow-sm btn-filtro"
+						data-estado="11" onclick="filtrarEstadoRapido('11', this)">
+						<i class="fa-solid fa-circle text-danger me-1"></i>Retirados
+					</button>
+				</div>
+			</th:block>
+
+		</div>
+
+
+
+		<!-- TABLA CENTRAL -->
+		<div class="tabla-unificada-container shadow-sm">
+			<table class="table table-hover align-middle mb-0"
+				id="tablaRecepcion">
+				<thead>
+					<tr>
+						<!-- PUNTO A: La columna SELECCIÓN solo existe para la SECRETARÍA -->
+						<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+							<th class="ps-3 text-center"
+								style="width: 85px; vertical-align: middle;">
+								<div class="dropdown d-inline-block">
+									<button
+										class="btn btn-xs btn-light dropdown-toggle fw-bold text-dark border shadow-sm px-2 py-1"
+										type="button" data-bs-toggle="dropdown"
+										style="font-size: 10px;">
+										<i class="fa-solid fa-list-check text-primary me-1"></i>
+										ANULAR
+									</button>
+									<ul class="dropdown-menu shadow border-0"
+										style="font-size: 11px; min-width: 140px;">
+										<li><a class="dropdown-item py-2 fw-bold text-dark"
+											href="#" onclick="toggleChecksDirecto('TURNO')"><i
+												class="fa-solid fa-calendar-check text-info me-2"></i>Solo
+												Turnos</a></li>
+										<li><a class="dropdown-item py-2 fw-bold text-dark"
+											href="#" onclick="toggleChecksDirecto('SOBRETURNO')"><i
+												class="fa-solid fa-calendar-plus text-warning me-2"></i>Solo
+												Sobreturnos</a></li>
+										<li><hr class="dropdown-divider"></li>
+										<li><a class="dropdown-item py-2 fw-bold text-danger"
+											href="#" onclick="desmarcarTodo()"><i
+												class="fa-solid fa-eraser me-2"></i>Limpiar Selección</a></li>
+									</ul>
+								</div>
+							</th>
+						</th:block>
+
+						<!-- El médico arranca viendo directamente la Hora -->
+						<th>Fecha Hora Turno</th>
+						<th>Paciente / DNI</th>
+						<th>Médico</th>
+						<th>Origen</th>
+						<th class="text-center">Estado</th>
+						<th class="text-center">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="item : ${listado}" class="fila-recepcion"
+						th:id="'fila-' + ${item.tipo} + '-' + ${item.idOriginal}"
+						th:classappend="${item.estadoId == 5 or item.estadoId == 6} ? 'fila-anulada-fantasma' : (${item.estadoId == 9 or item.estadoId == 11} ? 'fila-deshabilitada' : '')"
+						th:data-apellido="${item.paciente}" th:data-dni="${item.dni}"
+						th:data-estado="${item.estadoId}">
+
+						<!-- PUNTO A: La celda del Checkbox solo existe para la SECRETARÍA -->
+						<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+							<td class="ps-3 text-center"><input type="checkbox"
+								class="checkIndividual" th:value="${item.idOriginal}"
+								th:data-tipo="${item.tipo}"
+								th:disabled="${item.estadoId == 9 or item.estadoId == 11 or item.estadoId == 5 or item.estadoId == 6}"
+								onclick="gestionarInterfazSeleccion()"></td>
+						</th:block>
+
+						<!-- <td class="fw-bold text-primary text-capitalize"
+							th:text="${#dates.format(item.fechaHora, 'EEEE dd/MM/yyyy HH:mm')}"></td> -->
+						<td class="fw-bold text-primary text-capitalize">
+						    <!-- Tu fecha y hora original -->
+						    <span th:text="${#dates.format(item.fechaHora, 'EEEE dd/MM/yyyy HH:mm')}"></span>
+						    
+						    <!-- Solo muestra el numero de box si el box NO es nulo Y NO está vacío -->
+						    <span th:if="${item.box != null && item.box != '' && item.box != 'null'}" class="text-uppercase">
+						        &nbsp; <span class="text-danger">Box <span th:text="${item.box}"></span></span>
+						    </span>
+						</td>
+						<td>
+							<div class="fw-bold text-dark text-uppercase"
+								th:text="${item.paciente}"></div> <small
+							class="text-muted fw-bold" th:text="'DNI: ' + ${item.dni}"></small>
+						</td>
+
+						<td>
+							<div class="text-dark small fw-bold"
+								th:text="'Dr. ' + ${item.medico}"></div> <span
+							class="badge bg-light text-muted" style="font-size: 0.6rem;"
+							th:text="${item.especialidad}"></span>
+						</td>
+
+						<td><span
+							th:class="${item.tipo == 'TURNO'} ? 'badge badge-turno' : 'badge badge-sobreturno'"
+							th:text="${item.tipo}"></span></td>
+
+						<!-- COLUMNA ESTADO (Corregida con los IDs 5 y 6) -->
+						<td class="text-center status-cell"><span
+							th:if="${item.estadoId == 4}"
+							class="badge bg-secondary opacity-50">PROGRAMADO</span> <span
+							th:if="${item.estadoId == 10}"
+							class="badge bg-warning text-dark shadow-sm pulse-medico">EN
+								SALA</span> <span th:if="${item.estadoId == 9}"
+							class="badge bg-success shadow-sm">ATENDIDO</span> <span
+							th:if="${item.estadoId == 11}"
+							class="badge bg-dark text-white shadow-sm">SE RETIRÓ</span> <span
+							th:if="${item.estadoId == 5}"
+							class="badge bg-danger-subtle text-danger fw-bold shadow-sm">ANULADO</span>
+							<span th:if="${item.estadoId == 6}"
+							class="badge bg-secondary-subtle text-secondary fw-bold shadow-sm">CANCELADO</span>
+						</td>
+
+												<!-- COLUMNA ACCIONES MODIFICADA: UNIFICADA Y DESHABILITADA EN GRIS -->
+						<td class="text-center action-cell">
+							
+							<!-- =========================================================================
+							     1. VISTA EXCLUSIVA PARA LA SECRETARÍA (ACCIONES UNIFICADAS EN HILERA)
+							     ========================================================================= -->
+							<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+								<div class="d-flex justify-content-center gap-1">
+									
+									<!-- BOTÓN 1: PRESENTISMO (Marcar Arribo o Finalizar) -->
+									<!-- Estado Vivo (Programado o En Sala) -->
+									<th:block th:if="${item.estadoId != 9 and item.estadoId != 11 and item.estadoId != 5 and item.estadoId != 6}">
+										<button th:if="${item.estadoId == 4}" class="btn btn-sm btn-primary" th:onclick="darPresente(this, [[${item.idOriginal}]], [[${item.tipo}]])" title="Marcar Arribo">
+											<i class="fa-solid fa-user-check"></i>
+										</button>
+										<button th:if="${item.estadoId == 10}" class="btn btn-sm btn-warning" th:onclick="finalizarManual(this, [[${item.idOriginal}]], [[${item.tipo}]])" title="Finalizar: El paciente se retira">
+											<i class="fa-solid fa-door-open"></i>
+										</button>
+									</th:block>
+									<!-- Estado Pasivo (Gris Deshabilitado definitivo con ícono dinámico del estado final) -->
+									<button th:if="${item.estadoId == 9 or item.estadoId == 11 or item.estadoId == 5 or item.estadoId == 6}" class="btn btn-sm btn-secondary opacity-50" disabled style="pointer-events: none;">
+										<i class="fa-solid fa-check-double text-success-emphasis" th:if="${item.estadoId == 9}" title="Atendido"></i>
+										<i class="fa-solid fa-person-walking-arrow-right text-dark" th:if="${item.estadoId == 11}" title="Se retiró"></i>
+										<i class="fa-solid fa-ban text-danger" th:if="${item.estadoId == 5}" title="Turno Anulado"></i>
+										<i class="fa-solid fa-trash-can text-muted" th:if="${item.estadoId == 6}" title="Turno Cancelado"></i>
+									</button>
+
+									<!-- BOTÓN 2: IMPRIMIR COMPROBANTE CON PASO DE ELEMENTO CAPTURADOR -->
+<button th:if="${item.estadoId != 9 and item.estadoId != 11 and item.estadoId != 5 and item.estadoId != 6}" 
+        class="btn btn-sm btn-outline-info" 
+        th:onclick="${item.tipo == 'TURNO'} ? |printTurno('${item.idOriginal}')| : |printSobreturno('${item.idOriginal}', this)|" 
+        title="Imprimir Comprobante">
+    <i class="fa-solid fa-print"></i>
+</button>
+
+									<!-- Gris Deshabilitado -->
+									<button th:if="${item.estadoId == 9 or item.estadoId == 11 or item.estadoId == 5 or item.estadoId == 6}" class="btn btn-sm btn-secondary opacity-25" disabled style="pointer-events: none;">
+										<i class="fa-solid fa-print"></i>
+									</button>
+
+									<!-- BOTÓN 3: DAR OTRO TURNO -->
+									<!-- Activo -->
+									<a th:if="${item.estadoId != 9 and item.estadoId != 11 and item.estadoId != 5 and item.estadoId != 6}" th:href="@{${item.tipo == 'TURNO' ? '/turnos/formTurno' : '/sobreturnos/formSobreturno'}(profId=${item.profesionalId},  especId=${item.especialidadId})}" class="btn btn-sm btn-outline-success" title="Dar otro turno">
+										<i class="fa-solid fa-hand-point-left"></i>
+									</a>
+									<!-- Gris Deshabilitado -->
+									<button th:if="${item.estadoId == 9 or item.estadoId == 11 or item.estadoId == 5 or item.estadoId == 6}" class="btn btn-sm btn-secondary opacity-25" disabled style="pointer-events: none;">
+										<i class="fa-solid fa-hand-point-left"></i>
+									</button>
+
+									<!-- BOTÓN 4: ANULAR CITA INDIVIDUAL -->
+									<!-- Activo -->
+									<button th:if="${item.estadoId != 9 and item.estadoId != 11 and item.estadoId != 5 and item.estadoId != 6}" class="btn btn-sm btn-outline-danger" th:onclick="${item.tipo == 'TURNO'} ? |enviarAnulacionTurnoIndividual('${item.idOriginal}')| : |ejecutarBajaIndividualSobret('${item.idOriginal}')|" title="Anular Cita">
+										<i class="fa-solid fa-ban"></i>
+									</button>
+									<!-- Gris Deshabilitado -->
+									<button th:if="${item.estadoId == 9 or item.estadoId == 11 or item.estadoId == 5 or item.estadoId == 6}" class="btn btn-sm btn-secondary opacity-25" disabled style="pointer-events: none;">
+										<i class="fa-solid fa-ban"></i>
+									</button>
+								</div>
+							</th:block>
+
+							<!-- =========================================================================
+							     2. VISTA EXCLUSIVA PARA EL MÉDICO (SE MANTIENE INTACTA COMO ANTES)
+							     ========================================================================= -->
+							<th:block sec:authorize="hasRole('ROLE_MEDICO')">
+								<div th:if="${item.estadoId == 9}">
+									<a th:href="@{'/consultorio/atender/' + ${item.pacienteId}(${item.tipo == 'TURNO' ? 'turno' : 'sobreturno'}=${item.idOriginal})}" class="btn btn-sm btn-outline-primary fw-bold px-2" style="font-size: 11px;"> 
+										<i class="fa-solid fa-notes-medical me-1"></i> VER / CREAR HC
+									</a>
+								</div>
+								<div th:if="${item.estadoId == 11}" class="text-muted">
+									<i class="fa-solid fa-person-walking-arrow-right" title="El paciente se retiró de la sala"></i>
+								</div>
+								<th:block th:if="${item.estadoId != 9 and item.estadoId != 11 and item.estadoId != 5 and item.estadoId != 6}">
+									<a th:href="@{'/consultorio/atender/' + ${item.pacienteId}(${item.tipo == 'TURNO' ? 'turno' : 'sobreturno'}=${item.idOriginal})}" th:classappend="${item.estadoId == 10} ? 'pulse-medico-atender' : ''" class="btn btn-sm btn-success fw-bold px-2"> 
+										<i class="fa-solid fa-stethoscope me-1"></i> ATENDER
+									</a>
+								</th:block>
+							</th:block>
+
+						</td>
+
+
+					</tr>
+				</tbody>
+
+			</table>
+		</div>
+
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script th:replace="turnos/js/funcionesParaListarTurnos :: javascript"></script>
+	<script
+		th:replace="sobreturnos/js/funcionesParaListarSobreturnos :: javascript"></script>
+
+	<script>
+    /* =========================================================================
+       1. CONFIGURACIÓN INICIAL Y AUTO-REFRESCO
+       ========================================================================= */
+    document.addEventListener("DOMContentLoaded", function() {
+        actualizarContador();
+        
+        // Foco inicial en el buscador maestro si existe
+        const buscador = document.getElementById('buscadorMaestro');
+        if(buscador) buscador.focus();
+
+        // Detección de rol adaptativa por DOM
+        const esMedico = document.querySelector('.btn-filtro[data-estado="10"]') && !document.querySelector('.btn-filtro[data-estado="TODOS"]');
+        
+        if (esMedico) {
+            // Médico: Arranca activado en "EN SALA" (Estado 10)
+            const btnSala = document.querySelector('.btn-filtro[data-estado="10"]');
+            if (btnSala) {
+                seleccionarBotonEstado(btnSala);
+                document.querySelectorAll('.fila-recepcion').forEach(f => {
+                    f.style.display = (f.getAttribute('data-estado') === '10') ? '' : 'none';
+                });
+            }
+        } else {
+            // Administración/Secretaría: Arranca en "TODOS"
+            const btnTodos = document.querySelector('.btn-filtro[data-estado="TODOS"]');
+            if (btnTodos) seleccionarBotonEstado(btnTodos);
+        }
+
+        // Auto-refresco inteligente de grilla (45s)
+        setInterval(() => {
+            const inputActivo = document.activeElement.tagName === 'INPUT';
+            const buscadorVal = document.getElementById('buscadorMaestro')?.value || "";
+            if (!inputActivo && buscadorVal === "") {
+                location.reload();
+            }
+        }, 45000);
+    });
+
+    /**
+     * Sincroniza la estética y los estados de los botones de filtro rápido
+     */
+    function seleccionarBotonEstado(btn) {
+        document.querySelectorAll('.btn-filtro').forEach(b => {
+            b.classList.remove('active', 'bg-dark', 'text-white');
+            const icono = b.querySelector('i.fa-circle');
+            if(icono) icono.style.color = ""; 
+        });
+
+        btn.classList.add('active');
+
+        // Caso especial: Si se activa "Retirados" (11), mutamos su punto a blanco
+        if (btn.getAttribute('data-estado') === '11') {
+            btn.classList.add('bg-dark', 'text-white');
+            const icono = btn.querySelector('i.fa-circle');
+            if(icono) {
+                icono.style.setProperty('color', '#ffffff', 'important'); 
+            }
+        }
+    }
+
+    /* =========================================================================
+       2. FILTROS COMBINADOS Y CONTROL DE ESTADOS
+       ========================================================================= */
+    function filtrarEstadoRapido(id, btn) {
+        if (btn.classList.contains('active') && id !== 'TODOS') {
+            const btnTodos = document.querySelector('.btn-filtro[data-estado="TODOS"]');
+            if(btnTodos) return filtrarEstadoRapido('TODOS', btnTodos);
+        }
+
+        seleccionarBotonEstado(btn);
+        
+        document.querySelectorAll('.fila-recepcion').forEach(f => {
+            if (id === 'TODOS') {
+                // REGLA ACORDADA: En TODOS se visualizan tanto citas vivas como las bajas atenuadas
+                f.style.display = ''; 
+            } else {
+                f.style.display = (f.getAttribute('data-estado') === id) ? '' : 'none';
+            }
+        });
+        
+        actualizarContador();
+    }
+
+    function filtrarTablaElite() {
+        const ape = (document.getElementById('filtroApellido')?.value || "").toUpperCase();
+        const dni = (document.getElementById('filtroDni')?.value || "").toUpperCase();
+        const glob = (document.getElementById('buscadorMaestro')?.value || "").toUpperCase();
+        
+        document.querySelectorAll('.fila-recepcion').forEach(f => {
+            const texto = f.textContent.toUpperCase();
+            const coincide = texto.includes(ape) && texto.includes(dni) && texto.includes(glob);
+            f.style.display = coincide ? "" : "none";
+        });
+    }
+
+    /* =========================================================================
+       3. SELECCIÓN MASIVA E INTERFAZ DINÁMICA
+       ========================================================================= */
+    function toggleChecksDirecto(tipoObjetivo) {
+        const checksDelTipo = Array.from(document.querySelectorAll('.checkIndividual:not(:disabled)'))
+                                   .filter(c => c.getAttribute('data-tipo') === tipoObjetivo);
+        
+        if (checksDelTipo.length < 2) {
+            desmarcarTodo();
+            
+            const mensaje = checksDelTipo.length === 1 
+                ? `Solo hay 1 ${tipoObjetivo.toLowerCase()}. Use el botón de anular de la fila.` 
+                : `No hay ${tipoObjetivo.toLowerCase()}s disponibles para anular.`;
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'info',
+                title: mensaje,
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+            return; 
+        }
+
+        document.querySelectorAll('.checkIndividual').forEach(check => {
+            if (check.getAttribute('data-tipo') === tipoObjetivo && !check.disabled) {
+                check.checked = true;
+            } else {
+                check.checked = false;
+            }
+        });
+
+        gestionarInterfazSeleccion();
+    }
+
+    function desmarcarTodo() {
+        document.querySelectorAll('.checkIndividual').forEach(c => c.checked = false);
+        gestionarInterfazSeleccion();
+    }
+
+    function gestionarInterfazSeleccion() {
+        const count = document.querySelectorAll('.checkIndividual:checked').length;
+        const btnMasivo = document.getElementById('contenedorMasivo');
+        if (btnMasivo) btnMasivo.style.display = (count >= 2) ? 'block' : 'none';
+    }
+
+    /* =========================================================================
+       4. ACCIONES OPERATIVAS (AJAX Y ENVÍOS POST)
+       ========================================================================= */
+    function darPresente(btn, id, tipo) {
+        const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        $.ajax({
+            url: "/recepcion/dar-presente", type: "POST", data: { id: id, tipo: tipo, _csrf: token },
+            success: function(res) { if(res==="OK") location.reload(); }
+        });
+    }
+
+    function finalizarManual(btn, id, tipo) {
+        Swal.fire({
+            title: '¿Finalizar atención?',
+            text: "El paciente se marcará como retirado.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, finalizar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+                $.ajax({
+                    url: "/recepcion/finalizar-manual", type: "POST", data: { id: id, tipo: tipo, _csrf: token },
+                    success: function(res) { if(res==="OK") location.reload(); }
+                });
+            }
+        });
+    }
+
+    function actualizarContador() {
+        const ID_ANULADO = '5';
+        const ID_CANCELADO = '6';
+
+        // 1. Contar pacientes "En Sala"
+        const contadorEspera = document.getElementById('contadorEspera');
+        if (contadorEspera) {
+            contadorEspera.innerText = document.querySelectorAll('.pulse-medico').length;
+        }
+
+        // 2. Contar acumulado de "Anulados"
+        const contadorAnulados = document.getElementById('contadorAnulados');
+        if (contadorAnulados) {
+            const totalAnulados = document.querySelectorAll(`.fila-recepcion[data-estado="${ID_ANULADO}"], .fila-recepcion[data-estado="${ID_CANCELADO}"]`).length;
+            contadorAnulados.innerText = totalAnulados;
+        }
+
+        // 3. Contar total de "Citas Activas" netas
+        const contadorTotalCitas = document.getElementById('contadorTotalCitas');
+        if (contadorTotalCitas) {
+            const activas = document.querySelectorAll(`.fila-recepcion:not([data-estado="${ID_ANULADO}"]):not([data-estado="${ID_CANCELADO}"])`).length;
+            contadorTotalCitas.innerText = activas;
+        }
+    }
+    
+    function enviarAnulacionTurnoIndividual(id) {
+        if (confirm('¿Confirma cancelar este Turno?')) {
+            const form = document.createElement('form');
+            form.method = 'POST'; form.action = '/turnos/eliminar'; 
+
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden'; inputId.name = 'id'; inputId.value = id;
+            form.appendChild(inputId);
+
+            const tokenMeta = document.querySelector("meta[name='_csrf']");
+            if (tokenMeta) {
+                const inputToken = document.createElement('input');
+                inputToken.type = 'hidden'; inputToken.name = '_csrf';
+                inputToken.value = tokenMeta.getAttribute("content");
+                form.appendChild(inputToken);
+            }
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function ejecutarBajaIndividualSobret(id) {
+        if (confirm('¿Confirma cancelar este Sobreturno?')) {
+            const form = document.createElement('form');
+            form.method = 'POST'; form.action = '/sobreturnos/eliminar';
+            
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden'; inputId.name = 'id'; inputId.value = id;
+            form.appendChild(inputId);
+            
+            const tokenMeta = document.querySelector("meta[name='_csrf']");
+            if (tokenMeta) {
+                const inputToken = document.createElement('input');
+                inputToken.type = 'hidden'; inputToken.name = '_csrf';
+                inputToken.value = tokenMeta.getAttribute("content");
+                form.appendChild(inputToken);
+            }
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function ejecutarAnulacionMasiva() {
+        const seleccionados = document.querySelectorAll('.checkIndividual:checked');
+        if (seleccionados.length === 0) return;
+
+        const ids = Array.from(seleccionados).map(cb => cb.value);
+        
+        // CORREGIDO: Extraemos de forma segura la propiedad del primer elemento del array indexado [0]
+        const tipo = seleccionados[0].getAttribute('data-tipo'); 
+        const textoTipo = tipo === 'TURNO' ? 'turnos' : 'sobreturnos';
+
+        Swal.fire({
+            title: `¿Anular ${ids.length} ${textoTipo}?`,
+            text: "Esta acción no se puede deshacer y liberará los espacios en la agenda.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, anular lote',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const urlDestino = (tipo === 'TURNO') ? '/turnos/cancelar-seleccion' : '/sobreturnos/cancelar-multiple';
+                enviarFormMasivo(urlDestino, ids);
+            }
+        });
+    }
+
+    function enviarFormMasivo(action, ids) {
+        const form = document.createElement('form');
+        form.method = 'POST'; form.action = action;
+        ids.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = 'ids'; input.value = id;
+            form.appendChild(input);
+        });
+        const token = document.querySelector("meta[name='_csrf']");
+        if (token) {
+            const inputT = document.createElement('input');
+            inputT.type = 'hidden'; inputT.name = '_csrf'; inputT.value = token.getAttribute("content");
+            form.appendChild(inputT);
+        }
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+
+</body>
+</html>

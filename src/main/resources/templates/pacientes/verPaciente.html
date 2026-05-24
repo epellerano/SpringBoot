@@ -4,84 +4,105 @@
     <link rel="stylesheet" href="https://cloudflare.com">
 </head>
 <style>
-    /* Estética SIGAT: Centrado vertical y aprovechamiento de pantalla */
-    .viewport-container {
-        min-height: calc(100vh - 110px); 
-        display: flex;
-        align-items: center; 
-        justify-content: center;
-        padding: 1rem 0;
-    }
+/* Estética SIGAT: Centrado vertical y aprovechamiento de pantalla */
+.viewport-container {
+	min-height: calc(100vh - 110px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem 0;
+}
 
-    .header-clinica {
-        border-bottom: 2px solid #dee2e6;
-        position: relative;
-        padding-bottom: 12px;
-        margin-bottom: 25px;
-    }
-    .header-clinica::after {
-        content: "";
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 100px;
-        height: 4px;
-        background-color: #0d6efd;
-        border-radius: 2px;
-    }
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	position: relative;
+	padding-bottom: 12px;
+	margin-bottom: 25px;
+}
 
-    .perfil-img {
-        width: 100%;
-        max-width: 220px;
-        height: 220px;
-        object-fit: cover;
-        border-radius: 12px;
-        border: 4px solid #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+.header-clinica::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 100px;
+	height: 4px;
+	background-color: #0d6efd;
+	border-radius: 2px;
+}
 
-    /* Bloques de información ordenados */
-    .info-box {
-        background-color: #f8fafc;
-        border-radius: 8px;
-        padding: 12px 15px;
-        border: 1px solid #e2e8f0;
-        height: 100%;
-    }
+.perfil-img {
+	width: 100%;
+	max-width: 220px;
+	height: 220px;
+	object-fit: cover;
+	border-radius: 12px;
+	border: 4px solid #fff;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-    .info-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        color: #64748b;
-        font-weight: 800;
-        margin-bottom: 2px;
-        display: flex;
-        align-items: center;
-    }
-    .info-label i { margin-right: 6px; color: #0d6efd; }
+/* Bloques de información ordenados */
+.info-box {
+	background-color: #f8fafc;
+	border-radius: 8px;
+	padding: 12px 15px;
+	border: 1px solid #e2e8f0;
+	height: 100%;
+}
 
-    .info-value {
-        font-size: 1rem;
-        color: #1e293b;
-        font-weight: 600;
-    }
+.info-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	color: #64748b;
+	font-weight: 800;
+	margin-bottom: 2px;
+	display: flex;
+	align-items: center;
+}
 
-    .section-tag {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #0d6efd;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        display: block;
-    }
+.info-label i {
+	margin-right: 6px;
+	color: #0d6efd;
+}
 
-    /* Reglas para el PDF de impresión */
-    @media print {
-        @page { size: auto; margin: 10mm; }
-        header, footer, .btn-acciones { display: none !important; }
-        .card { border: none !important; box-shadow: none !important; }
-        .viewport-container { min-height: auto !important; padding: 0 !important; display: block !important; }
-    }
+.awesome {
+	margin-right: 6px;
+}
+
+.info-value {
+	font-size: 1rem;
+	color: #1e293b;
+	font-weight: 600;
+}
+
+.section-tag {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: #0d6efd;
+	text-transform: uppercase;
+	margin-bottom: 10px;
+	display: block;
+}
+
+/* Reglas para el PDF de impresión */
+@media print {
+	@page {
+		size: auto;
+		margin: 10mm;
+	}
+	header, footer, .btn-acciones {
+		display: none !important;
+	}
+	.card {
+		border: none !important;
+		box-shadow: none !important;
+	}
+	.viewport-container {
+		min-height: auto !important;
+		padding: 0 !important;
+		display: block !important;
+	}
+}
 </style>
 <body class="bg-light">
 
@@ -131,18 +152,18 @@
                             <div class="col-md-8">
                                 <span class="section-tag">Identidad y Domicilio</span>
                                 <div class="row g-2 mb-3">
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-address-card"></i>Apellido</div><div class="info-value text-uppercase" th:text="${paciente.apellido}"></div></div></div>
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-user"></i>Nombre</div><div class="info-value text-uppercase" th:text="${paciente.nombre}"></div></div></div>
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-fingerprint"></i>DNI</div><div class="info-value" th:text="${paciente.dni}"></div></div></div>
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-map-location-dot"></i>Localidad</div><div class="info-value" th:text="${paciente.localidad}"></div></div></div>
-                                    <div class="col-12"><div class="info-box"><div class="info-label"><i class="fa-solid fa-house-chimney-user"></i>Domicilio Completo</div><div class="info-value text-uppercase" th:text="${paciente.domicilio}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-address-card"></i>Apellido</div><div class="info-value text-uppercase" th:text="${paciente.apellido}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-user"></i>Nombre</div><div class="info-value text-uppercase" th:text="${paciente.nombre}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-fingerprint"></i>DNI</div><div class="info-value" th:text="${paciente.dni}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-map-location-dot"></i>Localidad</div><div class="info-value" th:text="${paciente.localidad}"></div></div></div>
+                                    <div class="col-12"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-house-chimney-user"></i>Domicilio Completo</div><div class="info-value text-uppercase" th:text="${paciente.domicilio}"></div></div></div>
                                 </div>
 
                                 <span class="section-tag">Contacto y Nacimiento</span>
                                 <div class="row g-2">
-                                    <div class="col-sm-12"><div class="info-box"><div class="info-label"><i class="fa-solid fa-envelope"></i>Correo Electrónico</div><div class="info-value" th:text="${paciente.email}"></div></div></div>
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-phone"></i>Teléfono</div><div class="info-value" th:text="${paciente.telefono}"></div></div></div>
-                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="fa-solid fa-cake-candles"></i>Fecha de Nacimiento</div><div class="info-value" th:text="${#dates.format(paciente.createAt,'dd/MM/yyyy')}"></div></div></div>
+                                    <div class="col-sm-12"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-envelope"></i>Correo Electrónico</div><div class="info-value" th:text="${paciente.email}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-phone"></i>Teléfono</div><div class="info-value" th:text="${paciente.telefono}"></div></div></div>
+                                    <div class="col-sm-6"><div class="info-box"><div class="info-label"><i class="awesome fa-solid fa-cake-candles"></i>Fecha de Nacimiento</div><div class="info-value" th:text="${#dates.format(paciente.createAt,'dd/MM/yyyy')}"></div></div></div>
                                 </div>
 
                                 <!-- ACCIONES -->

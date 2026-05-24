@@ -65,7 +65,7 @@
 
     /* --- ESTILOS DE TABLA PREMIUM --- */
     .table thead th {
-        background-color: #f8fafc;
+        background-color: #f4f6f9;
         color: #475569;
         text-transform: uppercase;
         font-size: 0.7rem;
@@ -99,7 +99,7 @@
 
     <header th:replace="~{layout/layout :: header}"></header>
 
-    <div class="container-fluid px-lg-5 py-4">
+    <div class="container-fluid px-lg-5 py-4 w-75">
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4 p-lg-5">
 
@@ -127,9 +127,9 @@
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th class="text-center" sec:authorize="hasRole('ROLE_USER')">Ver</th>
-                                <th>Código de Área</th>
+                                <th class="text-center" sec:authorize="hasRole('ROLE_USER')">Ver</th>                                
                                 <th>Nombre de la Especialidad</th>
+                                <th>Código Interno</th>
                                 <th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Acciones</th>
                             </tr>
                         </thead>
@@ -138,17 +138,17 @@
                                 <!-- Ver Detalle -->
                                 <td class="text-center" sec:authorize="hasRole('ROLE_USER')">
                                     <a th:href="@{/especialidades/verEspecialidad/} + ${especialidad.id}" class="btn-action-link">
-                                        <i class="fa-solid fa-circle-info fa-lg"></i>
+                                        <i class="fa-solid fa-circle-info fa-lg" style="color:#10b981;"></i>
                                     </a>
-                                </td>
+                                </td>                                
 
+                                <!-- Nombre -->
+                                <td th:text="${especialidad.especialidadNombre}" class="fw-bold text-dark text-uppercase"></td>
+                                
                                 <!-- Código -->
                                 <td>
                                     <span class="badge badge-clinico" th:text="${especialidad.especialidadCodigo}"></span>
                                 </td>
-
-                                <!-- Nombre -->
-                                <td th:text="${especialidad.especialidadNombre}" class="fw-bold text-dark text-uppercase"></td>
 
                                 <!-- Acciones Admin -->
                                 <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
@@ -170,7 +170,7 @@
 
                 <!-- PAGINADOR -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <p class="small text-muted mb-0">Configuración global de especialidades SIGAT</p>
+                    <p class="small text-muted mb-0">Especialidades registradas bajo normativa SIGAT</p>
                     <nav th:replace="~{paginator-nav :: paginator}"></nav>
                 </div>
 

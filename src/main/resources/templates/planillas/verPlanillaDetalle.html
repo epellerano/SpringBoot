@@ -56,6 +56,10 @@
 	color: #0d6efd;
 }
 
+.awesome {
+	margin-right: 6px;
+}
+
 .info-value {
 	font-size: 1rem;
 	color: #1e293b;
@@ -141,7 +145,7 @@
 							<div class="col-md-6 col-lg-3">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-user-doctor"></i>Médico
+										<i class="awesome fa-solid fa-user-doctor"></i>Médico
 									</div>
 									<div class="info-value"
 										th:text="${planillaDetCompleta[0].planillacabecera.profesional.apellido} + ' ' + ${planillaDetCompleta[0].planillacabecera.profesional.nombre}"></div>
@@ -150,7 +154,7 @@
 							<div class="col-md-6 col-lg-3">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-hashtag"></i>Código Prof.
+										<i class="awesome fa-solid fa-hashtag"></i>Código Prof.
 									</div>
 									<div class="info-value text-primary"
 										th:text="${planillaDetCompleta[0].planillacabecera.profesional.codigo}"></div>
@@ -159,7 +163,7 @@
 							<div class="col-md-6 col-lg-3">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-stethoscope"></i>Especialidad
+										<i class="awesome fa-solid fa-stethoscope"></i>Especialidad
 									</div>
 									<div class="info-value"
 										th:text="${planillaDetCompleta[0].planillacabecera.especialidad.especialidadNombre}"></div>
@@ -168,7 +172,7 @@
 							<div class="col-md-6 col-lg-3">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-id-badge"></i>Cód. Esp.
+										<i class="awesome fa-solid fa-id-badge"></i>Cód. Esp.
 									</div>
 									<div class="info-value text-primary"
 										th:text="${planillaDetCompleta[0].planillacabecera.especialidad.especialidadCodigo}"></div>

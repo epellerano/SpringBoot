@@ -1,5 +1,6 @@
 package com.sigat.springboot.app.models.service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -43,14 +44,34 @@ public interface ISobreTurnoService {
 	//buscar sobreturnos ocupados fechas Horas (vista: Cancelar Planillas) 
 	public List<Sobreturno>buscarSobreturnosOcupadosFechasHoras(Long profId, Long EspecId, Date fechaHoraIni, Date  fechaHoraFin);
 	
-	// Eliminar "Sobreturnos Ocupados" entre fechas (vista: Cancelar Planillas)
-	public void eliminarSobreturnosOcupadosFechas(Long profId, Long EspecId, Date fechaIni, Date fechaFin);
-	
-	// Eliminar "Sobreturnos Ocupados" entre fechas y horas(vista: Cancelar Planillas)
-	public void eliminarSobreturnosOcupadosFechasHoras(Long profId, Long EspecId, Date fechaHoraIni, Date fechaHoraFin);
-	
 	//para los Mails
 	public void registrarSobreturnoCompleto(Sobreturno sobreturno);
+	
+	//PARA CANCELACION DE PLANILLAS NUEVO
+	 // Para el PDF usamos Date
+	List<Sobreturno> buscarSobreturnosParaBajaSoloFecha(Long profId, Long especId, String inicio, String fin);
+    List<Sobreturno> buscarSobreturnosParaBajaFechaHora(Long profId, Long especId, LocalDateTime inicio, LocalDateTime fin);
+    
+    // Para la cancelación masiva usamos LocalDateTime
+    void eliminarSobreturnosOcupadosFechas(Long profId, Long especId, LocalDateTime inicio, LocalDateTime fin);
+    void eliminarSobreturnosOcupadosFechasHoras(Long profId, Long especId, LocalDateTime inicio, LocalDateTime fin);
+    
+	// En ISobreTurnoService
+    void cancelarSobreturnosMasivo(Long profId, Long especId, LocalDateTime inicio, LocalDateTime fin);
+    
+    // Para la selección manual por Checkbox (listarSobreturno)
+    void cancelarSobreturnosPorLista(List<Long> ids);
+    
+    List<Sobreturno> findAllActivosYAtendidos();
+    
+    //SECCION RESTAURACION (AUDITORIA)
+    String restaurarSobreturnoIndividual(Long id);
+    List<Profesional> findAllProfesionales();
+    List<Sobreturno> findCancelados(Long profId, Long especId, String desde, String hasta);
+    
+    //HISTORIA CLINICA
+    public Sobreturno findById(Long id);
+
 	
 	//SECCION REPORTES PARA PDF
 	

@@ -1,35 +1,211 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Confirmación de Turno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+	font-family: 'Segoe UI', Arial, sans-serif;
+	color: #1a202c;
+	line-height: 1.6;
+	margin: 0;
+	padding: 0;
+	background-color: #f4f7fa;
+}
+
+.wrapper {
+	width: 100%;
+	padding: 30px 0;
+	background-color: #f4f7fa;
+}
+
+.container {
+	max-width: 550px;
+	margin: 0 auto;
+	background: #ffffff;
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+	border: 1px solid #e2e8f0;
+}
+
+.header {
+	background-color: #0052cc;
+	padding: 30px;
+	text-align: center;
+	color: #ffffff;
+}
+
+.header h2 {
+	margin: 0;
+	font-size: 22px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+}
+
+.content {
+	padding: 35px;
+}
+
+.patient-name {
+	font-size: 20px;
+	font-weight: 700;
+	color: #0052cc;
+	margin-bottom: 5px;
+}
+
+.details-box {
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	padding: 20px;
+	margin: 25px 0;
+}
+
+.detail-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 12px;
+	border-bottom: 1px solid #edf2f7;
+	padding-bottom: 12px;
+}
+
+.detail-row:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+.label {
+	font-weight: 800;
+	color: #64748b;
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	width: 40%;
+}
+
+.value {
+	font-weight: 600;
+	color: #1e293b;
+	font-size: 14px;
+	width: 60%;
+	text-align: right;
+}
+
+.qr-section {
+	text-align: center;
+	padding: 30px;
+	border-top: 2px dashed #e2e8f0;
+	background-color: #fcfdfe;
+}
+
+.qr-instruction {
+	font-size: 13px;
+	font-weight: 700;
+	color: #4a5568;
+	margin-bottom: 15px;
+	text-transform: uppercase;
+}
+
+.footer {
+	padding: 25px;
+	text-align: center;
+	background-color: #f1f5f9;
+	font-size: 12px;
+	color: #94a3b8;
+}
+
+.badge {
+	background: #e0f2fe;
+	color: #0369a1;
+	padding: 5px 15px;
+	border-radius: 50px;
+	font-size: 10px;
+	font-weight: 800;
+	border: 1px solid #bae6fd;
+}
+</style>
 </head>
 <body>
-	<h1>
-		Hola, <span th:text="${pacienteNombre}">Paciente</span>
-	</h1>
-	<p>
-		Te confirmamos tu turno médico en <strong>Centro Medico
-			Cosalud</strong>.
-	</p>
+	<div class="wrapper">
+		<div class="container">
+			<div class="header">
+				<h2>CENTRO MÉDICO COSALUD</h2>
+				<div style="margin-top: 12px;">
+					<span class="badge" th:text="${tipo}">TURNO NORMAL</span>
+				</div>
+			</div>
+			<div class="content">
+				<div class="patient-name" th:text="'Hola, ' + ${pacienteNombre}">Paciente</div>
+				<p style="margin: 0; color: #718096; font-size: 14px;">Tu cita
+					ha sido confirmada. Presentá este mail en recepción al llegar.</p>
+				<div class="details-box">
+					<div class="detail-row">
+						<span class="label">Profesional</span><span class="value"
+							th:text="'Dr. ' + ${medicoNombre}"></span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Especialidad</span><span class="value"
+							th:text="${especialidad}"></span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Fecha</span><span class="value"
+							th:text="${fecha}"></span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Horario</span><span class="value"
+							th:text="${hora} + ' hs'"></span>
+					</div>
+				</div>
+				<p
+					style="font-size: 12px; color: #64748b; text-align: center; margin: 0;">
+					<em>Se sugiere asistir 15 minutos antes.</em>
+				</p>
+			</div>
+			<!-- REEMPLAZAR LA SECCIÓN qr-section POR ESTA -->
+<div class="qr-section">
+    <div class="qr-instruction">Presentá este código en Ventanilla</div>
+    
+    <!-- Contenedor del QR -->
+    <div style="background: white; display: inline-block; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);">
+        <img src="cid:qrCode" width="180" height="180" style="display: block;" alt="QR Acceso" />
+    </div>
 
-	<ul>
-		<li><strong>Médico:</strong> <span th:text="${medicoNombre}">Nombre
-				del Médico</span></li>
-		<li><strong>Especialidad:</strong> <span
-			th:text="${especialidad}">Especialidad</span></li>
-		<li><strong>Fecha:</strong> <span th:text="${fecha}">00/00/0000</span></li>
-		<li><strong>Hora:</strong> <span th:text="${hora}">00:00</span>
-			hs</li>
-		<li><strong>Tipo: </strong><span th:text="${tipo}">TURNO NORMAL</span></li>
-	</ul>
+    <!-- D: BLOQUE DE RESPALDO: REFERENCIA DNI (DEBAJO DEL QR) -->
+	<div style="margin-top: 15px; text-align: center;">
+	    <div style="display: inline-block; padding: 8px 15px; border: 1px dashed #cbd5e0; border-radius: 8px; background-color: #f8fafc;">
+	        <p style="margin: 0; color: #64748b; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+	            Referencia Manual de Validación
+	        </p>
+	        
+	        <!-- Usamos un span para que el DNI se inyecte aquí sin romper el diseño -->
+	        <p style="margin: 4px 0 0 0; color: #0d6efd; font-family: 'Courier New', Courier, monospace; font-size: 22px; font-weight: 800; letter-spacing: 2px;">
+	            <span th:text="${pacienteDni}">00.000.000</span>
+	        </p>
+	        
+	        <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 9px; font-style: italic;">
+	            (Si el código QR no carga, dictá este número en recepción)
+	        </p>
+	    </div>
+	</div>
 
-	<p>Por favor, asistir 15 minutos antes. ¡Te esperamos!</p>
-	<p>
-		<strong>Dirección: </strong> <span th:text="${direccion}"></span>
-	</p>
-	<p>
-		<strong>Teléfono: </strong> <span th:text="${telefono}"></span>
-	</p>
+
+    <p style="font-size: 10px; color: #a0aec0; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;">
+        SIGAT • Gestión de Acceso Rápido
+    </p>
+</div>
+
+			<div class="footer">
+				<div style="margin-bottom: 5px;">
+					<strong>Dirección:</strong> <span th:text="${direccion}"></span>
+				</div>
+				<div>
+					<strong>Teléfono:</strong> <span th:text="${telefono}"></span>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
+
 </html>

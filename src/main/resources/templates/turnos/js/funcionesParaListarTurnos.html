@@ -13,27 +13,46 @@
 	  function printTurno(turno_id) {
 		//Continuamos
 		$.ajax({
-       url: "/api/turnosLibresController/obtener-turno-id/" + turno_id,
- 		method: "GET",
- 		success: function(data) { 
-           moment.locale('es-ar');
-           data.forEach(function(turno) {
-              swal.fire({
-           	   title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL TURNO ASIGNADO</h5>
-           		   <p style='float: center;color: green; font-size: 22px;'>${ObtenerDiaEspañol(turno.planilladetalle.rangoFechaHora) + ' ' + moment(turno.planilladetalle.rangoFechaHora).format('DD/MM/YYYY HH:mm')}</p><hr style='margin-bottom: -5px;'>`,
+     url: "/api/turnosLibresController/obtener-turno-id/" + turno_id,
+		method: "GET",
+		success: function(data) { 
+         moment.locale('es-ar');
+         data.forEach(function(turno) {
+            
+            // 1. SANITIZACIÓN ABSOLUTA DE FECHAS (Previene nulos si es sobreturno)
+            let fechaRaw = (turno.planilladetalle && turno.planilladetalle.rangoFechaHora) ? turno.planilladetalle.rangoFechaHora : (turno.rangoFechaHora || new Date());
+            let stringFechaYHora = ObtenerDiaEspañol(fechaRaw) + ' ' + moment(fechaRaw).format('DD/MM/YYYY HH:mm');
+
+            // 2. CONTROL DEL BOX (Solo se crea si el texto es válido)
+            let valorBox = (turno.planilladetalle && turno.planilladetalle.box) ? String(turno.planilladetalle.box).trim() : '';
+            let lineaBoxHtml = (valorBox !== '' && valorBox !== 'null' && valorBox !== 'undefined') ? `
+                <span style='float: left;'>Box / Consultorio:</span><span style='float: left; color: green; font-weight: bold;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BOX NRO ${valorBox}</span><br>
+            ` : '';
+
+            // 3. TEXTOS DE RESPALDO (Previene errores por strings nulos)
+            let profesionalTxt = (turno.profesional && turno.profesional.apellido) ? (turno.profesional.apellido + ' ' + (turno.profesional.nombre || '')) : 'S/P';
+            let especialidadTxt = (turno.especialidad && turno.especialidad.especialidadNombre) ? (turno.especialidad.especialidadCodigo + ' - ' + turno.especialidad.especialidadNombre) : 'S/E';
+            let pacienteTxt = (turno.paciente && turno.paciente.apellido) ? (turno.paciente.apellido + ' ' + (turno.paciente.nombre || '')) : 'S/P';
+            let pacienteDni = (turno.paciente && turno.paciente.dni) ? turno.paciente.dni : '';
+            let observacionTxt = (turno.observacion) ? turno.observacion : '';
+
+            // 4. DISPARO DEL SWEETALERT SIN RIESGO DE EMBARGO DE FLUJO
+            swal.fire({
+         	   title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL TURNO ASIGNADO</h5>
+         		   <p style='float: center;color: green; font-size: 22px;'>${stringFechaYHora}</p><hr style='margin-bottom: -5px;'>`,
 		      html: `
-		    	  <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${turno.profesional.apellido.toUpperCase() + ' ' + turno.profesional.nombre.toUpperCase()}</span><br>
-		    	  <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${turno.especialidad.especialidadCodigo + ' - ' + turno.especialidad.especialidadNombre.toUpperCase()}</span><br>
+		    	  <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${profesionalTxt.toUpperCase()}</span><br>
+		    	  <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${especialidadTxt.toUpperCase()}</span><br>
+		    	  ${lineaBoxHtml}
 		    	  <hr>
-		    	  <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${turno.paciente.apellido.toUpperCase() + ' ' + turno.paciente.nombre.toUpperCase()}</span><br>
-		    	  <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${turno.paciente.dni}</span><br>
-		    	  <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${turno.observacion.toUpperCase()}</span><br>
+		    	  <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${pacienteTxt.toUpperCase()}</span><br>
+		    	  <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pacienteDni}</span><br>
+		    	  <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${observacionTxt.toUpperCase()}</span><br>
 		    	  <hr>
 		    	  <span style='font-family: Arial; font-size: 12px;'>Juan Francisco Segui 1331 - Grand Bourg || Telefonos: 02320-410000/411317/486666</span><br>
 		    	  <span style='font-family: Arial; font-size: 12px;'>** Asistir 20 Minutos antes de su hora asignada **</span><br>				    	  				    	  						
-		    	  <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>www.centromedicosalud.com</span>
+		    	  <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>://centromedicosalud.com</span>
 		      `,
-		      //icon: "info",
 		      imageUrl : '/images/termalPrinter-56.png',
 		      showDenyButton: true,
 		      confirmButtonText: `
@@ -42,26 +61,24 @@
 		      denyButtonText: 'Cerrar Ventana',	
 		      denyButtonColor: "#3085d6",
 		      customClass: {
-		      popup: 'swal2-border-custom' //Style producido en styleformTurno.css
+		      popup: 'swal2-border-custom'
 		      }
 		      })
 		      .then((result) => {
 		      if (result.isConfirmed) {
-		      //Reimprimimos en turno
-		      									
-		      Swal.fire('IMPRIMIENDO', 'El turno seleccionado', 'success')
-		      } else if (result.isDenied) {
-		      //Swal.fire('HASTA PRONTO', '', 'info')
+		         Swal.fire('IMPRIMIENDO', 'El turno seleccionado', 'success');
 		      }
 		      });	                	
-           });
-           
- 		},
- 		error: function(error) {
-           console.log(error);
-       }
-   });
+         });
+         
+		},
+		error: function(error) {
+         console.log(error);
+     }
+ });
 	}
+
+
 	
 	//FUNCION PARA FILTRAR TURNOS POR APELLIDO EN listarTurnos.html
 	     document.getElementById('filtroBusquedaApellido').addEventListener('input', function() {

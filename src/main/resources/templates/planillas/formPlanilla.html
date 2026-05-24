@@ -1,292 +1,853 @@
 <!DOCTYPE html>
-<html xmlns:th="http://thymeleaf.org">
-<head th:replace="layout/layout :: head ">
-    <link rel="stylesheet" href="https://cloudflare.com">
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
 </head>
 <style>
-    /* SIGAT: MEDICAL ELITE - COLOR & SIZE REFINEMENT */
-    .viewport-container {
-        min-height: calc(100vh - 70px);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 15px 10px 10px 10px;
-    }
-    .container-custom-width {
-        max-width: 1450px;
-        width: 98%;
-        margin: 0 auto;
-    }
-    .card-full {
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-    }
-    .fa-solid, .fa-user-md, .fa-stethoscope, .fa-calendar-day,
-    .fa-calendar-check, .fa-clock, .fa-sync, .fa-save,
-    .fa-arrow-rotate-left, .fa-wand-sparkles, .fa-database {
-        color: #333333 !important;
-    }
-    .text-blue-clinical {
-        color: #0d6efd !important;
-        font-weight: 700;
-    }
-    .custom-section-box {
-        background-color: #f8fafc;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        padding: 8px 15px;
-        margin-bottom: 8px;
-    }
-    .shift-card-compact {
-        border-radius: 8px;
-        padding: 6px 12px;
-        border: 1px solid #e2e8f0;
-        border-left: 5px solid;
-    }
-    .card-mañana { background-color: #f0fdf4; border-left-color: #198754; }
-    .card-tarde { background-color: #f0f9ff; border-left-color: #0d6efd; }
-    .table-preview-fixed {
-        height: 36vh;
-        min-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: white;
-    }
-    .header-tabla-generada { background-color: #0f5132 !important; color: white !important; }
-    .header-tabla-db { background-color: #2c3e50 !important; color: white !important; }
-    .btn-limpiar-warning-slim {
-        font-size: 0.62rem !important;
-        height: 18px !important;
-        padding: 0 6px;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        border-radius: 3px;
-        border: none;
-        background-color: #ffc107 !important;
-        color: #000 !important;
-    }
-    .form-control, .form-select, .btn { font-size: 0.9rem !important; height: 32px !important; }
-    .btn-clinica-solid { background-color: #157347 !important; color: white !important; border: none; font-weight: 700; }
-    .btn-custom-listado { background-color: transparent; color: #4b5563; border: 2px solid #9ca3af; font-weight: 700; }
+
+/* Selector ultra-específico para que sea Esmeralda siempre */
+button#btnGuardar, 
+#btnGuardar.btn {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    border: none !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Hover con el verde un poco más oscuro */
+button#btnGuardar:hover,
+#btnGuardar.btn:hover {
+    background-color: #059669 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 15px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Selector para el botón Volver */
+a#btnVolverPlanilla,
+#btnVolverPlanilla.btn {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+a#btnVolverPlanilla:hover,
+#btnVolverPlanilla.btn:hover {
+    background-color: #e2e8f0 !important;
+    color: #1e293b !important;
+    transform: translateY(-2px) !important;
+}
+
+
+/* --- 1. ESTRUCTURA Y FONDO (MONITOR ELITE) --- */
+body {
+    background-color: #cbd5e1 !important; /* Gris acero para resaltar los paneles */
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.viewport-container {
+    min-height: calc(100vh - 65px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.container-custom-width {
+    max-width: 99% !important;
+    width: 99% !important;
+    margin: 0 auto;
+}
+
+.card-full {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #94a3b8;
+    background-color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* --- 2. INPUTS Y SELECTS: FUENTE PROFESIONAL #1e293b --- */
+.form-control, .form-select, .input-group-text {
+    font-size: 0.95rem !important;
+    height: 33px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #94a3b8 !important;
+    /* Color de fuente solicitado: Negro Azulado */
+    color: #1e293b !important; 
+    font-weight: 400; /* Un poco más de cuerpo para que se lea mejor */
+    transition: all 0.3s ease;
+}
+
+/* Efecto "Soldado" para grupos de input */
+.input-group {
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.input-group-text {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: none !important;
+}
+
+.input-group .form-control, .input-group .form-select {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-left: none !important;
+}
+
+/* Efecto Selección Activa (Azul Clínico) */
+/* Efecto cuando el campo está seleccionado (Azul #0369a1 de fondo con letra #1e293b) */
+.input-group.seleccionado-medico .form-control, 
+.input-group.seleccionado-medico .form-select,
+.input-group.seleccionado-medico .input-group-text {
+    background-color: #f0f9ff !important;
+    color: #1e293b !important; /* Mantenemos tu color preferido */
+    font-weight: 400 !important; /* Más negrita para que resalte la selección */
+    border-color: #0369a1 !important;
+}
+
+/* Foco: Cuando el usuario está escribiendo */
+.form-control:focus, .form-select:focus {
+    background-color: #ffffff !important;
+    color: #1e293b !important; 
+    border-color: #0891b2 !important;
+    box-shadow: 0 0 8px rgba(8, 145, 178, 0.3) !important;
+}
+
+/* Modo Boxes: Alineación Quirúrgica */
+.box-selector-top {
+    min-width: 260px;
+    height: 42px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    background-color: #ffffff;
+    border: 2px solid #157347 !important;
+    border-radius: 8px !important;
+}
+
+#optionBox {
+    width: 80px !important;
+    height: 26px !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid #157347;
+    background-color: #f0fdf4;
+    color: #157347;
+    text-align: left !important;
+    padding: 0 0 0 18px !important;
+    line-height: 24px;
+    background-position: right 5px center !important;
+    background-size: 12px !important;
+}
+
+/* --- 3. PANELES Y SECCIONES (SIMETRÍA 50/50) --- */
+.custom-section-box {
+    border-radius: 8px;
+    padding: 5px 15px !important;
+    border: 1px solid #e2e8f0;
+}
+
+.section-profesional {
+    background-color: #f5f3ff !important; /* Lila profundo para contraste */
+    border: 1px solid #94a3b8 !important;
+    margin-bottom: 8px !important;
+    padding-bottom: 10px !important;
+}
+
+.section-profesional label {
+    color: #1e293b !important;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 100;
+    margin-bottom: 1px;
+    display: block;
+}
+
+.section-profesional .border-end {
+    border-right: 2px solid #94a3b8 !important;
+}
+
+/* Boxes de Turnos (Blanco Pro) */
+.section-mañana { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; border-left: 6px solid #198754 !important; margin-bottom: 8px !important; }
+.section-tarde { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; border-left: 6px solid #0d6efd !important; margin-bottom: 8px !important; }
+
+/* --- 4. TABLAS (VISTA 38VH) --- */
+.table-preview-fixed {
+    height: 38vh !important;
+    overflow-y: auto;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    background: white;
+}
+
+.header-table-custom {
+    position: sticky; top: 0; z-index: 10;
+    color: white !important;
+    font-weight: 800; font-size: 0.7rem;
+    background-color: #1e3a8a !important;
+    text-transform: uppercase;
+    padding: 3px 10px !important;
+}
+
+/* --- 5. BOTONES Y ACCIONES --- */
+.row.gx-minima.mt-2 { margin-top: 10px !important; margin-bottom: 10px !important; }
+
+/* Generar (Azul Pro) */
+#btnGenerar {
+    background: #1e40af !important;
+    color: white !important;
+    font-weight: 700; height: 40px !important;
+    border-radius: 6px; border: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+#btnGenerar:hover { background: #1e3a8a !important; transform: translateY(-1px); }
+
+/* Guardar (Verde Éxito) */
+/* #btnGuardar {
+    background: #157347 !important;
+    color: white !important;
+    font-weight: 700; height: 40px !important;
+    border-radius: 6px; border: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+} */
+
+/* Volver (Gris Pizarra) */
+.btn-custom-listado {
+    background: #475569 !important;
+    color: white !important;
+    height: 40px !important;
+    border-radius: 6px; border: none;
+    font-size: 0.8rem !important;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.btn-custom-listado:hover { background: #1e293b !important; transform: translateX(-4px); }
+
+/* Limpiar (Rojo/Gris Reactivo) */
+.btn-limpiar-warning-slim {
+    font-size: 0.6rem !important; height: 20px !important; padding: 0 10px;
+    font-weight: 800; background: #f1f5f9 !important;
+    color: #64748b !important; border: 1px solid #cbd5e1 !important;
+    border-radius: 4px; transition: all 0.3s;
+}
+
+.btn-limpiar-warning-slim:hover { background: #ef4444 !important; color: #fff !important; }
+
+/* Muestra el cuadro flotante al hacer hover con el mouse */
+.posicion-ayuda-infalible:hover .cuadro-flotante-emergente {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 </style>
 
 <body class="bg-light">
-    <header th:replace="layout/layout :: header "></header>
+	<header th:replace="~{layout/layout :: header}"></header>
 
-    <div class="viewport-container">
-        <div class="container-custom-width">
-            <div class="card card-full shadow">
-                <div class="card-body p-3">
+	<div class="viewport-container">
+		<div class="container-custom-width">
+			<div class="card card-full shadow">
+				<div class="card-body p-2 px-4">
+					<form th:action="@{/planillacabecera/formPlanillaCabecera}"
+						th:object="${planillacabecera}" method="post" id="form">
 
-                    <form th:action="@{/planillacabecera/formPlanillaCabecera}" th:object="${planillacabecera}" method="post" id="form">
-                        
-                        <!-- ENCABEZADO DENTRO DEL FORM -->
-                        <div class="header-clinica d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                            <div class="d-flex align-items-center">
-                                <div class="d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 45px; height: 45px; background-color: #e8f5e9; border: 1px solid #157347;">
-                                    <i class="bi bi-calendar-check-fill" style="font-size: 1.8rem; color: #157347;"></i>
-                                </div>
-                                <div>
-                                    <h4 th:text="${titulo}" class="fw-bold text-dark mb-0"></h4>
-                                    <p class="text-muted mb-0 small text-uppercase" style="font-size: 0.6rem; font-weight: 800; color: #157347;">SIGAT • Gestión Profesional</p>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 bg-white p-1 px-3 rounded-pill border shadow-sm">
-                                <div class="form-check form-switch m-0">
-                                    <!-- CORRECCIÓN: AGREGADO NAME Y VALUE -->
-                                    <input class="form-check-input" type="checkbox" id="isCheckBoxes" name="isCheckBoxes" value="true"> 
-                                    <label class="fw-bold text-success mb-0 small" style="font-size: 0.7rem;" for="isCheckBoxes">MODO BOXES</label>
-                                </div>
-                                <select class="form-select" id="optionBox" name="optionBox" style="width: 60px; text-align: center; border-radius: 20px;" disabled>
-                                    <option th:each="i : ${#numbers.sequence(0, 8)}" th:value="${i}" th:text="${i}"></option>
-                                </select>
-                            </div>
-                        </div>
+						<!-- ENCABEZADO -->
+						<div
+							class="header-clinica d-flex justify-content-between align-items-start mb-2 pb-1 border-bottom">
+							<div class="d-flex align-items-center">
+								<div
+									class="d-flex align-items-center justify-content-center rounded-3 me-3"
+									style="width: 40px; height: 40px; background-color: #e8f5e9; border: 1px solid #157347;">
+									<i class="bi bi-calendar-check-fill"
+										style="font-size: 1.6rem; color: #157347;"></i>
+								</div>
+								<div>
+									<h4 th:text="${titulo}" class="mb-0 titulo-grande"></h4>
+									<p class="text-secondary mb-0 small text-normal fw-bold"
+										style="font-size: 0.9rem;">SIGAT • Gestión de Agenda</p>
+								</div>
+							</div>
+							
+							<!-- CONTENEDOR AGRUPADOR: MODO BOXES + BOTÓN VOLVER -->
+							<div class="d-flex align-items-center gap-2">
+							<!-- BOTÓN VOLVER EN CASILLERO SUPERIOR DE ACCIONES -->
+								<a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+								   id="btnVolverPlanilla"
+								   class="px-4 shadow-sm"
+								   style="white-space: nowrap;"> 
+									<i class="fa-solid fa-circle-arrow-left me-2"></i> VOLVER
+								</a>
+								
+								<div class="d-flex align-items-center gap-2 shadow-sm box-selector-top">
+									<div class="form-check form-switch m-0">
+										<input class="form-check-input" type="checkbox"
+											id="isCheckBoxes" name="isCheckBoxes" value="true"> <label
+											class="fw-bold text-success mb-0" style="font-size: 0.75rem;"
+											for="isCheckBoxes">MODO BOXES</label>
+									</div>
+									
+									<!-- BOTÓN INFORMATIVO CON CUADRO FLOTANTE HACIA ABAJO -->
+									<div class="posicion-ayuda-infalible" style="position: relative; display: inline-block;">
+										<span style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; background-color: #1e3a8a; color: #ffffff; border-radius: 50%; font-size: 0.7rem; font-weight: bold; cursor: pointer;">
+											i
+										</span>
+										<!-- Modificado top: 130% para que baje de forma limpia -->
+										<div class="cuadro-flotante-emergente" style="visibility: hidden; width: 220px; background-color: #f5f3ff; color: #1e293b; text-align: left; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd6fe; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 0.75rem; position: absolute; z-index: 999; top: 130%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s;">
+											Habilite el Modo Box para asignar consultorios específicos del 0 al 8 generalmente utilizados en Kinesiologia donde se atiende a 'x' pacientes al mismo tiempo.
+										</div>
+									</div>
+								
+									<select class="form-select" id="optionBox" name="optionBox"
+										disabled>
+										<option th:each="i : ${#numbers.sequence(1, 8)}"
+											th:value="${i}" th:text="${i}"></option>
+									</select>
+								</div>
 
-                        <!-- FILA 1: PROFESIONAL Y ESPECIALIDAD -->
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <label class="small fw-bold text-blue-clinical mb-0">Profesional</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-user-md"></i></span> 
-                                    <select class="form-select" th:field="*{profesional.id}" id="profesional" onchange="cargarEspecialidades()">
-                                        <option value="" disabled selected>Seleccione...</option>
-                                        <option th:each="p : ${profesionales}" th:value="${p.id}" th:text="${p.apellido} + ' ' + ${p.nombre}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small fw-bold text-blue-clinical mb-0">Especialidad</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-stethoscope"></i></span> 
-                                    <select id="especialidad" class="form-select" th:field="*{especialidad.id}" onclick="existeEspecialidad()"></select>
-                                </div>
-                            </div>
-                        </div>
+								
+							</div>
 
-                        <!-- BOX FECHAS -->
-                        <div class="custom-section-box shadow-sm">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="text-blue-clinical"><i class="fa-solid fa-calendar-day"></i> FECHA DE INICIO</label> 
-                                    <input type="date" th:field="*{fechaInicio}" class="form-control" id="fechaInicio" />
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="text-blue-clinical"><i class="fa-solid fa-calendar-check"></i> FECHA FINAL</label> 
-                                    <input type="date" th:field="*{fechaFinal}" class="form-control" id="fechaFinal" />
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="text-blue-clinical"><i class="fa-solid fa-clock"></i> SELECCIONE EL DÍA</label> 
-                                    <select class="form-select" th:field="*{dia}">
-                                        <option th:each="d : ${dias}" th:value="${d.id}" th:text="${d.nombre}"></option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+						</div>
 
-                        <!-- BOX TURNOS -->
-                        <div class="custom-section-box shadow-sm">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="shift-card-compact card-mañana">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <div class="form-check form-switch">
-                                                <!-- CORRECCIÓN: AGREGADO NAME Y VALUE -->
-                                                <input class="form-check-input" type="checkbox" id="isCheckMañana" name="isCheckMañana" value="true"> 
-                                                <label class="fw-bold text-success small">MAÑANA</label>
-                                            </div>
-                                            <button type="button" class="btn-limpiar-warning-slim" id="limpiarTM"><i class="fa-solid fa-broom"></i> LIMPIAR</button>
-                                        </div>
-                                        <div class="row g-1">
-                                            <div class="col-4"><input type="time" th:field="*{horaInicialR1}" class="form-control" id="horaInicialR1" disabled /></div>
-                                            <div class="col-4"><input type="time" th:field="*{horaFinalR1}" class="form-control" id="horaFinalR1" disabled /></div>
-                                            <div class="col-4">
-                                                <select class="form-select" th:field="*{intervaloR1}" id="intervaloR1" disabled onchange="generarRangoHorario()">
-                                                    <option value="" selected>Int.</option>
-                                                    <option th:each="m : ${ {1, 5, 10, 15, 20, 30, 45, 60} }" th:value="${m}" th:text="${m} + 'm'"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="shift-card-compact card-tarde">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <div class="form-check form-switch">
-                                                <!-- CORRECCIÓN: AGREGADO NAME Y VALUE -->
-                                                <input class="form-check-input" type="checkbox" id="isCheckTarde" name="isCheckTarde" value="true"> 
-                                                <label class="fw-bold text-primary small">TARDE</label>
-                                            </div>
-                                            <button type="button" class="btn-limpiar-warning-slim" id="limpiarTT"><i class="fa-solid fa-broom"></i> LIMPIAR</button>
-                                        </div>
-                                        <div class="row g-1">
-                                            <div class="col-4"><input type="time" th:field="*{horaInicialR2}" class="form-control" id="horaInicialR2" disabled /></div>
-                                            <div class="col-4"><input type="time" th:field="*{horaFinalR2}" class="form-control" id="horaFinalR2" disabled /></div>
-                                            <div class="col-4">
-                                                <select class="form-select" th:field="*{intervaloR2}" id="intervaloR2" disabled onchange="generarRangoHorario()">
-                                                    <option value="" selected>Int.</option>
-                                                    <option th:each="m : ${ {5, 10, 15, 20, 30, 45, 60} }" th:value="${m}" th:text="${m} + 'm'"></option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+						<!-- SECCIÓN UNIFICADA: PANEL DE VINCULACIÓN -->
+						<div class="custom-section-box section-profesional shadow-lg">
+							<div class="row gx-4">
 
-                        <!-- TABLAS PREVIA -->
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <div class="table-preview-fixed shadow-sm">
-                                    <table class="table table-sm table-hover mb-0" id="rango">
-                                        <thead><tr class="header-tabla-generada"><th class="ps-3"><i class="fa-solid fa-wand-sparkles"></i> VISTA PREVIA</th></tr></thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="table-preview-fixed shadow-sm">
-                                    <table class="table table-sm table-hover mb-0" id="TablaMysql">
-                                        <thead><tr class="header-tabla-db"><th class="ps-3"><i class="fa-solid fa-database"></i> BASE DE DATOS</th></tr></thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+								<!-- LADO IZQUIERDO: Identificación (Exactamente el 50% del ancho) -->
+								<div class="col-md-6 border-end pe-4">
+									<div class="row g-3">
+										<div class="col-12">
+											<label
+												class="small fw-bold text-primary text-uppercase mb-1 d-block">
+												Asignar Profesional
+											</label>
+											<div class="input-group">
+												<span class="input-group-text bg-white border-end-0">
+													<i class="fa-solid fa-search text-muted small"></i>
+												</span> <input list="listaMedicos" id="buscadorMedico"
+													class="form-control border-start-0"
+													placeholder="Escriba apellido o nombre..."
+													oninput="vincularMedico(this.value)"
+													onfocus="limpiarBusquedaCompleta()"
+													autocomplete="off"> <select
+													class="d-none" th:field="*{profesional.id}"
+													id="profesional">
+													<option value="">Seleccione...</option>
+													<option th:each="p : ${profesionales}" th:value="${p.id}"
+														th:data-codigo="${p.codigo}"
+														th:data-nombre="${p.apellido} + ' ' + ${p.nombre}"
+														th:text="${p.apellido} + ' ' + ${p.nombre}"></option>
+												</select>
 
-                        <!-- ACCIONES -->
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-clinica-solid flex-grow-1" id="btnGenerar" onclick="generarRangoHorario()">
-                                <i class="fa-solid fa-sync"></i> GENERAR RANGO
-                            </button>
-                            <button type="submit" id="btnGuardar" class="btn btn-clinica-solid flex-grow-1" onclick="validarRango()" disabled>
-                                <i class="fa-solid fa-save"></i> GUARDAR PLANILLA
-                            </button>
-                            <a th:href="@{/planillacabecera/listarPlanillaCabecera}" class="btn btn-custom-listado px-5 d-flex align-items-center">
-                                <i class="fa-solid fa-arrow-rotate-left"></i> VOLVER
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+												<datalist id="listaMedicos">
+													<option th:each="p : ${profesionales}"
+														th:value="${p.apellido} + ' ' + ${p.nombre}"></option>
+												</datalist>
+											</div>
+
+										</div>
+
+										<div class="col-12">
+    <label class="small fw-bold text-info text-uppercase mb-1 d-block">
+        Asignar Especialidad Vinculada
+    </label>
+    <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+            <i class="fa-solid fa-stethoscope text-muted small"></i>
+        </span> 
+        <select id="especialidad"
+                class="form-select border-start-0 py-0" 
+                style="height: 30px; font-size: 14px; line-height: 1.2; padding-left: 8px;"
+                th:field="*{especialidad.id}"
+                th:onclick="|window.existeEspecialidad()|"
+                onchange="formatearSeleccionEspecialidad()">
+        </select>
     </div>
+</div>
 
-    <footer th:replace="layout/layout :: footer "></footer>
+									</div>
+								</div>
+
+								<!-- LADO DERECHO: Tiempos (El otro 50%, alineado al box Tarde) -->
+								<div class="col-md-6 ps-4">
+									<div class="row g-3">
+										<div class="col-md-6">
+											<label
+												class="small fw-bold text-success text-uppercase mb-1 d-block">
+												Fecha de Inicio
+											</label> <input type="date" th:field="*{fechaInicio}"
+												class="form-control" id="fechaInicio" />
+										</div>
+										<div class="col-md-6">
+											<label
+												class="small fw-bold text-success text-uppercase mb-1 d-block">
+												Fecha Final
+											</label> <input type="date" th:field="*{fechaFinal}"
+												class="form-control" id="fechaFinal" />
+										</div>
+										<div class="col-12">
+											<label
+												class="small fw-bold text-success text-uppercase mb-1 d-block ">
+												Día de Atención
+											</label>
+											<div class="input-group">
+    <span class="input-group-text border-end-0 bg-white"><i class="fa-solid fa-clock text-muted small"></i></span> 
+    <select class="form-select border-start-0 py-0" 
+            style="height: 30px; font-size: 14px; line-height: 1.2; padding-left: 8px;"
+            th:field="*{dia}" id="dia">
+        <option value="">Seleccione el día...</option>
+        <option th:each="d : ${dias}" th:value="${d.id}" th:text="${d.nombre}"></option>
+    </select>
+</div>
+
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+
+						<!-- 3. MAÑANA Y TARDE -->
+						<div class="row gx-minima mb-2">
+							<div class="col-md-6">
+								<div class="custom-section-box section-mañana shadow-sm h-100">
+									<div
+										class="d-flex justify-content-between align-items-center mb-1">
+										<div class="form-check form-switch">
+											<input class="form-check-input" type="checkbox"
+												id="isCheckMañana" name="isCheckMañana" value="true">
+											<label class="fw-bold text-success ms-2"
+												style="font-size: 0.85rem;">TURNO MAÑANA</label>
+										</div>
+										<button type="button" class="btn-limpiar-warning-slim"
+											id="limpiarTM" th:onclick="|window.limpiarTM()|">
+											<i class="fa-solid fa-broom"></i> LIMPIAR
+										</button>
+									</div>
+									<div class="row g-1">
+										<div class="col-4">
+											<input type="time" th:field="*{horaInicialR1}"
+												class="form-control" style="height: 30px;"
+												id="horaInicialR1" disabled />
+										</div>
+										<div class="col-4">
+											<input type="time" th:field="*{horaFinalR1}"
+												class="form-control" style="height: 30px;" id="horaFinalR1"
+												disabled />
+										</div>
+										<div class="col-4">
+											<select class="form-select" style="height: 30px;"
+												th:field="*{intervaloR1}" id="intervaloR1" disabled
+												onchange="generarRangoHorario()">
+												<option value="">Intervalo</option>
+												<option th:each="m : ${ {1, 5, 10, 15, 20, 30, 45, 60} }"
+													th:value="${m}" th:text="${m} + ' minutos'"></option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="custom-section-box section-tarde shadow-sm h-100">
+									<div
+										class="d-flex justify-content-between align-items-center mb-1">
+										<div class="form-check form-switch">
+											<input class="form-check-input" type="checkbox"
+												id="isCheckTarde" name="isCheckTarde" value="true">
+											<label class="fw-bold text-primary ms-2"
+												style="font-size: 0.85rem;">TURNO TARDE</label>
+										</div>
+										<button type="button" class="btn-limpiar-warning-slim"
+											id="LimpiarTT" th:onclick="|window.limpiarTT()|">
+											<i class="fa-solid fa-broom"></i> LIMPIAR
+										</button>
+									</div>
+									<div class="row g-1">
+										<div class="col-4">
+											<input type="time" th:field="*{horaInicialR2}"
+												class="form-control" style="height: 30px;"
+												id="horaInicialR2" disabled />
+										</div>
+										<div class="col-4">
+											<input type="time" th:field="*{horaFinalR2}"
+												class="form-control" style="height: 30px;" id="horaFinalR2"
+												disabled />
+										</div>
+										<div class="col-4">
+											<select class="form-select" style="height: 30px;"
+												th:field="*{intervaloR2}" id="intervaloR2" disabled
+												onchange="generarRangoHorario()">
+												<option value="">Intervalo</option>
+												<option th:each="m : ${ {5, 10, 15, 20, 30, 45, 60} }"
+													th:value="${m}" th:text="${m} + ' minutos'"></option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- TABLAS ALINEADAS -->
+						<div class="row gx-minima mb-2">
+							<div class="col-md-6">
+								<div class="table-preview-fixed shadow-sm">
+									<table class="table table-sm table-hover mb-0" id="rango">
+										<thead>
+											<tr>
+												<th class="header-table-custom bg-header-generada"
+													style="width: 35%;"><i
+													class="fa-solid fa-calendar-day me-1"></i> DIA</th>
+												<th class="header-table-custom bg-header-generada"><i
+													class="fa-solid fa-clock me-1"></i> FECHA Y HORA</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="table-preview-fixed shadow-sm">
+									<table class="table table-sm table-hover mb-0" id="TablaMysql">
+										<thead>
+											<tr>
+												<th class="header-table-custom bg-header-database"><i
+													class="fa-solid fa-database me-2"></i> TURNOS EN BASE DE
+													DATOS</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+
+						<!-- ACCIONES ALINEADAS SIMÉTRICAMENTE CON LAS TABLAS -->
+						<div class="row gx-minima mt-2">
+							<!-- Columna Izquierda: Botón Generar (Alineado con la tabla de Vista Previa) -->
+							<div class="col-md-6">
+								<button type="button" class="btn btn-clinica-solid w-100"
+									id="btnGenerar" onclick="generarRangoHorario()">
+									<i class="fa-solid fa-sync me-1"></i> GENERAR RANGO
+								</button>
+							</div>
+
+							<!-- Columna Derecha: Botones Guardar y Volver (Alineados con la tabla de DB) -->
+							<!-- Columna Derecha: Botones Guardar y Volver -->
+							<div class="col-md-6">
+							    <div class="d-flex gap-2 align-items-center">
+							        <!-- BOTÓN GUARDAR -->
+							        <button type="submit" id="btnGuardar"
+							                class="flex-grow-1"
+							                onclick="validarRango()">
+							            <i class="fa-solid fa-save me-2"></i> GUARDAR PLANILLA
+							        </button>
+							
+							        <!-- BOTÓN VOLVER -->
+							        <!-- <a th:href="@{/planillacabecera/listarPlanillaCabecera}"
+							           id="btnVolverPlanilla"
+							           class="px-4 shadow-sm"> 
+							            <i class="fa-solid fa-circle-arrow-left me-2"></i> VOLVER
+							        </a> -->
+							    </div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+
+	<script
+		th:replace="planillas/js/load-combobox-vinculacion :: javascript"></script>
+	<script th:replace="planillas/js/generarRangoHorario :: javascript"></script>
+	<script th:replace="planillas/js/validacionRango :: javascript"></script>
+	<!-- Funcion que detecta cuando esta tildado un check Box -->
+	<script>
+    const isCheckMañana = document.getElementById("isCheckMañana");
+    const isCheckBoxes = document.getElementById("isCheckBoxes");
+    const isCheckTarde = document.getElementById("isCheckTarde");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    isCheckMañana.addEventListener("click", () => {
+      if (isCheckMañana.checked === true && isCheckBoxes.checked !== true) {
+    		//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;
+			//habilitamos todos los values del combobox.
+			const miCombobox = document.getElementById('intervaloR1');
+			const opciones = miCombobox.options;
+			// bucle 'for'
+			for (let i = 0; i < opciones.length; i++) {
+			  //opciones[i].disabled = false;
+			  opciones[i].style.visibility = 'visible';
+			}
+			 
+      }
+      
+      if (isCheckMañana.checked === true && isCheckBoxes.checked === true) {
+  			//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;		
+			
+			document.getElementById("intervaloR1").selectedIndex = 1;
+			document.getElementById("intervaloR1").disabled = true;
+    }
+      
+      if (isCheckMañana.checked !== true && isCheckBoxes.checked === true) {
+			//turno mañana habilitado
+			document.getElementById('horaInicialR1').disabled = false;
+			document.getElementById('horaFinalR1').disabled = false;
+			document.getElementById('intervaloR1').disabled = false;		
+			
+			document.getElementById("intervaloR1").selectedIndex = 0;
+			document.getElementById("intervaloR1").disabled = true;
+			deshabilitar_isCheckBoxes();
+    }
+      
+      
+      
+      if (isCheckMañana.checked === false) {
+    		//turno mañana deshabilitado
+    	    const limpiarTM = document.getElementById('limpiarTM');
+    	  	// click en boton limpiar turno Mañana
+    	  	limpiarTM.click();
+      }      
+    });
     
-    <!-- SCRIPTS -->
-    <script th:replace="planillas/js/load-combobox-vinculacion :: javascript"></script>
-    <script th:replace="planillas/js/generarRangoHorario :: javascript"></script>
-    <script th:replace="planillas/js/validacionRango :: javascript"></script>
-    <script th:inline="javascript">
-        const btnGuardar = document.getElementById('btnGuardar');
-        const originalGenerarRango = window.generarRangoHorario;
+    isCheckTarde.addEventListener("click", () => {      
+        if (isCheckTarde.checked === true) {
+      	//Turno tarde habilitado
+  			document.getElementById('horaInicialR2').disabled = false;
+  		    document.getElementById('horaFinalR2').disabled = false;
+  			document.getElementById('intervaloR2').disabled = false;
+          }else{
+      		//turno tarde deshabilitado
+      	    const limpiarTT = document.getElementById('limpiarTT');
+      	  	// click en boton limpiar turno Tarde.
+      	  	limpiarTT.click();
+        }
+      });
+    
+    btnGuardar.addEventListener("mouseover", () => {      
+        if (isCheckTarde.checked === true && document.getElementById("intervaloR2").value.length === 0) {
+        	//limpiar turno tarde
+        	document.getElementById('horaInicialR2').value='00:00';
+			 document.getElementById('horaInicialR2').disabled = true;
+			 document.getElementById('horaFinalR2').value='00:00';
+			 document.getElementById('horaFinalR2').disabled = true;
+			 document.getElementById('intervaloR2').selectedIndex = 0;
+			 document.getElementById('intervaloR2').disabled = true;
+			 const checkTarde = document.getElementById('isCheckTarde');
+			 checkTarde.checked = false;
+          }
+        
+        if (isCheckMañana.checked === true && document.getElementById("intervaloR1").value.length === 0) {
+        	//limpiar turno mañana
+        	document.getElementById('horaInicialR1').value='00:00';
+			document.getElementById('horaInicialR1').disabled = true;
+			document.getElementById('horaFinalR1').value='00:00';
+			document.getElementById('horaFinalR1').disabled = true;
+			document.getElementById('intervaloR1').selectedIndex = 0;
+			document.getElementById('intervaloR1').disabled = true;			  
+			const checkMañana = document.getElementById('isCheckMañana');
+			checkMañana.checked = false;
+          }
+      });
+    
+    //FUNCION AL DETECTAR CLICK EN COMBOBOX Personalizado.
+    isCheckBoxes.addEventListener("click", () => {
+    	//if(document.getElementById('especialidad').options.length > 0){
+    	
+	        if (isCheckBoxes.checked === true) {
+	      		
+	        	//hacer algo
+	        	optionBox.selectedIndex = 0;
+	    	    optionBox.disabled=false;
+	    	    //limpiamos y tildamos el chek mañana
+	    	    const limpiarTM = document.getElementById('limpiarTM');
+	    	    limpiarTM.click();
+	    	    document.getElementById('horaInicialR1').value='00:00';
+				document.getElementById('horaFinalR1').value='00:00';
+				//document.getElementById("intervaloR1").selectedIndex = 0;
+				const isCheckMañana = document.getElementById("isCheckMañana");
+				isCheckMañana.click();
+				//habilitamos solo el value1 del combobox
+				var combobox = document.getElementById("intervaloR1");
 
-        window.generarRangoHorario = function() {
-            if(typeof originalGenerarRango === 'function') originalGenerarRango();
-            const int1 = document.getElementById('intervaloR1').value;
-            const int2 = document.getElementById('intervaloR2').value;
-            const checkM = document.getElementById('isCheckMañana').checked;
-            const checkT = document.getElementById('isCheckTarde').checked;
+			    // Recorrer el combobox.
+			    for (var i = 0; i < combobox.options.length; i++) {
+			        // Obtener la opción actual
+			        var opcion = combobox.options[i];			
+			        // Deshabilitar todo exceopto el índice 1
+			        if (i !== 1) {
+			            //opcion.disabled = true;
+			            opcion.style.visibility = 'hidden';
+			        } else {
+			            // Asegurarse que la opción 1 está habilitada.			            
+			            opcion.style.visibility = 'visible';
+			            //opcion.style.display = 'none'
+			        }
+			    }
+			  document.getElementById("intervaloR1").selectedIndex = 1;
+			  document.getElementById("intervaloR1").disabled = false; 
+	    	  //deshabilitamos
+	    	    document.getElementById('isCheckTarde').checked = false;
+				document.getElementById('isCheckTarde').disabled = true;
+				document.getElementById('horaInicialR2').disabled = true;
+				document.getElementById('horaFinalR2').disabled = true;
+				document.getElementById('intervaloR2').disabled = true;
+				//limpiamos campos
+				document.getElementById('horaInicialR2').value='00:00';
+				document.getElementById('horaFinalR2').value='00:00';
+				document.getElementById("intervaloR2").selectedIndex = 0;
+	          }else{
+	      		//hacer algo	      	    
+	        	  optionBox.selectedIndex = 0;
+	        	  optionBox.disabled=true;
+	        	//habilitamos
+	        	  document.getElementById('isCheckTarde').checked = false;
+				  document.getElementById('isCheckTarde').disabled = false;
+				  document.getElementById('horaInicialR2').disabled = false;
+				  document.getElementById('horaFinalR2').disabled = false;
+				  document.getElementById('intervaloR2').disabled = false;
+				  const limpiarTM = document.getElementById('limpiarTM');
+	        	  const limpiarTT = document.getElementById('limpiarTT');
+	        	  limpiarTM.click();
+	        	  limpiarTT.click();	        	  
+	        }    	
+      });
+    
+    function deshabilitar_isCheckBoxes(){
+    	document.getElementById('isCheckBoxes').checked = false;
+        const optionBox=document.getElementById('optionBox');
+        optionBox.selectedIndex = 0;
+        optionBox.disabled=true;
+    }
+    
+    function vincularMedico(valorInput) {
+        const selectOriginal = document.getElementById("profesional");
+        const opciones = selectOriginal.options;
+        const buscador = document.getElementById("buscadorMedico");
+        const grupo = buscador.closest(".input-group");
 
-            if ((checkM && int1 !== "") || (checkT && int2 !== "")) {
-                btnGuardar.disabled = false;
-            } else {
-                btnGuardar.disabled = true;
+        for (let i = 0; i < opciones.length; i++) {
+            // Buscamos la coincidencia exacta
+            if (opciones[i].text.trim() === valorInput.trim()) {
+                selectOriginal.selectedIndex = i;
+                
+                const nombreCompleto = opciones[i].text;
+                // Extraemos el código real que viene de la DB
+                const codigoReal = opciones[i].getAttribute("data-codigo") || "S/C";
+                
+                // Seteamos el texto: Tallada Maria Gabriela — TMG
+                buscador.value = `${nombreCompleto}  | Codigo:  ${codigoReal}`;
+                
+                // "Soldamos" el bloque visualmente (Fondo azul para icono e input)
+                if (grupo) {
+                    grupo.style.border = "1px solid #0369a1";
+                    const componentes = grupo.querySelectorAll('.input-group-text, .form-control');
+                    componentes.forEach(el => {
+                        el.style.backgroundColor = "#f0f9ff";
+                        el.style.color = "#0369a1";
+                    });
+                }
+                buscador.style.fontWeight = "200";
+                
+                // Disparamos la carga de especialidades
+                selectOriginal.dispatchEvent(new Event('change'));
+                cargarEspecialidades();
+                buscador.blur();
+                break;
             }
-        };        
+        }
+    }
 
-        const setupTurno = (checkId, inputsIds, btnId) => {
-          const check = document.getElementById(checkId);
-          const inputs = inputsIds.map(id => document.getElementById(id));
-          const btn = document.getElementById(btnId);
-          check.addEventListener('change', () => inputs.forEach(i => i.disabled = !check.checked));
-          btn.addEventListener('click', () => {
-              inputs.forEach(i => { i.value = (i.type === 'time' ? '00:00' : ''); i.disabled = true; });
-              check.checked = false;
-              btnGuardar.disabled = true;
-              if(typeof generarRangoHorario === 'function') generarRangoHorario();
-          });
-        };
+    
+    function limpiarBusquedaCompleta() {
+        const buscador = document.getElementById("buscadorMedico");
+        const grupo = buscador.closest(".input-group"); // Accedemos al contenedor que "suelda" todo
+
+        // 1. Resetear el buscador (Texto y Estilos)
+        buscador.value = "";
+        buscador.style.fontWeight = "normal";
         
-        setupTurno('isCheckMañana', ['horaInicialR1', 'horaFinalR1', 'intervaloR1'], 'limpiarTM');
-        setupTurno('isCheckTarde', ['horaInicialR2', 'horaFinalR2', 'intervaloR2'], 'limpiarTT');    
+        // 2. Quitamos la clase de "soldado azul" al grupo completo
+        if (grupo) {
+            grupo.classList.remove("seleccionado");
+            // Forzamos el reset de colores por si el CSS no llega
+            const elementos = grupo.querySelectorAll('.input-group-text, .form-control');
+            elementos.forEach(el => {
+                el.style.backgroundColor = "#ffffff";
+                el.style.color = "#1e293b";
+            });
+        }
+
+        // 3. Resetear selects
+        document.getElementById("profesional").selectedIndex = 0;
         
-        const isCheckBoxes = document.getElementById("isCheckBoxes");
-        isCheckBoxes.addEventListener("click", () => {
-         if (isCheckBoxes.checked) {
-             document.getElementById('optionBox').disabled = false;
-             document.getElementById('isCheckMañana').checked = true;
-             ['horaInicialR1', 'horaFinalR1', 'intervaloR1'].forEach(id => document.getElementById(id).disabled = false);
-         } else {
-             document.getElementById('optionBox').disabled = true;
-         }
-        });
-    </script>
+        const selectEsp = document.getElementById("especialidad");
+        selectEsp.innerHTML = ""; 
+        selectEsp.disabled = true;
+        
+        // Si la especialidad también estaba "soldada", le quitamos el color
+        const grupoEsp = selectEsp.closest(".input-group");
+        if (grupoEsp) grupoEsp.classList.remove("seleccionado");
+
+        console.log("Limpieza total: interfaz reseteada a blanco.");
+    }
+    
+ // Función para la especialidad: SOLO COLOREA, NO CAMBIA EL TEXTO
+    function formatearSeleccionEspecialidad() {
+        const select = document.getElementById("especialidad");
+        const grupo = select.closest(".input-group");
+        
+        if (!select.value) return;
+
+        // Solo aplicamos el "soldado" visual azul
+        if (grupo) {
+            grupo.style.border = "1px solid #0369a1";
+            const componentes = grupo.querySelectorAll('.input-group-text, .form-select');
+            componentes.forEach(el => {
+                el.style.backgroundColor = "#f0f9ff";
+                el.style.color = "#0369a1";
+            });
+        }
+        select.style.fontWeight = "200";
+    }
+    
+    //Al cargar la pagina
+    deshabilitar_isCheckBoxes();
+  </script>
+
+
 </body>
 </html>

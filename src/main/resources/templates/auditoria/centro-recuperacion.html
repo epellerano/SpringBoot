@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+/* --- ESTÉTICA CLÍNICA SIGAT PREMIUM --- */
+:root {
+	--med-cyan: #0891b2;
+	--med-blue: #164e63;
+	--med-bg: #f0f9ff;
+	--med-border: #bae6fd;
+	--med-header-table: #e0f2fe;
+	--med-subbox-gray: #f1f5f9;
+}
+
+/* MARGEN SUPERIOR GENERAL */
+.viewport-container {
+	padding-top: 1.0rem !important;
+	padding-bottom: 1.5rem !important;
+}
+
+.header-clinica-compact {
+	margin-bottom: 1.25rem;
+	border-bottom: 1px solid #f1f5f9;
+	padding-bottom: 0.75rem;
+}
+
+.title-audit-main {
+	font-size: 1.60rem;
+	font-weight: 700;
+	color: #1e293b;
+	letter-spacing: -0.5px;
+}
+
+.subtitle-audit-main {
+	font-size: 0.75rem;
+	color: #64748b;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+}
+
+/* PANEL DE BÚSQUEDA */
+.search-panel-toolbar {
+	background: #ffffff;
+	border: 2px solid var(--med-border);
+	padding: 1.5rem;
+	/* Más espacio interno para que respiren los sub-boxes */
+	border-radius: 1.5rem;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+	position: relative;
+	z-index: 1000;
+	margin-bottom: 1.5rem !important;
+}
+
+/* SUB-BOXES: REDONDEADOS Y CON MÁRGENES */
+.sub-box-audit {
+	background-color: var(--med-subbox-gray);
+	border: 1px solid #e2e8f0;
+	border-radius: 15px; /* Bordes bien redondeados, no cuadrados */
+	padding: 15px 18px;
+	height: 90px;
+	margin: 5px 0;
+	/* Margen superior e inferior interno dentro de la toolbar */
+	transition: all 0.3s ease;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	overflow: visible !important; /* Vital para el despliegue */
+}
+
+.sub-box-audit:hover {
+	border-color: var(--med-cyan);
+	background-color: #f8fafc;
+	transform: translateY(-1px);
+}
+
+/* SELECTORES Y FECHAS */
+.form-select-clinico, .form-control-sm {
+	border: 2px solid #e2e8f0;
+	font-weight: 700;
+	color: var(--med-blue);
+	height: 40px !important;
+	border-radius: 8px;
+	font-size: 0.88rem;
+}
+
+.box-label-min {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: var(--med-cyan);
+	text-transform: uppercase;
+	margin-bottom: 8px;
+	display: block;
+	letter-spacing: 0.6px;
+}
+
+/* BOTONES: ESTILO ELITE RESTAURADO */
+.btn-ejecutar-medico {
+	background-color: var(--med-cyan);
+	color: white !important;
+	font-weight: 700;
+	height: 40px;
+	border-radius: 8px;
+	border: none;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: 0.3s;
+}
+
+.btn-ejecutar-medico:hover {
+	background-color: var(--med-blue);
+	box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+}
+
+.btn-group-audit .btn {
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 0.72rem;
+	border: 2px solid #f1f5f9;
+	background-color: white;
+	color: #64748b !important;
+	transition: 0.2s;
+}
+
+.btn-group-audit .btn-outline-light:hover {
+	background-color: var(--med-bg) !important;
+	color: var(--med-cyan) !important;
+}
+
+.btn-group-audit .btn-check:checked+.btn {
+	background-color: var(--med-blue) !important;
+	color: white !important;
+	border-color: var(--med-blue) !important;
+}
+
+/* CONTENEDOR RESULTADOS CON PISO ALTO PARA EL COMBO */
+#contenedorResultados {
+	max-height: 52vh;
+	min-height: 300px !important;
+	border-radius: 0.75rem;
+	position: relative;
+	z-index: 1;
+}
+
+.fragment-storage {
+	display: none !important;
+	visibility: hidden;
+}
+
+.table-audit thead th {
+	background-color: var(--med-header-table) !important;
+	color: var(--med-blue) !important;
+	font-weight: 800;
+	text-transform: uppercase;
+	font-size: 0.72rem;
+}
+
+/* Asegura que el menú siempre esté por encima de los boxes */
+header, .navbar, .dropdown-menu {
+    z-index: 9999 !important;
+}
+
+/* Si tu menú es un sidebar o un menu lateral, aplicá esto: */
+.nav-container, .fixed-top {
+    z-index: 10000 !important;
+}
+
+/* Por seguridad, bajamos un nivel a los boxes del formulario */
+.custom-section-box {
+    position: relative; /* Para que respete el z-index */
+    z-index: 1 !important;
+}
+</style>
+
+
+
+<body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<!-- px-lg-3 y padding-top 2.5rem para amplitud y espacio con el logo superior -->
+	<div class="container-fluid viewport-container px-lg-3">
+		<div class="card shadow-sm border-0 rounded-4">
+			<div class="card-body p-4">
+
+				<!-- ENCABEZADO -->
+				<div
+					class="header-clinica-compact d-flex justify-content-between align-items-center">
+					<div class="d-flex align-items-center">
+						<div
+							class="bg-info bg-opacity-10 p-3 rounded-4 me-3 shadow-sm border border-info border-opacity-10">
+							<i class="fa-solid fa-notes-medical fa-xl"
+								style="color: var(--med-cyan);"></i>
+						</div>
+						<div>
+							<h4 class="fw-bold text-dark mb-0 title-audit-main">Centro
+								de Recuperación</h4>
+							<p class="subtitle-audit-main text-muted mb-0 uppercase">SIGAT
+								• Panel de Integridad y Auditoría de Registros Médicos</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- TOOLBAR -->
+				<div class="search-panel-toolbar" id="recuperacionContainer"
+					th:data-tipo-pre="${tipoPreCargado}"
+					th:data-prof-pre="${profIdPreCargado}"
+					th:data-espec-pre="${especIdPreCargado}">
+					<div class="row g-3">
+						<div class="col-lg-5">
+							<div class="sub-box-audit shadow-sm border">
+								<span class="box-label-min">1. Selección de Profesional y
+									Especialidad</span>
+								<div class="row g-2">
+									<div class="col-7">
+										<select id="profesionalAudit"
+											class="form-select form-select-clinico shadow-none"
+											onchange="cargarEspecialidadesAudit(); limpiarResultados();">
+											<option value="">Seleccione Médico...</option>
+											<th:block th:each="prof : ${profesionales}">
+												<option th:value="${prof.id}"
+													th:text="${prof.apellido} + ' ' + ${prof.nombre}"></option>
+											</th:block>
+										</select>
+									</div>
+									<div class="col-5">
+										<select id="especialidadAudit"
+											class="form-select form-select-clinico shadow-none"
+											onchange="limpiarResultados();">
+											<option value="">Especialidad...</option>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-lg-3">
+							<div class="sub-box-audit shadow-sm border">
+								<span class="box-label-min">2. Módulo de Registro</span>
+								<div class="btn-group btn-group-audit w-100" role="group">
+									<input type="radio" class="btn-check" name="tipoRegistro"
+										id="optTurnos" value="TURNOS" checked
+										onchange="limpiarResultados();"> <label
+										class="btn btn-outline-light fw-bold" for="optTurnos">TURNOS</label>
+									<input type="radio" class="btn-check" name="tipoRegistro"
+										id="optSobreturnos" value="SOBRETURNOS"
+										onchange="limpiarResultados();"> <label
+										class="btn btn-outline-light fw-bold" for="optSobreturnos">SOBRE</label>
+									<input type="radio" class="btn-check" name="tipoRegistro"
+										id="optPlanillas" value="PLANILLAS"
+										onchange="limpiarResultados();"> <label
+										class="btn btn-outline-light fw-bold" for="optPlanillas">PLANILLAS</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-lg-4">
+							<div class="sub-box-audit shadow-sm border">
+								<span class="box-label-min">3. Rango Temporal y Búsqueda</span>
+								<div class="row g-2">
+									<div class="col-4">
+										<input type="date" id="fechaDesde"
+											class="form-control form-control-sm shadow-none"
+											onchange="limpiarResultados();">
+									</div>
+									<div class="col-4">
+										<input type="date" id="fechaHasta"
+											class="form-control form-control-sm shadow-none"
+											onchange="limpiarResultados();">
+									</div>
+									<div class="col-4">
+										<button type="button"
+											class="btn btn-ejecutar-medico w-100 shadow-sm"
+											onclick="buscarCancelados()">
+											<i class="fa-solid fa-magnifying-glass me-1"></i> BUSCAR
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- CONTENEDOR DE RESULTADOS -->
+				<div id="contenedorResultados"
+					class="border shadow-inner bg-white rounded-4">
+					<div
+						class="d-flex flex-column align-items-center justify-content-center h-100 p-5 text-muted">
+						<i class="fa-solid fa-microscope fa-4x mb-2 opacity-25"
+							style="color: var(--med-cyan);"></i>
+						<h5 class="fw-bold mb-1">Sistema de Integridad Médica</h5>
+						<p class="small">Inicie la auditoría para visualizar registros
+							cancelados</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<!-- ALMACÉN DE FRAGMENTOS COMPLETO -->
+<div class="fragment-storage" style="display: none;">
+
+    <!-- 1. FRAGMENTO: PLANILLAS -->
+    <div th:fragment="tablaPlanillas">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-audit">
+                <thead class="sticky-top">
+                    <tr>
+                        <th class="ps-4">Fecha Planilla</th>
+                        <th>Médico</th>
+                        <th>Especialidad</th>
+                        <th>Estado Actual</th>
+                        <th class="text-center">Informe Restauración</th>
+                        <th class="text-center">Gestión Masiva</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${cancelados}">
+                        <td class="ps-4 fw-bold text-dark" th:text="${#dates.format(p.fechaInicio, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${p.profesional.apellido} + ' ' + ${p.profesional.nombre}"></td>
+                        <td th:text="${p.especialidad.especialidadNombre}"></td>
+                        <td><span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 fw-bold">PLANILLA CANCELADA</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-dark fw-bold px-3 shadow-sm" th:onclick="|verInformeRecorte('${p.id}')|">
+                                <i class="fa-solid fa-file-waveform me-1"></i> Ver Informe Detallado
+                            </button>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary fw-bold px-3 py-1 shadow-sm" onclick="confirmarRestauracionMasiva()">
+                                <i class="fa-solid fa-file-import me-1"></i> RESTAURAR TODO
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(cancelados)}">
+                        <td colspan="6" class="text-center p-5 text-muted">No se encontraron planillas canceladas.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. FRAGMENTO: SOBRETURNOS -->
+    <div th:fragment="tablaSobreturnos">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-audit">
+                <thead class="sticky-top">
+                    <tr>
+                        <th class="ps-4">Paciente</th>
+                        <th>DNI</th>
+                        <th>Fecha Cita</th>
+                        <th>Estado Actual</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="s : ${cancelados}">
+                        <td class="ps-4 fw-bold text-dark" th:text="${s.paciente.apellido} + ' ' + ${s.paciente.nombre}"></td>
+                        <td th:text="${s.paciente.dni}"></td>
+                        <td class="text-danger fw-bold" th:text="${#temporals.format(s.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 fw-bold" style="font-size:0.7rem;">SOBRETURNO CANCELADO</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary fw-bold px-3 py-1 shadow-sm" th:onclick="|restaurarSobreturno('${s.id}')|">
+                                <i class="fa-solid fa-rotate-left me-1"></i> RESTAURAR
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(cancelados)}">
+                        <td colspan="5" class="text-center p-5 text-muted">No hay sobreturnos cancelados para este profesional.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. FRAGMENTO: TURNOS -->
+    <div th:fragment="tablaTurnos">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-audit">
+                <thead class="sticky-top">
+                    <tr>
+                        <th class="ps-4">Paciente</th>
+                        <th>DNI</th>
+                        <th>Fecha Turno</th>
+                        <th>Estado Actual</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t : ${cancelados}">
+                        <td class="ps-4 fw-bold text-dark" th:text="${t.paciente.apellido} + ' ' + ${t.paciente.nombre}"></td>
+                        <td th:text="${t.paciente.dni}"></td>
+                        <td class="text-danger fw-bold" th:text="${#dates.format(t.planilladetalle.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td><span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 fw-bold" style="font-size:0.7rem;">TURNO CANCELADO</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary fw-bold px-3 py-1 shadow-sm" th:onclick="|restaurarTurno('${t.id}')|">
+                                <i class="fa-solid fa-rotate-left me-1"></i> RESTAURAR
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(cancelados)}">
+                        <td colspan="5" class="text-center p-5 text-muted">No se encontraron turnos cancelados en este rango.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script th:replace="auditoria/js/funcionesAuditoria :: javascript"></script>
+</body>
+</html>

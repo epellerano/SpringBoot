@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+	<script type="text/javascript" th:fragment="javascript">
+
+/* 
+SIGAT - FUNCIONES PARA BAJA MÉDICA UNIFICADA (ELITE)
+Este script reemplaza las múltiples llamadas AJAX por una sola petición atómica.
+*/
+
+/* async function ejecutarCancelacionMedicaMasiva() {
+    const profId = $("#profesional").val();
+    const especId = $("#especialidad").val();
+    const motivo = $("#motivoCancelacion").val();
+    const tipo = document.getElementById("tipoCancelacion").value;
+
+    if (!profId || !especId || motivo === "" || tipo === "0") {
+        Swal.fire({
+            title: '<span style="font-family: Arial; font-weight: bold;">Campos Incompletos</span>',
+            text: "Por favor, complete todos los datos antes de continuar.",
+            icon: 'info',
+            confirmButtonColor: '#2c3e50',
+            confirmButtonText: 'ENTENDIDO'
+        });
+        return;
+    }
+
+    // --- PRIMERA CONFIRMACIÓN: INICIO DEL PROCESO ---
+    const { isConfirmed: iniciaProceso } = await Swal.fire({
+        title: '<span style="font-family: Arial; font-weight: bold; color: #2c3e50;">Confirmar Operación</span>',
+        html: '<p style="font-size: 15px;">Se iniciará el <b>Backup de Seguridad</b> antes de proceder con la cancelación masiva.</p>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#164e63', // Azul Petróleo Elite
+        cancelButtonColor: '#6c757d',  // Gris Neutro
+        confirmButtonText: 'SÍ, INICIAR',
+        cancelButtonText: 'CANCELAR',
+        focusConfirm: true,
+        didOpen: () => {
+            Swal.getConfirmButton().style.width = '120px';
+            Swal.getCancelButton().style.width = '120px';
+        }
+    });
+
+    if (!iniciaProceso) return;
+
+    // --- PASO 1: INTENTO DE BACKUP ---
+    try {
+        mostrarLoadingElite("Realizando Backup de Seguridad...");
+        
+        // Llamada a tu API de backup que ya tenías
+        const resBackup = await fetch('/api/db/backup'); 
+        if (!resBackup.ok) throw new Error("Error en Backup");
+
+    } catch (error) {
+        // --- SEGUNDA CONFIRMACIÓN: EL BACKUP FALLÓ ---
+        const { isConfirmed: sigueSinBackup } = await Swal.fire({
+            title: '<span style="font-family: Arial; color: #d33; font-weight: bold;">¡Backup Fallido!</span>',
+            html: '<p style="font-size: 14px;">No se pudo realizar el respaldo de la base de datos.<br><br><b>¿Desea ejecutar la cancelación masiva de todas formas?</b></p>',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',    // Rojo para advertencia
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'SÍ, CONTINUAR',
+            cancelButtonText: 'DETENER TODO',
+            didOpen: () => {
+                Swal.getConfirmButton().style.width = '140px';
+                Swal.getCancelButton().style.width = '140px';
+            }
+        });
+
+        if (!sigueSinBackup) return;
+    }
+
+    // --- PASO 2: EJECUCIÓN FINAL (BLOQUEO Y PDF) ---
+    try {
+        const fechaIni = document.getElementById('fechaInicial').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        let ini = fechaIni;
+        let fin = fechaFin;
+
+        if (tipo.includes("Hora")) {
+            ini += ` ${document.getElementById('horaInicio').value}`;
+            fin += ` ${document.getElementById('horaFinal').value}`;
+        }
+
+        mostrarLoadingElite("Generando PDFs y Bloqueando Agenda...");
+
+        const response = await fetch(`/api/baja-medica/ejecutar-proceso-completo?profId=${profId}&especId=${especId}&inicio=${ini}&fin=${fin}&motivo=${motivo}&ignorarBackup=true`);
+        const result = await response.json();
+
+        if (response.ok && result.status === "success") {
+            await Swal.fire({
+                title: '<span style="font-family: Arial; font-weight: bold; color: #164e63;">¡Proceso Finalizado!</span>',
+                text: result.message,
+                icon: 'success',
+                confirmButtonColor: '#164e63'
+            });
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+
+    } catch (error) {
+        Swal.fire({
+            title: 'Error Crítico',
+            text: error.message,
+            icon: 'error',
+            confirmButtonColor: '#2c3e50'
+        });
+    }
+} */
+
+async function ejecutarCancelacionMedicaMasiva() {
+    const profId = $("#profesional").val();
+    const especId = $("#especialidad").val();
+    const motivo = $("#motivoCancelacion").val();
+    const tipo = document.getElementById("tipoCancelacion").value;
+
+    if (!profId || !especId || motivo === "" || tipo === "0") {
+        Swal.fire({
+            title: '<span style="font-family: Arial; font-weight: bold;">Campos Incompletos</span>',
+            text: "Por favor, complete todos los datos antes de continuar.",
+            icon: 'info',
+            confirmButtonColor: '#2c3e50',
+            confirmButtonText: 'ENTENDIDO'
+        });
+        return;
+    }
+
+    // --- 1. CONFIRMACIÓN DE INICIO ---
+    const { isConfirmed: iniciaProceso } = await Swal.fire({
+        title: '<span style="font-family: Arial; font-weight: bold; color: #2c3e50;">Confirmar Operación</span>',
+        html: '<p style="font-size: 15px;">Se iniciará el <b>Backup de Seguridad</b> antes de proceder con la cancelación masiva.</p>',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#164e63',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'SÍ, INICIAR',
+        cancelButtonText: 'CANCELAR'
+    });
+
+    if (!iniciaProceso) return;
+
+    // --- 2. PASO: BACKUP ESPECÍFICO DE PLANILLAS ---
+    try {
+        mostrarLoadingElite("Realizando Backup de Seguridad...");
+        
+        // MODIFICADO: Agregamos ?tipo=Planillas para crear la carpeta BackupBDCancelacionPlanillas
+        const resBackup = await fetch('/api/db/backup?tipo=Planillas'); 
+        if (!resBackup.ok) throw new Error("Error en Backup");
+
+    } catch (error) {
+        // SI FALLA EL BACKUP, PREGUNTAMOS SI CONTINÚA
+        const { isConfirmed: sigueSinBackup } = await Swal.fire({
+            title: '<span style="font-family: Arial; color: #d33; font-weight: bold;">¡Backup Fallido!</span>',
+            html: '<p style="font-size: 14px;">No se pudo realizar el respaldo.<br><b>¿Desea ejecutar la cancelación de todas formas?</b></p>',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'SÍ, CONTINUAR',
+            cancelButtonText: 'DETENER TODO'
+        });
+
+        if (!sigueSinBackup) return;
+    }
+
+    // --- 3. PASO: EJECUCIÓN FINAL (CAMBIO DE ESTADOS Y PDF) ---
+    try {
+        const fechaIni = document.getElementById('fechaInicial').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        let ini = fechaIni;
+        let fin = fechaFin;
+
+        if (tipo.includes("Hora")) {
+            ini += ` ${document.getElementById('horaInicio').value}`;
+            fin += ` ${document.getElementById('horaFinal').value}`;
+        }
+
+        mostrarLoadingElite("Generando PDFs y Bloqueando Agenda...");
+
+        // Llamada al Controller del proceso completo
+        const response = await fetch(`/api/baja-medica/ejecutar-proceso-completo?profId=${profId}&especId=${especId}&inicio=${ini}&fin=${fin}&motivo=${motivo}&ignorarBackup=true`);
+        const result = await response.json();
+
+        if (response.ok && result.status === "success") {
+            await Swal.fire({
+                title: '¡Proceso Finalizado!',
+                text: result.message,
+                icon: 'success',
+                confirmButtonColor: '#164e63'
+            });
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+
+    } catch (error) {
+        Swal.fire({
+            title: 'Error Crítico',
+            text: error.message,
+            icon: 'error',
+            confirmButtonColor: '#2c3e50'
+        });
+    }
+}
+
+
+// Función auxiliar para el Loading
+function mostrarLoadingElite(mensaje) {
+    Swal.fire({
+        title: '<span style="font-family: Arial;">Procesando...</span>',
+        html: `<span style="font-size: 13px;">${mensaje}</span>`,
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+}
+
+
+</script>
+
+</body>
+
+</html>

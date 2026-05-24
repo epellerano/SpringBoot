@@ -154,7 +154,7 @@ public class PlanillaCabeceraController {
 		// model.addAttribute("especialidades", especialidadService.findAll());
 		model.addAttribute("dias", diaService.findAll());
 		model.addAttribute("estados", estadoService.findByEstadoActivo(activo));
-		String fechaString = "02/04/2026";
+		String fechaString = "25/05/2026";
 		SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
 		planillacabecera.setFechaInicio(formato.parse(fechaString));
 		planillacabecera.setFechaFinal(formato.parse(fechaString));

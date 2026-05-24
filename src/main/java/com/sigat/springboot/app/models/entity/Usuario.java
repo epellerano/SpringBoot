@@ -22,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -44,6 +45,14 @@ public class Usuario implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
 	private List<Role> roles;
+	
+	@OneToOne
+	@JoinColumn(name = "paciente_id", unique = true)
+	private Paciente paciente;
+
+	@OneToOne
+	@JoinColumn(name = "profesional_id", unique = true)
+	private Profesional profesional;
 
 	// =========================================================================
 	// CAMPOS DE AUDITORÍA AUTOMÁTICA
@@ -103,6 +112,22 @@ public class Usuario implements Serializable {
 
 	public void setRoles(List<Role> roles) {
 		this.roles = roles;
+	}	
+
+	public Paciente getPaciente() {
+		return paciente;
+	}
+
+	public void setPaciente(Paciente paciente) {
+		this.paciente = paciente;
+	}
+
+	public Profesional getProfesional() {
+		return profesional;
+	}
+
+	public void setProfesional(Profesional profesional) {
+		this.profesional = profesional;
 	}
 
 	// --- Getters y Setters para Auditoría ---

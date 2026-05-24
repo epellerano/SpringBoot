@@ -2,6 +2,8 @@ package com.sigat.springboot.app.models.dao;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -50,4 +52,17 @@ public interface IProfesionalDao extends CrudRepository<Profesional, Long>, JpaR
 	// menos este prof_id.
 	@Query("select p from Profesional p where p.matricula = ?1 and p.id <> ?2")
 	Profesional findByProfesionalMatriculaUpdate(String profMatricula, Long profId);
+	
+	//Para el buscador global
+	@Query("select p from Profesional p where " +
+		       "upper(concat(p.apellido, ' ', p.nombre)) like upper(concat('%', ?1, '%')) or " +
+		       "upper(concat(p.nombre, ' ', p.apellido)) like upper(concat('%', ?1, '%')) or " +
+		       "upper(p.codigo) like upper(concat('%', ?1, '%')) or " +
+		       "p.dni like concat('%', ?1, '%')")
+		Page<Profesional> findByNombreOrApellidoOrCodigo(String term, Pageable pageable);
+	
+	//Historia Clinica
+	public Profesional findByCodigo(String codigo);
+
+
 }

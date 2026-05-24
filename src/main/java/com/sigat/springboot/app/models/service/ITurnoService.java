@@ -44,14 +44,34 @@ public interface ITurnoService {
 	public List<Turno>buscarTurnosOcupadosFechasHoras(Long profId, Long EspecId, Date fechaHoraIni, Date  fechaHoraFin);
 	
 	// DESACTIVAMOS EL MODO SEGURO DE MYSQL. (vista: Cancelar Planillas)
-	public void desactivarSafeUpdates();
+	public void desactivarSafeUpdates();	
 	
-	// Eliminar "Turnos Ocupados" entre fechas (vista: Cancelar Planillas)
-	public void eliminarTurnosOcupadosFechas(Long profId, Long EspecId, Date fechaIni, Date fechaFin);
+	// CANCELACION MASIVA DE TURNOS (Estado CANCELADO - 6)
+	public void cancelarTurnosSeleccionados(List<Long> ids);
 	
-	// Eliminar "Turnos Ocupados" entre fechas y horas (vista: Cancelar Planillas)
-	public void eliminarTurnosOcupadosFechasHoras(Long profId, Long EspecId, Date fechaHoraIni, Date fechaHoraFin);
+	// CANCELACION INDIVIDUAL DE TURNOS (Estado CANCELADO - 6)
+	public void eliminar(Long id);
 	
+	//LISTAR TURNOS SOLO CON ID=4
+	public List<Turno> findAllOcupados();
+	
+	//click en finalizarAtencion, paciente se retira por su cuenta
+	public List<Turno> findAllTotal();
+	
+	
+	//CANCELACION MASIVA NUEVA
+	void eliminarTurnosOcupadosFechas(Long profId, Long especId, LocalDateTime fechaIni, LocalDateTime fechaFin);
+    
+    void eliminarTurnosOcupadosFechasHoras(Long profId, Long especId, LocalDateTime inicio, LocalDateTime fin);
+
+    List<Turno> buscarTurnosOcupadosParaBajaSoloFecha(Long profId, Long especId, String inicio, String fin);
+    List<Turno> buscarTurnosOcupadosParaBajaFechaHora(Long profId, Long especId, java.time.LocalDateTime inicio, java.time.LocalDateTime fin);
+
+	//PARA RESTAURACIION (AUDITORIA)
+    List<Turno> findCancelados(Long profId, Long especId, String desde, String hasta);
+
+    //HISTORIA CLINICA
+    public Turno findById(Long id);
 	
 	//SECCION REPORTES --------------------------------------------------------------
 	
@@ -65,7 +85,7 @@ public interface ITurnoService {
 	//SECCION REPORTES PARA PDF ------------------------------------------------------
 	
 	// REPORTE PDF Turnos Ocupados por idProfesional e id_Especialidad Y FECHAS.
-		public List<Turno> reporteTurnosOcupadosFechasPdf(Long profId, Long EspecId, String fechaIni, String fechaFin);
+	public List<Turno> reporteTurnosOcupadosFechasPdf(Long profId, Long EspecId, String fechaIni, String fechaFin);
 	
 
 	

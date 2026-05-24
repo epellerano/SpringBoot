@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+	xmlns:sec="http://thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout/layout :: head}"></head>
+<body>
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<div class="container py-4" style="max-width: 1300px;">
+	
+		<!-- =========================================================================
+	     SECCIÓN CABECERA: TÍTULO PRINCIPAL CON BOTÓN REGRESAR INTEGRADO
+	     ========================================================================= -->
+	<div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
+		<div class="d-flex align-items-center justify-content-between flex-wrap g-2">
+			<div>
+				<h2 class="fw-bold text-dark mb-1" th:text="${titulo}">Dashboard de Gestión</h2>
+				<p class="text-muted small mb-0">Balance de auditoría gerencial, rendimiento de profesionales y control de ausentismo.</p>
+			</div>
+			<div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+				<!-- EL NUEVO BOTÓN DE RETORNO OPERATIVO -->
+				<a th:href="@{/recepcion}" class="btn btn-light btn-sm fw-bold border text-secondary px-3 shadow-sm">
+					<i class="fa-solid fa-arrow-left me-1 text-muted"></i> Regresar a Recepción
+				</a>
+				<div class="text-muted small fw-bold bg-light px-3 py-2 rounded-3 border" style="height: 31px; display: flex; align-items: center;">
+					<i class="fa-solid fa-clock text-primary me-1"></i> Actualizado al instante
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- =========================================================================
+	     SECCIÓN FILTROS: BOX DE CONTROL LILA CON INPUTS ANCHOS Y SOLDADOS
+	     ========================================================================= -->
+	<div class="card border-0 shadow-sm rounded-3 p-3 mb-3" style="background-color: #f5f3ff; border: 1px solid #e9e3ff !important;">
+		<form th:action="@{/estadisticas/dashboard}" method="GET">
+			<div class="row g-2 align-items-center">
+				
+				<!-- Especialidad (Ancho Generoso) -->
+				<div class="col-12 col-md-3">
+					<div class="input-group input-group-sm shadow-sm rounded-2">
+						<span class="input-group-text bg-white border-end-0 text-purple" style="width: 40px; justify-content: center; color: #7c3aed;">
+							<i class="fa-solid fa-stethoscope"></i>
+						</span>
+						<select name="especialidadId" class="form-select fw-bold text-secondary border-start-0 ps-1" style="height: 38px;">
+							<option value="0" th:selected="${especialidadSeleccionada == 0 || especialidadSeleccionada == null}">TODAS LAS ESPECIALIDADES</option>
+							<option th:each="esp : ${listaEspecialidades}" th:value="${esp.id}" th:text="${esp.especialidadNombre}" th:selected="${esp.id == especialidadSeleccionada}"></option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Profesional (Ancho Generoso e Índice Fijo Corregido) -->
+				<div class="col-12 col-md-3">
+					<div class="input-group input-group-sm shadow-sm rounded-2">
+						<span class="input-group-text bg-white border-end-0 text-purple" style="width: 40px; justify-content: center; color: #7c3aed;">
+							<i class="fa-solid fa-user-md"></i>
+						</span>
+						<select name="profesionalId" class="form-select fw-bold text-secondary border-start-0 ps-1" style="height: 38px;">
+							<option value="0" th:selected="${profesionalSeleccionada == 0 || profesionalSeleccionada == null}">TODOS LOS PROFESIONALES</option>
+							<option th:each="prof : ${listaProfesionales}" th:value="${prof.id}" th:text="${prof.apellido + ' ' + prof.nombre}" th:selected="${prof.id == profesionalSeleccionado}"></option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Mes -->
+				<div class="col-12 col-sm-6 col-md-2">
+					<div class="input-group input-group-sm shadow-sm rounded-2">
+						<span class="input-group-text bg-white border-end-0 text-purple" style="width: 40px; justify-content: center; color: #7c3aed;">
+							<i class="fa-solid fa-calendar"></i>
+						</span>
+						<select name="mes" class="form-select fw-bold text-secondary border-start-0 ps-1" style="height: 38px;">
+							<option value="1" th:selected="${mesSeleccionado == 1}">Enero</option>
+							<option value="2" th:selected="${mesSeleccionado == 2}">Febrero</option>
+							<option value="3" th:selected="${mesSeleccionado == 3}">Marzo</option>
+							<option value="4" th:selected="${mesSeleccionado == 4}">Abril</option>
+							<option value="5" th:selected="${mesSeleccionado == 5}">Mayo</option>
+							<option value="6" th:selected="${mesSeleccionado == 6}">Junio</option>
+							<option value="7" th:selected="${mesSeleccionado == 7}">Julio</option>
+							<option value="8" th:selected="${mesSeleccionado == 8}">Agosto</option>
+							<option value="9" th:selected="${mesSeleccionado == 9}">Septiembre</option>
+							<option value="10" th:selected="${mesSeleccionado == 10}">Octubre</option>
+							<option value="11" th:selected="${mesSeleccionado == 11}">Noviembre</option>
+							<option value="12" th:selected="${mesSeleccionado == 12}">Diciembre</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Año -->
+				<div class="col-12 col-sm-6 col-md-2">
+					<div class="input-group input-group-sm shadow-sm rounded-2">
+						<span class="input-group-text bg-white border-end-0 text-purple" style="width: 40px; justify-content: center; color: #7c3aed;">
+							<i class="fa-solid fa-clock-rotate-left"></i>
+						</span>
+						<select name="anio" class="form-select fw-bold text-secondary border-start-0 ps-1" style="height: 38px;">
+							<option th:each="anio : ${listaAnios}" th:value="${anio}" th:text="${anio}" th:selected="${anio == anioSeleccionado}"></option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Botón Filtrar (Alineación perfecta) -->
+				<div class="col-12 col-md-2">
+					<button type="submit" class="btn btn-primary btn-sm fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center" style="height: 38px; background-color: #6d28d9; border-color: #6d28d9;">
+						<i class="fa-solid fa-filter me-2"></i> Filtrar Canales
+					</button>
+				</div>
+
+			</div>
+		</form>
+	</div>
+
+	<!-- =========================================================================
+	     SECCIÓN 3: TARJETAS DE INDICADORES CLAVE (KPIs COMPACTOS)
+	     ========================================================================= -->
+	<div class="row g-2 mb-3">
+		<div class="col-12 col-sm-6 col-md-3">
+			<div class="card border-0 shadow-sm rounded-3 p-2 bg-white border-start border-primary border-4">
+				<div class="text-muted text-uppercase fw-bold opacity-70" style="font-size: 9px; letter-spacing: 0.5px;">Agenda Total Mes</div>
+				<div class="d-flex align-items-center justify-content-between mt-1">
+					<h4 class="mb-0 fw-black text-primary" th:text="${kpiTotalMes}">0</h4>
+					<div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: #e0f2fe; color: #0369a1;">
+						<i class="fa-solid fa-calendar-check fs-6"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-sm-6 col-md-3">
+			<div class="card border-0 shadow-sm rounded-3 p-2 bg-white border-start border-success border-4">
+				<div class="text-muted text-uppercase fw-bold opacity-70" style="font-size: 9px; letter-spacing: 0.5px;">Pacientes Atendidos</div>
+				<div class="d-flex align-items-center justify-content-between mt-1">
+					<h4 class="mb-0 fw-black text-success" th:text="${kpiAtendidos}">0</h4>
+					<div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: #dcfce7; color: #16a34a;">
+						<i class="fa-solid fa-user-check fs-6"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-sm-6 col-md-3">
+			<div class="card border-0 shadow-sm rounded-3 p-2 bg-white border-start border-warning border-4">
+				<div class="text-muted text-uppercase fw-bold opacity-70" style="font-size: 9px; letter-spacing: 0.5px;">Pacientes En Sala</div>
+				<div class="d-flex align-items-center justify-content-between mt-1">
+					<h4 class="mb-0 fw-black text-warning-emphasis" th:text="${kpiEnSala}">0</h4>
+					<div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: #fef3c7; color: #d97706;">
+						<i class="fa-solid fa-hospital-user fs-6"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-sm-6 col-md-3">
+			<div class="card border-0 shadow-sm rounded-3 p-2 bg-white border-start border-danger border-4">
+				<div class="text-muted text-uppercase fw-bold opacity-70" style="font-size: 9px; letter-spacing: 0.5px;">Citas Anuladas</div>
+				<div class="d-flex align-items-center justify-content-between mt-1">
+					<h4 class="mb-0 fw-black text-danger" th:text="${kpiAnulados}">0</h4>
+					<div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: #fee2e2; color: #dc2626;">
+						<i class="fa-solid fa-ban fs-6"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- =========================================================================
+	     SECCIÓN 4: CONTENEDORES GRÁFICOS COMPACTOS (TODO EN PANTALLA)
+	     ========================================================================= -->
+	<div class="row g-3">
+		
+		<!-- Gráfico izquierdo: Distribución de Estados (Dona) -->
+		<div class="col-12 col-md-4">
+			<div class="card border-0 shadow-sm rounded-3 p-3 bg-white" style="height: 310px;">
+				<h6 class="fw-bold text-dark mb-2">
+					<i class="fa-solid fa-chart-pie text-primary me-2"></i>Estado de la Agenda
+				</h6>
+				
+				<div class="d-flex align-items-center justify-content-center mb-2" style="height: 130px;">
+					<div th:if="${kpiTotalMes == 0}" class="rounded-circle border d-flex align-items-center justify-content-center text-muted small fw-bold" style="width: 110px; height: 110px; background-color: #f1f5f9;">
+						Sin Datos
+					</div>
+					
+					<div th:if="${kpiTotalMes > 0}" class="rounded-circle shadow-sm position-relative d-flex align-items-center justify-content-center"
+						 th:with="pctAtendidos=${kpiAtendidos * 100 / kpiTotalMes}, 
+						          pctSala=${kpiEnSala * 100 / kpiTotalMes}, 
+						          pctAnulados=${kpiAnulados * 100 / kpiTotalMes},
+						          finAtendidos=${pctAtendidos},
+						          finSala=${pctAtendidos + pctSala},
+						          finAnulados=${pctAtendidos + pctSala + pctAnulados}"
+						 th:style="'width: 110px; height: 110px; background: conic-gradient(#22c55e 0% ' + ${finAtendidos} + '%, #eab308 ' + ${finAtendidos} + '% ' + ${finSala} + '%, #ef4444 ' + ${finSala} + '% ' + ${finAnulados} + '%, #cbd5e1 ' + ${finAnulados} + '% 100%);'">
+						
+						<div class="rounded-circle bg-white d-flex flex-column align-items-center justify-content-center" style="width: 65px; height: 65px;">
+							<span class="text-muted fw-bold" style="font-size: 8px; text-transform: uppercase;">Total</span>
+							<span class="fw-bold text-dark fs-6" th:text="${kpiTotalMes}" style="line-height: 1;">0</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="d-flex flex-column gap-1 border-top pt-2" style="font-size: 11px;">
+					<div class="d-flex justify-content-between align-items-center text-muted fw-bold">
+						<span><i class="fa-solid fa-circle text-success me-1" style="font-size: 8px;"></i> ATENDIDOS</span>
+						<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" th:text="${kpiAtendidos} + ' (' + (${kpiTotalMes > 0} ? (${kpiAtendidos} * 100 / ${kpiTotalMes}) : 0) + '%)'">0</span>
+					</div>
+					<div class="d-flex justify-content-between align-items-center text-muted fw-bold">
+						<span><i class="fa-solid fa-circle text-warning me-1" style="font-size: 8px;"></i> EN SALA</span>
+						<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1" th:text="${kpiEnSala} + ' (' + (${kpiTotalMes > 0} ? (${kpiEnSala} * 100 / ${kpiTotalMes}) : 0) + '%)'">0</span>
+					</div>
+					<div class="d-flex justify-content-between align-items-center text-muted fw-bold">
+						<span><i class="fa-solid fa-circle text-danger me-1" style="font-size: 8px;"></i> ANULADOS</span>
+						<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1" th:text="${kpiAnulados} + ' (' + (${kpiTotalMes > 0} ? (${kpiAnulados} * 100 / ${kpiTotalMes}) : 0) + '%)'">0</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Gráfico derecho: Ranking de Médicos + Especialidad (Evita recortes de espacio) -->
+		<div class="col-12 col-md-8">
+			<div class="card border-0 shadow-sm rounded-3 p-3 bg-white" style="height: 310px;">
+				<h6 class="fw-bold text-dark mb-2">
+					<i class="fa-solid fa-chart-bar text-success me-2"></i>Ranking de Atenciones por Médico
+				</h6>
+				
+				<div class="d-flex align-items-end justify-content-around pt-3 pb-1" style="height: 240px; border-bottom: 2px solid #e2e8f0; overflow-x: auto;">
+					
+					<div th:if="${kpiAtendidos == 0}" class="text-center text-muted pb-4 small fw-bold w-100">
+						<i class="fa-solid fa-folder-open d-block fs-4 mb-1 opacity-50"></i> No hay datos de pacientes atendidos este mes para graficar.
+					</div>
+
+					<th:block th:if="${kpiAtendidos > 0}" th:each="medicoContador, iter : ${medicosLabels}">
+						<div class="d-flex flex-column align-items-center justify-content-end h-100" style="min-width: 90px; max-width: 120px;">
+							<span class="badge bg-light text-success border fw-bold mb-1 shadow-sm" style="font-size: 10px;" th:text="${medicosValores[iter.index]}">0</span>
+							
+							<div class="bg-success rounded-top-2 shadow-sm w-25" 
+								 style="min-height: 10px; transition: height 0.4s ease; background: linear-gradient(to top, #22c55e, #4ade80);"
+								 th:style="'height: ' + (${medicosValores[iter.index]} * 100 / ${kpiAtendidos}) + '%'"></div>
+							
+							<!-- Bloque Informativo de Identidad Separado (Médico arriba, Especialidad abajo) -->
+							<div class="text-center mt-2 w-100 lh-1">
+								<span class="text-dark d-block fw-bold text-truncate" style="font-size: 10px; text-transform: uppercase;" th:text="${medicoContador}">Médico</span>
+								<span class="text-muted d-block text-truncate mt-1" style="font-size: 8px; font-weight: 500; text-transform: uppercase;" th:text="${especialidadSeleccionada != 0 && especialidadSeleccionada != null ? 'Filtro Activo' : 'Clínica'}">Especialidad</span>
+							</div>
+						</div>
+					</th:block>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+
+
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+
+	<!-- Biblioteca Chart.js segura -->
+	<script th:src="@{/js/chart.min.js}"></script>
+
+	<!-- LÓGICA DE GRÁFICOS SANEADA -->
+	<!-- LÓGICA DE GRÁFICOS SANEADA Y COMPATIBLE 100% CON TU MOTOR LOCAL -->
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+
+			// 1. LEER LOS DATOS DESDE EL HTML DE FORMA SEGURA
+			const divEstados = document.getElementById('datosEstados');
+			const txtEstadosLabels = divEstados ? divEstados
+					.getAttribute('data-labels') : '';
+			const txtEstadosValores = divEstados ? divEstados
+					.getAttribute('data-valores') : '';
+
+			// Filtramos para evitar que entren arreglos con textos vacíos [""]
+			const estadosLabels = txtEstadosLabels ? txtEstadosLabels
+					.split(',') : [];
+			const estadosValores = txtEstadosValores ? txtEstadosValores.split(
+					',').map(Number) : [];
+
+			const divMedicos = document.getElementById('datosMedicos');
+			const txtMedicosLabels = divMedicos ? divMedicos
+					.getAttribute('data-labels') : '';
+			const txtMedicosValores = divMedicos ? divMedicos
+					.getAttribute('data-valores') : '';
+
+			const medicosLabels = txtMedicosLabels ? txtMedicosLabels
+					.split(',') : [];
+			const medicosValores = txtMedicosValores ? txtMedicosValores.split(
+					',').map(Number) : [];
+
+			// --- VALIDACIÓN DE CONTROL: Si no hay datos, mostramos un aviso visual en consola ---
+			console.log("Datos de Estados detectados:", estadosLabels,
+					estadosValores);
+			console.log("Datos de Médicos detectados:", medicosLabels,
+					medicosValores);
+
+			// 2. CONFIGURACIÓN DEL GRÁFICO DE DONA (Sintaxis nativa de tu Chart.js local)
+			if (estadosLabels.length > 0) {
+				const ctxEstados = document.getElementById('chartEstados')
+						.getContext('2d');
+				new Chart(ctxEstados,
+						{
+							type : 'doughnut',
+							data : {
+								labels : estadosLabels,
+								datasets : [ {
+									data : estadosValores,
+									backgroundColor : [ '#06b6d4', '#eab308',
+											'#22c55e', '#ef4444', '#64748b',
+											'#a855f7' ],
+									borderWidth : 2,
+									borderColor : '#ffffff'
+								} ]
+							},
+							options : {
+								responsive : true,
+								maintainAspectRatio : false,
+								legend : {
+									position : 'bottom',
+									labels : {
+										boxWidth : 12,
+										fontSize : 11
+									}
+								},
+								// Ajuste nativo para la dona en el motor local
+								cutoutPercentage : 65
+							}
+						});
+			}
+
+			// 3. CONFIGURACIÓN DEL GRÁFICO DE BARRAS (Sintaxis nativa de tu Chart.js local)
+			if (medicosLabels.length > 0) {
+				const ctxMedicos = document.getElementById('chartMedicos')
+						.getContext('2d');
+				new Chart(ctxMedicos, {
+					type : 'bar',
+					data : {
+						labels : medicosLabels,
+						datasets : [ {
+							label : 'Pacientes Atendidos',
+							data : medicosValores,
+							backgroundColor : 'rgba(34, 197, 94, 0.85)',
+							borderColor : '#22c55e',
+							borderWidth : 1
+						} ]
+					},
+					options : {
+						responsive : true,
+						maintainAspectRatio : false,
+						legend : {
+							display : false
+						},
+						scales : {
+							yAxes : [ {
+								ticks : {
+									beginAtZero : true,
+									stepSize : 1,
+									fontSize : 11
+								}
+							} ],
+							xAxes : [ {
+								ticks : {
+									fontSize : 10,
+									fontStyle : 'bold'
+								},
+								gridLines : {
+									display : false
+								}
+							} ]
+						}
+					}
+				});
+			}
+		});
+	</script>
+
+
+
+</body>
+</html>

@@ -29,5 +29,12 @@ public class EstadoServiceImpl implements IEstadoService {
 	public List<Estado> findByEstadoActivo(String term) {
 		return estadoDao.findByEstadoActivo(term);
 	}
+	
+	//HISTORIA CLINICA
+	@Override
+	@Transactional(readOnly = true)
+	public Estado findById(Long id) {
+	    return estadoDao.findById(id).orElse(null);
+	}
 
 }

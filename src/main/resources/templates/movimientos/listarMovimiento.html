@@ -1,193 +1,218 @@
 <!DOCTYPE html>
-<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://thymeleaf.org"
+	xmlns:sec="http://thymeleaf.org/extras/spring-security">
 <head th:replace="~{layout/layout :: head}">
-    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
 </head>
 <style>
-    /* --- CABECERA PROFESIONAL MODERNA --- */
-    .header-sigat-modern {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
-        border-bottom: 1px solid #e2e8f0;
-        position: relative;
-    }
+/* --- CABECERA PROFESIONAL MODERNA --- */
+.header-sigat-modern {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 20px;
+	margin-bottom: 30px;
+	border-bottom: 1px solid #e2e8f0;
+	position: relative;
+}
 
-    /* La línea azul ahora es más fina y elegante */
-    .header-sigat-modern::after {
-        content: "";
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        width: 150px;
-        height: 3px;
-        background-color: #0d6efd;
-        border-radius: 2px;
-    }
+/* La línea azul ahora es más fina y elegante */
+.header-sigat-modern::after {
+	content: "";
+	position: absolute;
+	bottom: -1px;
+	left: 0;
+	width: 150px;
+	height: 3px;
+	background-color: #0d6efd;
+	border-radius: 2px;
+}
 
-    .icon-shape {
-        width: 50px;
-        height: 50px;
-        background-color: #eef2ff;
-        color: #0d6efd;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        font-size: 1.5rem;
-    }
+.icon-shape {
+	width: 50px;
+	height: 50px;
+	background-color: #eef2ff;
+	color: #0d6efd;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	font-size: 1.5rem;
+}
 
-    .system-tag {
-        font-size: 0.65rem;
-        font-weight: 800;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        display: block;
-        margin-bottom: -2px;
-    }
+.system-tag {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #64748b;
+	text-transform: uppercase;
+	letter-spacing: 1.5px;
+	display: block;
+	margin-bottom: -2px;
+}
 
-    .title-main {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 1.75rem;
-        margin: 0;
-    }
+.title-main {
+	font-family: 'Segoe UI', Arial, sans-serif;
+	font-weight: 700;
+	color: #1e293b;
+	font-size: 1.75rem;
+	margin: 0;
+}
 
-    .subtitle-main {
-        font-size: 0.85rem;
-        color: #94a3b8;
-        font-weight: 500;
-    }
+.subtitle-main {
+	font-size: 0.85rem;
+	color: #94a3b8;
+	font-weight: 500;
+}
 
-    /* --- ESTILOS DE TABLA --- */
-    .table thead th {
-        background-color: #f8fafc;
-        color: #475569;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        padding: 15px 10px;
-    }
+/* --- ESTILOS DE TABLA --- */
+.table thead th {
+	background-color: #f4f6f9;
+	color: #475569;
+	text-transform: uppercase;
+	font-size: 0.7rem;
+	font-weight: 800;
+	letter-spacing: 0.5px;
+	padding: 15px 10px;
+}
 
-    .col-mañana { background-color: #f0fdf4 !important; color: #166534 !important; }
-    .col-tarde { background-color: #f0f9ff !important; color: #075985 !important; }
-    .col-total { background-color: #fefce8 !important; color: #854d0e !important; font-weight: 800; }
+.col-mañana {
+	background-color: #f0fdf4 !important;
+	color: #166534 !important;
+}
 
-    .badge-clinico {
-        background-color: #d1fae5;
-        color: #065f46;
-        border: 1px solid #10b981;
-        padding: 0.4em 0.8em;
-        font-weight: 700;
-        border-radius: 4px;
-    }
+.col-tarde {
+	background-color: #f0f9ff !important;
+	color: #075985 !important;
+}
+
+.col-total {
+	background-color: #fefce8 !important;
+	color: #854d0e !important;
+	font-weight: 800;
+}
+
+.badge-clinico {
+	background-color: #d1fae5;
+	color: #065f46;
+	border: 1px solid #10b981;
+	padding: 0.4em 0.8em;
+	font-weight: 700;
+	border-radius: 4px;
+}
 </style>
 <body class="bg-light">
 
-    <header th:replace="~{layout/layout :: header}"></header>
+	<header th:replace="~{layout/layout :: header}"></header>
 
-    <div class="container-fluid px-lg-5 py-4">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-4 p-lg-5">
-                
-                <!-- CABECERA REDISEÑADA -->
-                <div class="header-sigat-modern">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape me-3 shadow-sm">
-                            <i class="fa-solid fa-chart-simple"></i>
-                        </div>
-                        <div>
-                            <h2 class="title-main" th:text="${titulo}"></h2>
-                            <span class="subtitle-main"> SIGAT • Análisis detallado de carga horaria y presencia médica</span>
-                        </div>
-                    </div>
-                    
-                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/movimientos/formMovimiento}" 
-                       class="btn btn-primary fw-bold shadow-sm px-4 py-2 rounded-3">
-                        <i class="fa-solid fa-plus-circle me-2"></i>NUEVO REGISTRO
-                    </a>
-                </div>
+	<div class="container-fluid px-lg-5 py-4">
+		<div class="card shadow-sm border-0 rounded-4">
+			<div class="card-body p-4 p-lg-5">
 
-                <!-- TABLA DE MOVIMIENTOS -->
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle border">
-                        <thead>
-                            <tr>
-                                <th colspan="4" class="text-center border-end">Identificación</th>
-                                <th colspan="3" class="text-center col-mañana border-end">Sesión Mañana</th>
-                                <th colspan="3" class="text-center col-tarde border-end">Sesión Tarde</th>
-                                <th class="text-center col-total border-end">Cálculo</th>
-                                <th colspan="2" class="text-center">Acciones</th>
-                            </tr>
-                            <tr>
-                                <th class="text-center">Ver</th>
-                                <th>Profesional</th>
-                                <th>Especialidad</th>
-                                <th class="border-end">Fecha</th>
-                                <th class="col-mañana">Ingreso</th>
-                                <th class="col-mañana">Egreso</th>
-                                <th class="col-mañana border-end text-center">Horas</th>
-                                <th class="col-tarde">Ingreso</th>
-                                <th class="col-tarde">Egreso</th>
-                                <th class="col-tarde border-end text-center">Horas</th>
-                                <th class="col-total text-center border-end">Total</th>
-                                <th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Editar</th>
-                                <th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Baja</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="movimiento: ${movimientos}">
-                                <td class="text-center">
-                                    <a th:href="@{/movimientos/verMovimiento/} + ${movimiento.id}" class="text-info">
-                                        <i class="fa-solid fa-circle-info fa-lg"></i>
-                                    </a>
-                                </td>
-                                <td class="fw-bold text-dark" th:text="${movimiento.profesional.apellido} + ' ' + ${movimiento.profesional.nombre}"></td>
-                                <td><span class="badge badge-clinico" th:text="${movimiento.especialidad.especialidadNombre}"></span></td>
-                                <td class="border-end text-muted" th:text="${#dates.format(movimiento.createAt,'dd/MM/yyyy')}"></td>
+				<!-- CABECERA REDISEÑADA -->
+				<div class="header-sigat-modern">
+					<div class="d-flex align-items-center">
+						<div class="icon-shape me-3 shadow-sm">
+							<i class="fa-solid fa-chart-simple"></i>
+						</div>
+						<div>
+							<h2 class="title-main" th:text="${titulo}"></h2>
+							<span class="subtitle-main"> SIGAT • Análisis detallado de
+								carga horaria y presencia médica</span>
+						</div>
+					</div>
 
-                                <td class="col-mañana" th:text="${movimiento.horaIniManana}"></td>
-                                <td class="col-mañana" th:text="${movimiento.horaFinManana}"></td>
-                                <td class="col-mañana border-end text-center fw-bold" th:text="${movimiento.totalManana}"></td>
+					<a sec:authorize="hasRole('ROLE_ADMIN')"
+						th:href="@{/movimientos/formMovimiento}"
+						class="btn btn-primary fw-bold shadow-sm px-4 py-2 rounded-3">
+						<i class="fa-solid fa-plus-circle me-2"></i>NUEVO REGISTRO
+					</a>
+				</div>
 
-                                <td class="col-tarde" th:text="${movimiento.horaIniTarde}"></td>
-                                <td class="col-tarde" th:text="${movimiento.horaFinTarde}"></td>
-                                <td class="col-tarde border-end text-center fw-bold" th:text="${movimiento.totalTarde}"></td>
+				<!-- TABLA DE MOVIMIENTOS -->
+				<div class="table-responsive">
+					<table class="table table-hover align-middle border">
+						<thead>
+							<tr>
+								<th colspan="4" class="text-center border-end">Identificación</th>
+								<th colspan="3" class="text-center col-mañana border-end">Sesión
+									Mañana</th>
+								<th colspan="3" class="text-center col-tarde border-end">Sesión
+									Tarde</th>
+								<th class="text-center col-total border-end">Cálculo</th>
+								<th colspan="2" class="text-center">Acciones</th>
+							</tr>
+							<tr>
+								<th class="text-center">Ver</th>
+								<th>Profesional</th>
+								<th>Especialidad</th>
+								<th class="border-end">Fecha</th>
+								<th class="col-mañana">Ingreso</th>
+								<th class="col-mañana">Egreso</th>
+								<th class="col-mañana border-end text-center">Horas</th>
+								<th class="col-tarde">Ingreso</th>
+								<th class="col-tarde">Egreso</th>
+								<th class="col-tarde border-end text-center">Horas</th>
+								<th class="col-total text-center border-end">Total</th>
+								<th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Editar</th>
+								<th class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">Baja</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="movimiento: ${movimientos}">
+								<td class="text-center"><a
+									th:href="@{/movimientos/verMovimiento/} + ${movimiento.id}"
+									class="text-secondary"> <i class="fa-solid fa-circle-info fa-lg" style="color:#10b981;"></i>
+								</a></td>
+								<td class="fw-bold text-dark"
+									th:text="${movimiento.profesional.apellido} + ' ' + ${movimiento.profesional.nombre}"></td>
+								<td><span class="badge badge-clinico"
+									th:text="${movimiento.especialidad.especialidadNombre}"></span></td>
+								<td class="border-end text-muted"
+									th:text="${#dates.format(movimiento.createAt,'dd/MM/yyyy')}"></td>
 
-                                <td class="col-total text-center border-end fs-6" th:text="${movimiento.totalGeneral}"></td>
+								<td class="col-mañana" th:text="${movimiento.horaIniManana}"></td>
+								<td class="col-mañana" th:text="${movimiento.horaFinManana}"></td>
+								<td class="col-mañana border-end text-center fw-bold"
+									th:text="${movimiento.totalManana}"></td>
 
-                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
-                                    <a th:href="@{/movimientos/editarMovimiento/} + ${movimiento.id}" class="btn btn-sm btn-link text-warning p-0">
-                                        <i class="fa-solid fa-pen-to-square fa-lg"></i>
-                                    </a>
-                                </td>
-                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
-                                    <a th:href="@{/movimientos/eliminarMovimiento/} + ${movimiento.id}" 
-                                       class="btn btn-sm btn-link text-danger p-0"
-                                       th:onclick="return confirm('¿Eliminar registro de productividad?');">
-                                        <i class="fa-solid fa-trash-can fa-lg"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+								<td class="col-tarde" th:text="${movimiento.horaIniTarde}"></td>
+								<td class="col-tarde" th:text="${movimiento.horaFinTarde}"></td>
+								<td class="col-tarde border-end text-center fw-bold"
+									th:text="${movimiento.totalTarde}"></td>
 
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <p class="small text-muted mb-0">Mostrando registros de actividad profesional</p>
-                    <nav th:replace="~{paginator-nav :: paginator}"></nav>
-                </div>
+								<td class="col-total text-center border-end fs-6"
+									th:text="${movimiento.totalGeneral}"></td>
 
-            </div>
-        </div>
-    </div>
+								<td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
+									<a
+									th:href="@{/movimientos/editarMovimiento/} + ${movimiento.id}"
+									class="btn btn-sm btn-link text-warning p-0"> <i
+										class="fa-solid fa-pen-to-square fa-lg"></i>
+								</a>
+								</td>
+								<td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
+									<a
+									th:href="@{/movimientos/eliminarMovimiento/} + ${movimiento.id}"
+									class="btn btn-sm btn-link text-danger p-0"
+									th:onclick="return confirm('¿Eliminar registro de productividad?');">
+										<i class="fa-solid fa-trash-can fa-lg"></i>
+								</a>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
-    <footer th:replace="layout/layout :: footer"></footer>
+				<div class="d-flex justify-content-between align-items-center mt-4">
+					<p class="small text-muted mb-0">Entradas y Salidas registradas bajo normativa SIGAT</p>
+					<nav th:replace="~{paginator-nav :: paginator}"></nav>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
 </body>
 </html>
 

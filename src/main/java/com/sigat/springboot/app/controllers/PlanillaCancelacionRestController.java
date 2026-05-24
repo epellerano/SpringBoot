@@ -1,5 +1,6 @@
 package com.sigat.springboot.app.controllers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -136,32 +137,47 @@ public class PlanillaCancelacionRestController {
 		turnoService.desactivarSafeUpdates();
 	}
 	
-	@GetMapping("/eliminar-turnos-ocupados-fechas/{profId}/{EspecId}/{fechaIni}/{fechaFin}")
-	public void eliminarTurnosOcupadosFechas(@PathVariable Long profId, @PathVariable Long EspecId,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaIni,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaFin) {
-		turnoService.eliminarTurnosOcupadosFechas(profId, EspecId, fechaIni, fechaFin);
-	}
+	//PARA CANCELACION MASIVA DE PLANILLA (TURNOS Y SOBRETURNOS).
 	
-	@GetMapping("/eliminar-turnos-ocupados-fechas-horas/{profId}/{EspecId}/{fechaHoraIni}/{fechaHoraFin}")
-	public void eliminarTurnosOcupadosFechasHoras(@PathVariable Long profId, @PathVariable Long EspecId,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date fechaHoraIni,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date fechaHoraFin) {
-		turnoService.eliminarTurnosOcupadosFechasHoras(profId, EspecId, fechaHoraIni, fechaHoraFin);
-	}
+	// 1. ELIMINAR TURNOS POR FECHA (Pattern y Conversión)
+		@GetMapping("/eliminar-turnos-ocupados-fechas/{profId}/{especId}/{fechaIni}/{fechaFin}")
+		public void eliminarTurnosOcupadosFechas(@PathVariable Long profId, @PathVariable Long especId,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime fechaIni,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime fechaFin) {
+			
+			// El Service ITurnoService ahora pide LocalDateTime para este método
+			turnoService.eliminarTurnosOcupadosFechas(profId, especId, fechaIni, fechaFin);
+		}
+
+		// 2. ELIMINAR TURNOS POR FECHA Y HORA
+		@GetMapping("/eliminar-turnos-ocupados-fechas-horas/{profId}/{especId}/{inicio}/{fin}")
+		public void eliminarTurnosOcupadosFechasHoras(@PathVariable Long profId, @PathVariable Long especId,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime inicio,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime fin) {
+			
+			// El Service ITurnoService pide LocalDateTime para este método
+			turnoService.eliminarTurnosOcupadosFechasHoras(profId, especId, inicio, fin);
+		}
+
+		// 3. ELIMINAR SOBRETURNOS POR FECHA
+		@GetMapping("/eliminar-sobreturnos-ocupados-fechas/{profId}/{especId}/{fechaIni}/{fechaFin}")
+		public void eliminarSobreturnosOcupadosFechas(@PathVariable Long profId, @PathVariable Long especId,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime fechaIni,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDateTime fechaFin) {
+			
+			// El Service ISobreTurnoService ahora pide LocalDateTime
+			sobreturnoService.eliminarSobreturnosOcupadosFechas(profId, especId, fechaIni, fechaFin);
+		}
+
+		// 4. ELIMINAR SOBRETURNOS POR FECHA Y HORA
+		@GetMapping("/eliminar-sobreturnos-ocupados-fechas-horas/{profId}/{especId}/{inicio}/{fin}")
+		public void eliminarSobreturnosOcupadosFechasHoras(@PathVariable Long profId, @PathVariable Long especId,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime inicio,
+				@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime fin) {
+			
+			// El Service ISobreTurnoService pide LocalDateTime
+			sobreturnoService.eliminarSobreturnosOcupadosFechasHoras(profId, especId, inicio, fin);
+		}
 	
-	@GetMapping("/eliminar-sobreturnos-ocupados-fechas/{profId}/{EspecId}/{fechaIni}/{fechaFin}")
-	public void eliminarSobreturnosOcupadosFechas(@PathVariable Long profId, @PathVariable Long EspecId,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaIni,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaFin) {
-		sobreturnoService.eliminarSobreturnosOcupadosFechas(profId, EspecId, fechaIni, fechaFin);
-	}
-	
-	@GetMapping("/eliminar-sobreturnos-ocupados-fechas-horas/{profId}/{EspecId}/{fechaHoraIni}/{fechaHoraFin}")
-	public void eliminarSobreturnosOcupadosFechasHoras(@PathVariable Long profId, @PathVariable Long EspecId,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date fechaHoraIni,
-			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date fechaHoraFin) {
-		sobreturnoService.eliminarSobreturnosOcupadosFechasHoras(profId, EspecId, fechaHoraIni, fechaHoraFin);
-	}
 
 }

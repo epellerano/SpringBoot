@@ -287,21 +287,6 @@ public class TurnosOcupadosFechasPdfView extends AbstractPdfView {
 				}
 			}
 		}
-
-		/*
-		 * //PIE DE PAGINA PdfContentByte cb = writer.getDirectContent(); BaseFont bf =
-		 * BaseFont.createFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252,
-		 * BaseFont.EMBEDDED); cb.setFontAndSize(bf, 10);
-		 * 
-		 * String textoPie =
-		 * "SIGAT - Sistema General Administrativo de Turnos | Página: "; String
-		 * numPagina = String.valueOf(writer.getPageNumber());
-		 * 
-		 * // Posicionar el pie de página en la parte inferior cb.beginText();
-		 * cb.setTextMatrix(160, 30); // Ajusta la posición X e Y según necesites
-		 * cb.showText(textoPie + numPagina); cb.endText();
-		 */
-
 	}
 
 }

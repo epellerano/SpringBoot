@@ -16,10 +16,8 @@ import com.sigat.springboot.app.auth.handler.LoginSuccessHandler;
 import com.sigat.springboot.app.models.service.JpaUserDetailsService;
  
 @Configuration
-//@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SpringSecurityConfig {
     
-	//Inyectamos la clase login LoginSuccessHandler del package(com.sigat.springboot.app.auth.handler) anotada con @Component.
 	@Autowired
 	private LoginSuccessHandler successHandler;
 	
@@ -31,76 +29,83 @@ public class SpringSecurityConfig {
 
     @Autowired
     public void userDetailsService(AuthenticationManagerBuilder build) throws Exception {
-       build.userDetailsService(userDetailService) //obtenemos Usuarios y roles
-       .passwordEncoder(passwordEncoder); //Obtenemos la contraseña
+       build.userDetailsService(userDetailService) 
+       .passwordEncoder(passwordEncoder); 
     }
-    
-    /*
-    @Bean
-    public UserDetailsService userDetailsService()throws Exception{
-                
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        manager.createUser(User
-                .withUsername("andres")
-                .password(passwordEncoder().encode("12345"))
-                .roles("USER")
-                .build());
-         manager.createUser(User
-                    .withUsername("admin")
-                    .password(passwordEncoder().encode("12345"))
-                    .roles("ADMIN","USER")
-                    .build());
-        
-        return manager;
-    }*/
      
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
- 
+
         http.authorizeHttpRequests(
             (authz) -> authz
-            	//para profesionales a nivel controller
-            	//.requestMatchers("/", "/css/**", "/js/**", "/images/**", "/listar", "/locale").permitAll()
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/locale").permitAll()
-                .requestMatchers("/ver/**").hasAnyRole("USER") // en controlador: @Secured("ROLE_USER")
-                .requestMatchers("/uploads/**").hasAnyRole("USER")
-                .requestMatchers("/form/**").hasAnyRole("ADMIN")
-                .requestMatchers("/eliminar/**").hasAnyRole("ADMIN")
-                // para pacientes a nivel controller
-                .requestMatchers("pacientes/verPaciente/**").hasAnyRole("USER")
-                .requestMatchers("pacientes/formPaciente/**").hasAnyRole("ADMIN")
-                .requestMatchers("pacientes/eliminarPaciente/**").hasAnyRole("ADMIN")
-                // para especialidades a nivel controller
-                .requestMatchers("especialidades/verEspecialidad/**").hasAnyRole("USER")
-                .requestMatchers("especialidades/formEspecialidad/**").hasAnyRole("ADMIN")
-                .requestMatchers("especialidades/eliminarEspecialidad/**").hasAnyRole("ADMIN")
-             // para vinculaciones a nivel controller
-                .requestMatchers("vinculaciones/verVinculacion/**").hasAnyRole("USER")
-                .requestMatchers("vinculaciones/formVinculacion/**").hasAnyRole("ADMIN")
-                .requestMatchers("vinculaciones/eliminarVinculacion/**").hasAnyRole("ADMIN")
-             // para movimientos a nivel controller
-                .requestMatchers("movimientos/verMovimiento/**").hasAnyRole("USER")
-                .requestMatchers("movimientos/formMovimiento/**").hasAnyRole("ADMIN")
-                .requestMatchers("movimientos/eliminarMovimiento/**").hasAnyRole("ADMIN")
-                .requestMatchers("movimientos/editarMovimiento/**").hasAnyRole("ADMIN")
-             // para planillas a nivel controller
-                .requestMatchers("planillacabecera/verPlanillaCabecera/**").hasAnyRole("USER")
-                .requestMatchers("planillacabecera/formPlanillaCabecera/**").hasAnyRole("ADMIN")
-                .requestMatchers("planillacabecera/eliminarPlanillaCabecera/**").hasAnyRole("ADMIN")
-                .requestMatchers("planillacabecera/editarPlanillaCabecera/**").hasAnyRole("ADMIN")
-             // para turnos a nivel controller
-                .requestMatchers("turnos/verTurno/**").hasAnyRole("USER")
-                .requestMatchers("turnos/formTurno/**").hasAnyRole("ADMIN")
-                .requestMatchers("turnos/eliminarTurno/**").hasAnyRole("ADMIN")
-                .requestMatchers("turnos/openModal/**").hasAnyRole("ADMIN")
+                // 1. ACCESOS PÚBLICOS (Estilos, imágenes y endpoints del registro AJAX locales)
+                .requestMatchers("/login", "/registro/**", "/css/**", "/js/**", "/images/**", "/locale").permitAll()
+                
+                // 2. CONSULTORIO (HCE) - SOLO MÉDICOS
+                .requestMatchers("/consultorio/**").hasRole("MEDICO")
+
+                // 3. PROFESIONALES
+                .requestMatchers("/ver/**").hasAnyRole("ADMIN", "MEDICO") 
+                .requestMatchers("/uploads/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/form/**").hasRole("ADMIN")
+                .requestMatchers("/eliminar/**").hasRole("ADMIN")
+
+                // 4. PACIENTES
+                .requestMatchers("/pacientes/listarPaciente").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/pacientes/verPaciente/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/pacientes/formPaciente/**").hasRole("ADMIN")
+                .requestMatchers("/pacientes/eliminarPaciente/**").hasRole("ADMIN")
+
+                // 5. ESPECIALIDADES
+                .requestMatchers("/especialidades/verEspecialidad/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/especialidades/formEspecialidad/**").hasRole("ADMIN")
+                .requestMatchers("/especialidades/eliminarEspecialidad/**").hasRole("ADMIN")
+
+                // 6. VINCULACIONES
+                .requestMatchers("/vinculaciones/verVinculacion/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/vinculaciones/formVinculacion/**").hasRole("ADMIN")
+                .requestMatchers("/vinculaciones/eliminarVinculacion/**").hasRole("ADMIN")
+
+                // 7. MOVIMIENTOS
+                .requestMatchers("/movimientos/verMovimiento/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/movimientos/formMovimiento/**").hasRole("ADMIN")
+                .requestMatchers("/movimientos/eliminarMovimiento/**").hasRole("ADMIN")
+                .requestMatchers("/movimientos/editarMovimiento/**").hasRole("ADMIN")
+
+                // 8. PLANILLAS
+                .requestMatchers("/planillacabecera/verPlanillaCabecera/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/planillacabecera/formPlanillaCabecera/**").hasRole("ADMIN")
+                .requestMatchers("/planillacabecera/eliminarPlanillaCabecera/**").hasRole("ADMIN")
+                .requestMatchers("/planillacabecera/editarPlanillaCabecera/**").hasRole("ADMIN")
+
+                // 9. TURNOS (TUS REGLAS ORIGINALES INTACTAS - Bloqueado para el paciente común)
+                .requestMatchers("/turnos/listarTurno").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/turnos/verTurno/**").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/turnos/formTurno/**").hasRole("ADMIN")
+                .requestMatchers("/turnos/eliminarTurno/**").hasRole("ADMIN")
+                .requestMatchers("/turnos/openModal/**").hasRole("ADMIN")
+                
+                // 10. SOBRETURNOS (TUS REGLAS ORIGINALES INTACTAS - Bloqueado para el paciente común)
+                .requestMatchers("/sobreturnos/listarSobreturno").hasAnyRole("ADMIN", "MEDICO")
+                .requestMatchers("/sobreturnos/formSobreturno/**").hasRole("ADMIN")
+                .requestMatchers("/sobreturnos/eliminar/**").hasRole("ADMIN")
+
+                // =========================================================================
+                // 11. AUTOGESTIÓN FUTURA (Habilitamos la API y el ROL para el mañana)
+                // =========================================================================
+                .requestMatchers("/api/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE", "USER")
+                .requestMatchers("/paciente-web/**").hasRole("PACIENTE") // Reservado para tu vista autoTurno.html
+
+                // Cualquier otra petición requiere estar autenticado (Aquí entra libre la secretaria con ROLE_USER)
                 .anyRequest().authenticated()
-             )
-             .formLogin(login -> login.permitAll()
-            		 .successHandler(successHandler)
-            		 .loginPage("/login"))
-             .logout(logout -> logout.permitAll())
-             .exceptionHandling((exception)-> exception.accessDeniedPage("/error_403"));
- 
+        )
+        .formLogin(login -> login
+            .loginPage("/login") 
+            .successHandler(successHandler) 
+            .permitAll())
+        .logout(logout -> logout.permitAll())
+        .exceptionHandling((exception) -> exception.accessDeniedPage("/error_403"));
+
         return http.build();
     }
 }

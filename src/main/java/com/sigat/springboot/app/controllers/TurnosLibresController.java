@@ -46,6 +46,20 @@ public class TurnosLibresController {
 			@PathVariable Long diaId) {
 		return planillaDetalleService.mostrarTurnosLibresTodosByDiaId(profId, EspecId, diaId);
 	}
+	
+	//PARA TRABAJAR EN SOBRETURNOS Y LISTAR LOS TURNOS LIBRES
+	@GetMapping("/betweensobreturnos/{profId}/{EspecId}")
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosTodos(@PathVariable Long profId, @PathVariable Long EspecId) {
+		// Esta es la versión de tu backup que no fallaba
+		return planillaDetalleService.mostrarHorariosParaSobreturnosTodos(profId, EspecId);
+	}
+
+	//PARA TRABAJAR EN SOBRETURNOS Y LISTAR LOS TURNOS LIBRES por dia
+	@GetMapping("/betweensobreturnos-dia-id/{profId}/{EspecId}/{diaId}")
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosByDiaId(@PathVariable Long profId, @PathVariable Long EspecId,
+			@PathVariable Long diaId) {
+		return planillaDetalleService.mostrarHorariosParaSobreturnosByDiaId(profId, EspecId, diaId);
+	}
 
 	@GetMapping("/horarios/{profId}/{EspecId}")
 	public List<PlanillaCabecera> obtenerHorariosAtencion(@PathVariable Long profId, @PathVariable Long EspecId) {

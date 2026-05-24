@@ -35,6 +35,12 @@ public class ProfesionalServiceImpl implements IProfesionalService {
 	public Profesional findOne(Long id) {
 		return profesionalDao.findById(id).orElse(null);
 	}
+	
+	//Para el search buscador
+	@Override
+	public Page<Profesional> findByNombreOrApellidoOrCodigo(String term, Pageable pageable) {
+	    return profesionalDao.findByNombreOrApellidoOrCodigo(term, pageable);
+	}
 
 	@Override
 	@Transactional
@@ -94,6 +100,22 @@ public class ProfesionalServiceImpl implements IProfesionalService {
 		@Transactional(readOnly = true)
 		public Profesional findByProfesionalMatriculaUpdate(String profMatricula, Long profId) {
 			return profesionalDao.findByProfesionalMatriculaUpdate(profMatricula, profId);
+		}
+		
+		//Historia Clinica
+		/*
+		 * si por algún motivo el nombre de usuario tiene menos de 3 letras, el sistema
+		 * podría dar un error
+		 */
+		@Override
+		@Transactional(readOnly = true)
+		public Profesional findByUsername(String username) {
+		    if (username == null || username.length() < 3) {
+		        return null;
+		    }
+		    // Extrae las primeras 3 letras y las pasa a Mayúsculas
+		    String codigoBusqueda = username.substring(0, 3).toUpperCase();
+		    return profesionalDao.findByCodigo(codigoBusqueda);
 		}
 
 }

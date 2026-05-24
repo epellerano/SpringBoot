@@ -8,6 +8,24 @@
 	//a su vez Verifica que Fecha Inicial y Hora Final R1 sea menor a la fecha actual
 	function validarRango() {
 		
+		// --- BLOQUE DE SEGURIDAD NUEVO ---
+	    const prof = document.getElementById("profesional").value;
+	    const esp = document.getElementById("especialidad").value;
+
+	    if (prof === "" || esp === "") {
+	        Swal.fire({
+	            icon: "error",
+	            title: "Datos incompletos",
+	            text: "No se puede guardar la planilla sin Profesional y Especialidad seleccionados."
+	        });
+	        // Si la función se llama desde un botón submit, esto evitará el envío
+	        if (event) event.preventDefault(); 
+	        return false; 
+	    }
+	    // --- FIN BLOQUE DE SEGURIDAD ---
+	    
+	    // ... aquí sigue todo tu código original de validarRango() ...
+		
 		//Obtenemos fecha y Hora de inicio.		
 		const dateInicio = document.getElementById('fechaInicio').value;
 		const timeInicioR1 = document.getElementById('horaInicialR1').value;
@@ -39,7 +57,7 @@
 	        // Reset result	
 	        result = "";
 	        // Disable #btnGuardar button
-	        document.getElementById('btnGuardar').disabled = true;			
+	        //document.getElementById('btnGuardar').disabled = true;			
 		}
 		else
 		{
@@ -66,7 +84,7 @@
 	        // Reset result	
 	        result = "";
 	        // Disable #btnGuardar button
-	        document.getElementById('btnGuardar').disabled = true;
+	        //document.getElementById('btnGuardar').disabled = true;
 			
 		}
 		else
@@ -110,7 +128,7 @@
 			            html: "Existen duplicados en el Rango Creado...<br> Seran indicados en color amarillo.<br>Por favor generelo nuevamentre!!"
 			        }); 
 			     	// Disable #btnGuardar button
-				    document.getElementById('btnGuardar').disabled = true;
+				    //document.getElementById('btnGuardar').disabled = true;
 			    } else {
 			      fechasVistas[fechaFormateada] = true;
 			    }
@@ -180,7 +198,7 @@
 		        result = "";
 
 		        // Disable #btnGuardar button
-		        document.getElementById('btnGuardar').disabled = true;
+		        //document.getElementById('btnGuardar').disabled = true;
 		    }
 		}
 	}

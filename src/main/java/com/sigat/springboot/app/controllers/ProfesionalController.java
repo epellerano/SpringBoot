@@ -92,42 +92,34 @@ public class ProfesionalController {
 		return "profesionales/ver";
 	}
 
-	// Metodo listar con paginacion
-	@GetMapping({ "/listar", "/" })
-	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, Model model,
-			Authentication authentication, Locale locale) {
+	// Metodo listar con paginacion y BUSCADOR GLOBAL
+	@GetMapping({ "/listar"})
+	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, 
+	                     @RequestParam(name = "term", required = false) String term, 
+	                     Model model, Locale locale) {
 
-		// Autenticacion de usuarios. PERO PASAR EN EL FUTURO A LA PAGINA PRINCIPAL
-		// --------------------
-		if (authentication != null) { // Opcion 1: por inyeccion de dependencia
-			logger.info("Hola usuario autenticado, tu username es: ".concat(authentication.getName()));
-		}
+	    Page<Profesional> profesional;
 
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    //para el search anulando el paginator
+	    if (term != null && !term.isEmpty()) {
+	        // .trim() limpia espacios accidentales adelante o atrás
+	        String termBusqueda = term.trim(); 
+	        PageRequest pageRequestBusqueda = PageRequest.of(0, 1000);
+	        profesional = profesionalService.findByNombreOrApellidoOrCodigo(termBusqueda, pageRequestBusqueda);
+	    } else {
+	        // Listado normal paginado (de a 5 como tenías)
+	        PageRequest pageRequestNormal = PageRequest.of(page, 5);
+	        profesional = profesionalService.findAll(pageRequestNormal);
+	    }
 
-		if (auth != null) { // Opcion 2: de manera estatica
-			logger.info("Utilizando forma estática SecurityContextHolder.getContext().getAuthentication(): "
-					+ "Usuario autenticado: ".concat(auth.getName()));
-		}
-
-		// utilizar funcion hasRole() para ver si tiene acceso al sistema.
-		if (hasRole("ROLE_ADMIN")) {
-			logger.info("Hola ".concat(auth.getName()).concat(" tienes acceso!"));
-		} else {
-			logger.info("Hola ".concat(auth.getName()).concat(" NO tienes acceso!"));
-		}
-		// fin Autenticacion
-		// --------------------------------------------------------------------------------------
-
-		PageRequest pageRequest = PageRequest.of(page, 5);
-
-		Page<Profesional> profesional = profesionalService.findAll(pageRequest);
-
-		PageRender<Profesional> pageRender = new PageRender<>("/listar", profesional);
-		model.addAttribute("titulo", messageSource.getMessage("text.profesional.listar.titulo", null, locale));
-		model.addAttribute("profesionales", profesional);
-		model.addAttribute("page", pageRender);
-		return "profesionales/listar";
+	    PageRender<Profesional> pageRender = new PageRender<>("/listar", profesional);
+	    
+	    model.addAttribute("titulo", messageSource.getMessage("text.profesional.listar.titulo", null, locale));
+	    model.addAttribute("profesionales", profesional);
+	    model.addAttribute("page", pageRender);
+	    model.addAttribute("term", term); // Para que el input mantenga el texto escrito
+	    
+	    return "profesionales/listar";
 	}
 
 	// Metodo guardar primera fase (mostrar el formulario)

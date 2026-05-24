@@ -1,23 +1,26 @@
 package com.sigat.springboot.app.models.dao;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-
+import com.sigat.springboot.app.models.entity.PlanillaCabecera;
 import com.sigat.springboot.app.models.entity.PlanillaDetalle;
-
 import jakarta.transaction.Transactional;
 
 public interface IPlanillaDetalleDao
 		extends JpaRepository<PlanillaDetalle, Long>, CrudRepository<PlanillaDetalle, Long> {
+	
+	// UNA SOLA VERSIÓN: Limpia y compatible con el resto del sistema
+	@Query("select max(pd.Box) from PlanillaDetalle pd where pd.planillacabecera.id = :cabeceraId")
+	public Integer findBoxByCabeceraId(@Param("cabeceraId") Long cabeceraId);
+
+
+
+
 
 	// Metodo que verifica si existe una planillaDet Activa (se usa en
 	// PlanillaCabeceraController)
@@ -35,12 +38,10 @@ public interface IPlanillaDetalleDao
 	public String[] ListarRangoPlanillaDet(long profId, long EspecId);
 
 	// Recursive query que genera rango horario y lo almacena en un LIST.
-	@Query(value = "WITH RECURSIVE FECHAS AS (SELECT :fechaHoraInicial AS fecha " 
-			+ "UNION ALL "
+	@Query(value = "WITH RECURSIVE FECHAS AS (SELECT :fechaHoraInicial AS fecha " + "UNION ALL "
 			+ "SELECT fecha + INTERVAL :intervalo MINUTE FROM FECHAS WHERE fecha + INTERVAL :intervalo MINUTE <= :fechaHoraFinal) "
 			+ "SELECT fecha FROM FECHAS WHERE TIME(fecha) BETWEEN TIME(:fechaHoraInicial) "
-			+ "AND TIME(:fechaHoraFinal) " 
-			+ "AND DAYOFWEEK(fecha) = :dia " + "ORDER BY fecha asc", nativeQuery = true)
+			+ "AND TIME(:fechaHoraFinal) " + "AND DAYOFWEEK(fecha) = :dia " + "ORDER BY fecha asc", nativeQuery = true)
 	public List<String> generarRangoHorario(String fechaHoraInicial, String fechaHoraFinal, long intervalo, long dia);
 
 	// Recursive query que genera rango horario en grupos de 1 minuto y lo almacena
@@ -76,33 +77,49 @@ public interface IPlanillaDetalleDao
 	public List<PlanillaDetalle> verPlanillaDetalle(long idPlanillacab);
 
 	@Query(value = "select pd.id, prof.apellido, prof.nombre, pd.observacion, pd.estado_id, "
-	        + "pd.planillacabecera_id, pd.rango_fecha_hora, est.nombre as nombre_estado, pd.box, "
-	        + "pd.creado_por, pd.fecha_creacion, pd.modificado_por, pd.fecha_modificacion " // <--- AGREGADOS
-	        + "from planilladetalle pd " 
-	        + "inner join planillacabecera pc on pc.id = pd.planillacabecera_id "
-	        + "inner join profesionales prof on prof.id = pc.id_profesional "
-	        + "inner join estado est on est.id = pd.estado_id "
-	        + "where pc.id = :idPlanillacab LIMIT 1", nativeQuery = true)
+			+ "pd.planillacabecera_id, pd.rango_fecha_hora, est.nombre as nombre_estado, pd.box, "
+			+ "pd.creado_por, pd.fecha_creacion, pd.modificado_por, pd.fecha_modificacion " // <--- AGREGADOS
+			+ "from planilladetalle pd " + "inner join planillacabecera pc on pc.id = pd.planillacabecera_id "
+			+ "inner join profesionales prof on prof.id = pc.id_profesional "
+			+ "inner join estado est on est.id = pd.estado_id "
+			+ "where pc.id = :idPlanillacab LIMIT 1", nativeQuery = true)
 	public List<PlanillaDetalle> verPlanillaDetalleProfyEspecialidadDistinct(long idPlanillacab);
 
 	// muestra los turnos libres (de todos los Dias)de acuerdo a la planilla
-		// detalle por ProfId y EspecialidadID.
-		@Query("select pd from PlanillaDetalle pd " + "inner join PlanillaCabecera pc on pc.id = pd.planillacabecera.id "
-				+ "inner join Estado e on e.id = pd.estado.id "
-				+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id = 2 "
-				+ "and pd.estado.id IN (3, 6) " // <--- TRAE AMBOS 
-				+ "and DATE_FORMAT(pd.rangoFechaHora,'%Y-%m-%d %H:%i') >= CURRENT_TIMESTAMP "
-				+ "order by pd.rangoFechaHora asc")
-		public List<PlanillaDetalle> mostrarTurnosLibresTodos(Long profId, Long EspecId);
-		
+	// detalle por ProfId y EspecialidadID.
 	@Query("select pd from PlanillaDetalle pd " + "inner join PlanillaCabecera pc on pc.id = pd.planillacabecera.id "
 			+ "inner join Estado e on e.id = pd.estado.id "
-			+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id = 2 "
-			+ "and pd.estado.id IN (3, 6) " // <--- TRAE AMBOS 
-			+ "and pc.dia.id = :diaId "
+			+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id IN (2, 6) "
+			+ "and pd.estado.id IN (3, 6) " // <--- TRAE AMBOS
 			+ "and DATE_FORMAT(pd.rangoFechaHora,'%Y-%m-%d %H:%i') >= CURRENT_TIMESTAMP "
 			+ "order by pd.rangoFechaHora asc")
+	public List<PlanillaDetalle> mostrarTurnosLibresTodos(Long profId, Long EspecId);
+
+	@Query("select pd from PlanillaDetalle pd " + "inner join PlanillaCabecera pc on pc.id = pd.planillacabecera.id "
+			+ "inner join Estado e on e.id = pd.estado.id "
+			+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id IN (2, 6) "
+			+ "and pd.estado.id IN (3, 6) " // <--- TRAE AMBOS
+			+ "and pc.dia.id = :diaId " + "and DATE_FORMAT(pd.rangoFechaHora,'%Y-%m-%d %H:%i') >= CURRENT_TIMESTAMP "
+			+ "order by pd.rangoFechaHora asc")
 	public List<PlanillaDetalle> mostrarTurnosLibresTodosByDiaId(Long profId, Long EspecId, Long diaId);
+
+	// METODO QUE TRABAJA EN SOBRETURNOS PARA LISTAR TURNOS LIBRES
+	@Query("select pd from PlanillaDetalle pd " + "inner join PlanillaCabecera pc on pc.id = pd.planillacabecera.id "
+			+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id IN (2, 6) " + // <---
+																														// PERMITIR
+																														// CABECERA
+																														// CANCELADA
+			"and pd.estado.id IN (3, 4, 6) " + // <--- AGREGAMOS EL 4 AQUÍ
+			"and pd.rangoFechaHora >= CURRENT_TIMESTAMP " + "order by pd.rangoFechaHora asc")
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosTodos(Long profId, Long EspecId);
+
+	// METODO QUE TRABAJA EN SOBRETURNOS PARA LISTAR TURNOS LIBRES POR DIA
+	@Query("select pd from PlanillaDetalle pd " + "inner join PlanillaCabecera pc on pc.id = pd.planillacabecera.id "
+			+ "where pc.profesional.id = :profId and pc.especialidad.id = :EspecId " + "and pc.estado.id IN (2, 6) "
+			+ "and pd.estado.id IN (3, 4, 6) " + // <--- AGREGAMOS EL 4 AQUÍ
+			"and pc.dia.id = :diaId " + "and pd.rangoFechaHora >= CURRENT_TIMESTAMP "
+			+ "order by pd.rangoFechaHora asc")
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosByDiaId(Long profId, Long EspecId, Long diaId);
 
 	// ACTUALIZAMOS en Planilladetalle el estado_id=4 (OCUPADO).
 	@Modifying
@@ -217,6 +234,71 @@ public interface IPlanillaDetalleDao
 			+ "and DATE_FORMAT(pd.rango_fecha_hora,'%Y-%m-%d %H:%i') >= DATE_FORMAT(NOW(3), '%Y-%m-%d %H:%i') "
 			+ "and DATE_FORMAT(pd.rango_fecha_hora,'%Y-%m-%d %H:%i') between DATE_FORMAT(:fechaHoraIni, '%Y-%m-%d %H:%i') and DATE_FORMAT(:fechaHoraFin, '%Y-%m-%d %H:%i') ", nativeQuery = true)
 	public void actualizarPlanillaDetalleCanceladoFechasHorasTO(@Param("profId") Long profId,
-			@Param("EspecId") Long EspecId, @Param("fechaHoraIni") Date fechaHoraIni, @Param("fechaHoraFin") Date fechaHoraFin,
-			@Param("estadoId") String estadoId, @Param("motivo") String motivo);
+			@Param("EspecId") Long EspecId, @Param("fechaHoraIni") Date fechaHoraIni,
+			@Param("fechaHoraFin") Date fechaHoraFin, @Param("estadoId") String estadoId,
+			@Param("motivo") String motivo);
+
+	// Liberamos varios registros de planilla (Estado LIBRE - 3)
+	@Modifying
+	@Transactional
+	@Query("UPDATE PlanillaDetalle pd SET pd.estado.id = 3 WHERE pd.id IN :ids")
+	void updatePlanillaDetalleMasivoLibre(@Param("ids") List<Long> ids);
+
+	// NUEVO PROCEDIMIENTO PARA CANCELACION MASIVA DE PLANILLAS
+	// ****************************
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE planilladetalle pd " + "INNER JOIN planillacabecera pc ON pd.planillacabecera_id = pc.id "
+			+ "SET pd.estado_id = 6 " + "WHERE pc.id_profesional = :profId " + "AND pc.id_especialidad = :especId "
+			+ "AND pd.rango_fecha_hora BETWEEN :inicio AND :fin", nativeQuery = true)
+	int bloquearHorariosMasivo(@Param("profId") Long profId, @Param("especId") Long especId,
+			@Param("inicio") Date inicio, @Param("fin") Date fin);
+
+	// Necesitamos que la Cabecera también se entere de la cancelación
+	/*
+	 * @Modifying
+	 * 
+	 * @Transactional
+	 * 
+	 * @Query("UPDATE PlanillaCabecera pc SET pc.estado.id = 6 " +
+	 * "WHERE pc.profesional.id = :profId " + "AND pc.especialidad.id = :especId " +
+	 * "AND pc.id IN (SELECT DISTINCT pd.planillacabecera.id FROM PlanillaDetalle pd WHERE pd.rangoFechaHora BETWEEN :inicio AND :fin)"
+	 * ) void actualizarEstadoCabeceraMasivo(@Param("profId") Long
+	 * profId, @Param("especId") Long especId, @Param("inicio") Date
+	 * inicio, @Param("fin") Date fin);
+	 *
+	 */
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE planillacabecera pc " + "INNER JOIN planilladetalle pd ON pd.planillacabecera_id = pc.id "
+			+ "SET pc.id_estado = 6 " + "WHERE pc.id_profesional = :profId " + "AND pc.id_especialidad = :especId "
+			+ "AND pd.rango_fecha_hora BETWEEN :inicio AND :fin", nativeQuery = true)
+	void actualizarEstadoCabeceraMasivo(@Param("profId") Long profId, @Param("especId") Long especId,
+			@Param("inicio") java.util.Date inicio, @Param("fin") java.util.Date fin);
+
+	// PARA RESTAURACION (AUDITORIA)
+	@Query("select distinct pd.planillacabecera from PlanillaDetalle pd " + "where pd.estado.id = 6 "
+			+ "and (:profId is null or pd.planillacabecera.profesional.id = :profId) "
+			+ "and (:especId is null or pd.planillacabecera.especialidad.id = :especId) "
+			+ "and (cast(:desde as date) is null or date(pd.rangoFechaHora) >= :desde) "
+			+ "and (cast(:hasta as date) is null or date(pd.rangoFechaHora) <= :hasta)")
+	public List<PlanillaCabecera> findPlanillasCanceladasGroupByCabecera(@Param("profId") Long profId,
+			@Param("especId") Long especId, @Param("desde") Date desde, @Param("hasta") Date hasta);
+
+	@Query("select pd from PlanillaDetalle pd where pd.planillacabecera.profesional.id = :profId "
+			+ "and pd.planillacabecera.especialidad.id = :especId "
+			+ "and (cast(:desde as date) is null or pd.rangoFechaHora >= :desde) "
+			+ "and (cast(:hasta as date) is null or pd.rangoFechaHora <= :hasta)")
+	List<PlanillaDetalle> findAllByFiltroRestauracion(@Param("profId") Long profId, @Param("especId") Long especId,
+			@Param("desde") java.util.Date desde, @Param("hasta") java.util.Date hasta);
+
+	// Mostrar detalle de lo que esta cancelado y se va a restaurar
+	@Query("select pd from PlanillaDetalle pd where pd.planillacabecera.id = ?1 and pd.estado.id = ?2 order by pd.rangoFechaHora ASC")
+	public List<PlanillaDetalle> findByPlanillaCabeceraIdAndEstadoId(Long cabeceraId, Long estadoId);
+	
+	@Query("select pd from PlanillaDetalle pd where pd.estado.id = 6L")
+	public List<PlanillaDetalle> listarMonitor();
+
 }

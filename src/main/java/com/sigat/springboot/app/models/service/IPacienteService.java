@@ -28,7 +28,7 @@ public interface IPacienteService {
 	// para autocomplete en Turnos por nombre.
 	public List<Paciente> findByNombre(String term);
 
-	// para autocomplete en Turnos por documento.
+	// para autocomplete en Turnos por documento y para Registro.html.
 	public List<Paciente> findByDni(String term);
 
 	// metodo Existe el Dni del paciente al insertar.

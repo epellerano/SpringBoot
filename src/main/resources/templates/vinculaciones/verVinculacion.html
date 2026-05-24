@@ -56,6 +56,10 @@
 	color: #0d6efd;
 }
 
+.awesome {
+	margin-right: 6px;
+}
+
 .info-value {
 	font-size: 1.15rem;
 	color: #1e293b;
@@ -132,7 +136,7 @@
 							<div class="col-md-6">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-user-doctor"></i>Profesional Responsable
+										<i class="awesome fa-solid fa-user-doctor"></i>Profesional Responsable
 									</div>
 									<div class="info-value text-uppercase"
 										th:text="${vinculacion.profesional.apellido} + ' ' + ${vinculacion.profesional.nombre}"></div>
@@ -143,7 +147,7 @@
 							<div class="col-md-6">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-stethoscope"></i>Especialidad Vinculada
+										<i class="awesome fa-solid fa-stethoscope"></i>Especialidad Vinculada
 									</div>
 									<div class="mt-2">
 										<span class="badge-clinico"
@@ -156,7 +160,7 @@
 							<div class="col-12">
 								<div class="info-box shadow-sm">
 									<div class="info-label">
-										<i class="fa-solid fa-comment-medical"></i>Observaciones y
+										<i class="awesome fa-solid fa-comment-medical"></i>Observaciones y
 										Requisitos de Turno
 									</div>
 									<div class="obs-text mt-2" th:text="${vinculacion.Observacion}"></div>

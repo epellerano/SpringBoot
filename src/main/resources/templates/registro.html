@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" th:href="@{/css/login.css}" />
+<link rel="stylesheet" th:href="@{/css/awesome/all.min.css}" />
+<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+</head>
+<style>
+body {
+	margin: 0;
+	padding: 0;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #1a202c;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+	width: 100%;
+	max-width: 480px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.center-img {
+	width: 100px;
+	height: auto;
+	margin-bottom: 20px;
+	filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+.label-sigat {
+	color: white;
+	font-weight: 800;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	text-align: center;
+	margin-bottom: 25px;
+	width: 100%;
+}
+
+.form-box {
+	width: 100%;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 12px;
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: 30px;
+	backdrop-filter: blur(5px);
+}
+
+/* Contenedor del encabezado del logo */
+.logo-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center; /* Centra horizontalmente */
+	justify-content: center;
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+.imagen-trebol {
+	width: 100px;
+	height: auto;
+	display: block; /* Elimina espacios residuales */
+	margin: 0 auto; /* Centrado clásico de respaldo */
+	filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+.label-sigat {
+	width: 100%;
+	text-align: center; /* Centra el texto debajo del logo */
+	color: white;
+	font-weight: 800;
+	text-transform: uppercase;
+	margin-top: 10px;
+}
+</style>
+</head>
+<body>
+	<header
+		style="position: absolute; top: 0; width: 100%; color: white; text-align: center;">
+		<div class="alert alert-danger" role="alert" th:if="${error != null}"
+			th:text="${error}" id="myAlert"></div>
+	</header>
+
+	<div class="login-container">
+
+		<div class="logo-wrapper">
+			<img th:src="@{/images/trebol.png}" alt="logo" class="imagen-trebol">
+			<p class="label-sigat">SIGAT - Registro de Usuario</p>
+		</div>
+
+		<form th:action="@{/registro/guardar}" method="post" class="w-100">
+			<!-- ... dentro del form del registro ... -->
+			<div class="form-box shadow-lg">
+				<div class="mb-3">
+					<input type="text" class="form-control" name="dni"
+						placeholder="🪪 ingresar DNI" required style="height: 45px;">
+				</div>
+				<div class="mb-3">
+					<input type="email" class="form-control" name="email"
+						placeholder="📧 correo electrónico" required style="height: 45px;">
+				</div>
+				<div class="mb-3">
+					<input type="text" class="form-control" name="username"
+						placeholder="👤 nombre de usuario" required style="height: 45px;">
+				</div>
+
+				<!-- INPUT GROUP CORREGIDO -->
+				<div class="input-group mb-1">
+					<input type="password" class="form-control" name="password"
+						id="password_reg" placeholder="🔒 contraseña" required
+						style="height: 45px; border-right: none;"> <span
+						class="input-group-text" onclick="peakPasswordReg()"
+						style="cursor: pointer; background: white; border-left: none;">
+						<i class="fa-solid fa-eye" id="eyeIconReg"
+						style="color: #666; width: 20px;"></i>
+					</span>
+				</div>
+				<p class="text-center mt-2 mb-3"
+					style="color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; line-height: 1.3;">
+					<i class="fa-solid fa-circle-info me-1" style="color: #0dcaf0;"></i>
+					Tu clave debe ser robusta: incluí al menos una <strong>Mayúscula</strong>
+					<br> y finalizá obligatoriamente con un <strong>signo
+						especial</strong> (ej: !, #, $, %, &).
+				</p>
+
+				<button type="submit"
+					class="btn btn-primary w-100 fw-bold shadow-sm mb-2"
+					style="height: 45px; background-color: #0d6efd !important; border: none;">
+					CONFIRMAR REGISTRO</button>
+
+				<div class="text-center">
+					<p class="mb-0" style="color: white; font-size: 0.85rem;">
+						¿Ya tienes cuenta? <a th:href="@{/login}"
+							style="color: #0dcaf0; font-weight: bold; text-decoration: none;">Inicia
+							sesión aquí</a>
+					</p>
+				</div>
+			</div>
+			<input type="hidden" th:name="${_csrf.parameterName}"
+				th:value="${_csrf.token}" />
+		</form>
+	</div>
+
+	<script th:src="@{/js/bootstrap.min.js}"></script>
+	<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+	<script th:src="@{/js/sweetalert2.all.min.js}"></script>
+	<script th:src="@{/js/awesome/all.min.js}"></script>
+	<script th:src="@{/js/sweetalert2.all.min.js}"></script>
+	<script th:src="@{/js/sweetalert2.all.min.js}"></script>
+	<!-- CARGA DE TU JQUERY LOCAL MÁXIMA VELOCIDAD -->
+	<script th:src="@{/js/code.jquery.com_jquery-3.7.1.min.js}"></script>
+
+		<!-- TU PRIMER SCRIPT ORIGINAL (INTACTO SIN TOCAR UNA SOLA LETRA) -->
+	<script>
+	function peakPasswordReg() {
+	    // Buscamos los elementos por los IDs específicos que pusimos arriba
+	    const campo = document.getElementById('password_reg');
+	    const icono = document.getElementById('eyeIconReg');
+	    
+	    if (campo.type === 'password') {
+	        campo.type = 'text';
+	        // Cambiamos el icono a ojo tachado
+	        icono.classList.remove('fa-eye');
+	        icono.classList.add('fa-eye-slash');
+	    } else {
+	        campo.type = 'password';
+	        // Volvemos al icono de ojo normal
+	        icono.classList.remove('fa-eye-slash');
+	        icono.classList.add('fa-eye');
+	    }
+	}
+        setTimeout(() => { document.getElementById("myAlert")?.remove(); }, 4000);
+    </script>
+
+	<!-- TU SEGUNDO SCRIPT ORIGINAL (INTACTO SIN TOCAR UNA SOLA LETRA) -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var msgSuccess = /*[[${success}]]*/null;
+		var msgError = /*[[${error}]]*/null;
+
+		if (msgSuccess) {
+			Swal.fire({
+				title : '¡Operación Exitosa!',
+				text : msgSuccess,
+				icon : 'success',
+				confirmButtonColor : '#0d6efd',
+				confirmButtonText : 'Entendido'
+			});
+		}
+
+		if (msgError) {
+			Swal.fire({
+				title : 'Error',
+				text : msgError,
+				icon : 'error',
+				confirmButtonColor : '#dc3545',
+				confirmButtonText : 'Volver a intentar'
+			});
+		}
+
+		setTimeout(function() {
+			var alertElement = document.getElementById("myAlert");
+			if (alertElement)
+				alertElement.remove();
+		}, 4000);
+		/*]]>*/
+	</script>
+
+	<!-- INYECCIÓN EXCLUSIVA: ENLACE AJAX LOCAL CON CAPTURA DE SUBMIT MODIFICADO -->
+	<script>
+	$(document).ready(function() {
+	    $("form").on("submit", function(e) {
+	        e.preventDefault(); // Frenado total local
+
+	        const dni = $("input[name='dni']").val();
+	        const email = $("input[name='email']").val();
+	        const username = $("input[name='username']").val();
+	        const password = $("#password_reg").val();
+
+	        if (!dni || !email || !username || !password) {
+	            Swal.fire('Atención', 'Por favor, complete todos los campos obligatorios.', 'warning');
+	            return;
+	        }
+
+	        const tokenCsrf = $("input[name='_csrf']").val();
+
+	        Swal.fire({
+	            title: 'Generando Código',
+	            text: 'Enviando clave temporal de verificación a su casilla...',
+	            allowOutsideClick: false,
+	            didOpen: () => { Swal.showLoading(); }
+	        });
+
+	        // 1. AJAX: Solicita el código OTP (Agregada la variable password para evaluar formato robusto)
+	        $.ajax({
+	            url: "/registro/solicitar-codigo",
+	            method: "POST",
+	            data: { dni: dni, email: email, username: username, password: password }, // <-- MODIFICADO: Ahora viaja tu clave
+	            beforeSend: function(xhr) {
+	                if (tokenCsrf) xhr.setRequestHeader("X-CSRF-TOKEN", tokenCsrf);
+	            },
+	            success: function(response) {
+	                // Abre el panel interactivo soldado para tipear los 6 dígitos
+	                Swal.fire({
+	                    title: 'Verificación de Correo',
+	                    html: `Te enviamos un código de 6 dígitos a <strong>${email}</strong>.<br><br>
+	                           <input type="number" id="otpInput" class="swal2-input text-center" placeholder="000000" maxlength="6" style="width: 160px; font-weight: bold; letter-spacing: 2px;">`,
+	                    icon: 'info',
+	                    confirmButtonText: 'Validar y Registrar',
+	                    confirmButtonColor: '#0d6efd',
+	                    allowOutsideClick: false,
+	                    preConfirm: () => {
+	                        const otp = document.getElementById('otpInput').value;
+	                        if (!otp || otp.length !== 6) {
+	                            Swal.showValidationMessage('Ingrese el código de 6 dígitos enviado');
+	                            return false;
+	                        }
+	                        return otp;
+	                    }
+	                }).then((result) => {
+	                    if (result.isConfirmed) {
+	                        // 2. AJAX: Valida y guarda de forma definitiva
+	                        $.ajax({
+	                            url: "/registro/verificar-y-guardar",
+	                            method: "POST",
+	                            data: { dni: dni, email: email, username: username, password: password, codigo: result.value },
+	                            beforeSend: function(xhr) {
+	                                if (tokenCsrf) xhr.setRequestHeader("X-CSRF-TOKEN", tokenCsrf);
+	                            },
+	                            success: function(res) {
+	                                Swal.fire({
+	                                    title: '¡Registro Exitoso!',
+	                                    text: 'Su usuario ha sido validado e insertado correctamente.',
+	                                    icon: 'success',
+	                                    confirmButtonColor: '#0d6efd'
+	                                }).then(() => {
+	                                    window.location.href = "/login"; 
+	                                });
+	                            },
+	                            error: function(xhr) {
+	                                Swal.fire('Error de Validación', 'Código de verificación incorrecto o expirado.', 'error');
+	                            }
+	                        });
+	                    }
+	                });
+	            },
+	            error: function(xhr) {
+	                if(xhr.status === 409) {
+	                    Swal.fire('Registro Duplicado', 'El DNI, Usuario o Email ya se encuentran registrados.', 'warning');
+	                } else if(xhr.status === 404) {
+	                    Swal.fire('Atención', 'DNI no encontrado. Debes estar registrado previamente en la clínica.', 'error');
+	                } else {
+	                    Swal.fire('Error', xhr.responseText || 'No se pudo procesar la solicitud.', 'error');
+	                }
+	            }
+	        });
+	    });
+	});
+	</script>
+
+</body>
+</html>

@@ -46,6 +46,7 @@
 		//Funcion que limpia el Rango Turno mañana
 		  function limpiarTM()
 		  {
+			alert("llego");
 			  document.getElementById('horaInicialR1').value='00:00';
 			  document.getElementById('horaInicialR1').disabled = true;
 			  document.getElementById('horaFinalR1').value='00:00';
@@ -76,7 +77,7 @@
 					Tabla.deleteRow(x);
 				}
 				//Deshabilitamos el boton guardar
-				document.getElementById('btnGuardar').disabled = true;
+				//document.getElementById('btnGuardar').disabled = true;
 				//limpiamos la tabla Comparacion con datos de MysQl.
     			var Tabla = document.getElementById("TablaMysql");
     			var rowCount = Tabla.rows.length;
@@ -119,7 +120,7 @@
 					Tabla.deleteRow(x);
 				}
 				//Deshabilitamos el boton guardar
-				document.getElementById('btnGuardar').disabled = true;				
+				//document.getElementById('btnGuardar').disabled = true;				
 				//limpiamos la tabla Comparacion con datos de MysQl.
     			var Tabla = document.getElementById("TablaMysql");
     			var rowCount = Tabla.rows.length;

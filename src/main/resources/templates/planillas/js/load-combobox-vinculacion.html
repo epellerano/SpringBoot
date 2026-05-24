@@ -6,10 +6,10 @@
 		function cargarEspecialidades() {
 
 			//verificamos el indice del combobox profesional -----------------------
-			var indexProf = document.getElementById("profesional").selectedIndex;
+			var indexProf = document.getElementById("profesional").selectedIndex;			
 			// ----------------------------------------------------------------------
 
-			if (indexProf != 0) {
+			if (indexProf != 0) {			
 				var profesionalId = $("#profesional").val();
 				if (profesionalId == "") {
 					//mostramos una Alerta personalizada.
@@ -137,7 +137,7 @@
 
 		//ejecutamos la funcion cuando cargue la pagina	   
 		$(document).ready(function() {
-			document.getElementById('btnGuardar').disabled = true;
+			//document.getElementById('btnGuardar').disabled = true;
 			//turno mañana deshabilitado
 			document.getElementById('horaInicialR1').disabled = true;
 			document.getElementById('horaFinalR1').disabled = true;

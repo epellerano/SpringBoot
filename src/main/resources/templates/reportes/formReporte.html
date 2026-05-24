@@ -1,255 +1,307 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://thymeleaf.org">
 <head th:replace="~{layout/layout :: head}"></head>
+<style>
+/* SIGAT: MEDICAL ELITE - REPORTES ESTRUCTURA FINAL */
+.viewport-container {
+	min-height: calc(100vh - 70px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 15px 0 10px 0;
+}
 
-<body>
+.container-custom-width {
+	max-width: 98%;
+	width: 98%;
+	margin: 0 auto;
+}
+
+.card-full {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	padding-bottom: 8px;
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.titulo-grande {
+	font-size: 1.6rem !important;
+	font-weight: 700;
+	color: #164e63;
+	margin: 0;
+}
+
+.subtitulo-sigat {
+	font-size: 0.65rem !important;
+	font-weight: 700;
+	color: #64748b;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.custom-section-box {
+	border-radius: 10px;
+	padding: 12px 20px;
+	margin-bottom: 10px;
+	border: 1px solid #e2e8f0;
+}
+
+.section-azul {
+	background-color: #f0f7ff;
+	border-left: 6px solid #0d6efd;
+}
+
+.section-lila {
+	background-color: #f5f3ff;
+	border-left: 6px solid #7c3aed;
+}
+
+.box-label {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #475569;
+	text-transform: uppercase;
+	margin-bottom: 3px;
+	display: block;
+}
+
+.reporte-selector {
+	display: flex;
+	justify-content: space-between;
+	gap: 5px;
+	width: 100%;
+}
+
+.reporte-selector input[type="radio"] {
+	display: none;
+}
+
+.reporte-selector label {
+	flex: 1;
+	text-align: center;
+	padding: 7px 2px;
+	background-color: white;
+	border: 1px solid #ddd6fe;
+	color: #6b21a8;
+	border-radius: 6px;
+	font-weight: 700;
+	font-size: 0.72rem;
+	cursor: pointer;
+	text-transform: uppercase;
+}
+
+.reporte-selector input[type="radio"]:checked+label {
+	background-color: #7c3aed;
+	color: white;
+}
+
+/* CSS CLAVE PARA QUE SE VEA LA TABLA */
+.table-responsive-custom {
+	height: 32vh;
+	overflow-y: auto;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: white;
+	margin-bottom: 12px;
+}
+
+#tablaReportes thead th {
+	background-color: #1b4332 !important;
+	color: white !important;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+
+#tablaReportes tbody tr td {
+	vertical-align: middle;
+	font-size: 0.85rem;
+	color: #334155;
+}
+
+#fechaHora {
+	border: none !important;
+	background: transparent !important;
+	font-weight: 800;
+	color: #164e63;
+	text-align: right;
+	width: 300px;
+}
+</style>
+
+<body class="bg-light">
 	<header th:replace="~{layout/layout :: header}"></header>
-	<div class="container py-2 mx-4">
-		<div class="card bg-light" style="width: 112%;">
-			<!-- <div class="card-header" th:text="${titulo}"></div> -->
-			<div class="card-body">
-				<!-- Titulo - fecha y Linea divisoria ---------------------------------------------------------------->
-				<div
-					style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;">
-
-					<h4 th:text="${titulo}" class="text-danger" style="font-family: Arial; font-size: 20px"></h4>
-
-					<!-- fecha y hora--------------------------------------------------------------->
-					<div class="col-sm-2"
-						style="padding: 1px; position: absolute; top: 7px; right: 15px; width: 265px;">
-						<input class="form-control bg-light float-right text-danger" type="text" id="fechaHora"
-							style="height: 34px; border: 0; outline: 0; box-shadow: none;" name="fechaHora" readonly>
-					</div>
-					<!------------------- fin fecha y hora ------------------------------------------>
-				</div>
-				<!-- fin linea --------------------------------------------------------------------------------------->
-
-
-				<!-- ESPACIO DESPUES DE LA LINEA ------->
-				<h1 class="text-secondary pb-0"></h1>
-				<!-------------------------------------->
-
-				<div class="mb-1 row"
-					style="display: flex; justify-content: space-between; align-items: center;  margin-top: -4px;">
-					<label class="col-sm text-primary"><input class="form-check-input" type="checkbox"
-							id="isCheckReporteFechas" name="isCheckReporteFechas" value="true"
-							th:onclick="uncheckOther(this)" style="width: 18px; height: 18px;">&nbsp;Reporte
-						por Fecha</label> <label class="col-sm text-primary"><input class="form-check-input"
-							type="checkbox" th:onclick="uncheckOther(this)" id="isCheckReporteVigente"
-							name="isCheckReporteVigente" value="true" style="width: 18px; height: 18px;">&nbsp;Reporte
-						Vigente</label> <label class="col-sm text-primary"><input class="form-check-input"
-							type="checkbox" th:onclick="uncheckOther(this)" id="isCheckReporteHistorico"
-							name="isCheckReporteHistorico" value="true" style="width: 18px; height: 18px;">&nbsp;Reporte
-						Historico</label>
-
-				</div>
-
-
-				<!-- Linea divisoria cn margren inferion 15 px-------------------------------------------------------->
-				<div
-					style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%; margin-bottom: 10px;">
-				</div>
-				<!-- fin linea --------------------------------------------------------------------------------------->
-
-				<div class="modal-body">
-					<form id="myForm" th:action="@{/reportes/formReporte}" th:object="${turno}" method="post">
-						<!-- ID PROFESIONAL Y ESPECIALIDAD --------------------------->
-						<!-- <input type="hidden" id="profesionalId" name="profesionalId" />
-						<input type="hidden" id="especialidadId" name="especialidadId" /> -->
-						<!------------------------------------------------------------>
-						<div class="mb-3 row">
-							<!-- label para Buscar Profesional-->
-							<div class="col-sm-2" style="display: flex; align-items: center;">
-								<img th:src="@{/images/search-doctor.png}" width="17" height="17"
-									style="margin-right: 10px;"> <span for="profesional">Selección del Medico:</span>
+	<div class="viewport-container">
+		<div class="container-custom-width">
+			<div class="card card-full shadow">
+				<div class="card-body p-3 px-4">
+					<!-- ENCABEZADO -->
+					<div class="header-clinica">
+						<div class="d-flex align-items-center">
+							<div
+								class="d-flex align-items-center justify-content-center rounded-3 me-3"
+								style="width: 48px; height: 48px; background-color: #e2e8f0; border: 1px solid #164e63;">
+								<i class="bi bi-file-earmark-medical-fill"
+									style="font-size: 1.8rem; color: #164e63;"></i>
 							</div>
-
-							<div class="col-sm-3">
-								<!-- ancho del campo -->
-								<select class="form-select" id="profesional" name="profesional"
-									style="height: 35px; font-size: 15px" th:onchange="cargarEspecialidades()">
-									<!-- Renderizar opciones desde el controlador -->
-									<option value="" disabled>Seleccione una opción...</option>
-
-									<option th:each="profesional : ${profesionales}" th:value="${profesional.id}"
-										th:text="${profesional.codigo} + ' - ' + ${profesional.apellido} + ' ' + ${profesional.nombre}">
-								</select>
+							<div>
+								<h3 th:text="${titulo}" class="mb-0 titulo-grande"></h3>
+								<p class="subtitulo-sigat mb-0">SIGAT • Gestión de listados</p>
 							</div>
-
-							<!-- label para Buscar Especialidad-->
-							<div class="col-sm-2" style="display: flex; align-items: center;">
-								<img th:src="@{/images/search-doctor.png}" width="17" height="17"
-									style="margin-right: 10px;"> <span for="especialidad">Especialidad Asociada:</span>
-							</div>
-							<div class="col-sm-3">
-								<!-- ancho del campo -->
-								<select id="especialidad" name="especialidad" class="form-select"
-									style="height: 35px; font-size: 15px" th:onclick="existeEspecialidad()">
-									<!-- <option th:each="especialidad : ${especialidades}"
-										th:value="${especialidad.id}"
-										th:text="${especialidad.especialidadNombre}"></option> -->
-								</select>
-							</div>
-
-							<div class="col-sm" style="display: flex; align-items: center; text-align: center;">
-								<label class="col-sm text-warning">Validado (ok) <input class="form-check-input"
-										type="checkbox" id="isCheckProfEsp" name="isCheckProfEsp" value="true"
-										disabled="disabled" style="width: 15px; height: 15px;"></label>
-							</div>
-
 						</div>
-						<div class="mb-3 row">
-							<div class="col-sm-2" style="display: flex; align-items: center;">
-								<img th:src="@{/images/fechaReporte.png}" width="17" height="17"
-									style="margin-right: 10px;"> <span for="fechaInicial">Fecha
-									Inicial Reporte:</span>
-							</div>
-							<!-- <label class="col-sm-2 col-form-label" for="fechaInicial">Fecha
-								Inicial del Reporte:</label> -->
-							<div class="col-sm-3">
-								<input type="date" class="form-control" id="fechaInicio" name="fechaInicio" />
-							</div>
-
-							<div class="col-sm-2" style="display: flex; align-items: center;">
-								<img th:src="@{/images/fechaReporte.png}" width="17" height="17"
-									style="margin-right: 10px;"> <span for="fechaFinal">Fecha
-									Final Reporte:</span>
-							</div>
-							<!-- <label class="col-sm-2 col-form-label" for="fechaFinal">Fecha
-								Final del Reporte:</label> -->
-							<div class="col-sm-3">
-								<input type="date" class="form-control" id="fechaFinal" name="fechaFinal" />
-							</div>
-
-						</div>
-
-						<!-- LINEA Y ESPACIO DESPUES------------------------------------------------------------------------------>
-						<div class="text-secondary"
-							style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;">
-						</div>
-						<h1 class="text-secondary pb-0"></h1>
-						<!------------------------------------------------------------------------------------------------------------------->
-						<div style="display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: -8px;">
-							<input type="radio" id="turnoCancelado" name="reportes" value="turnoCancelado"> <label
-								for="turnoCancelado" style="margin-left: -40px; color: purple;">Turnos
-								Cancelados</label> <input type="radio" id="sobreturnoCancelado" name="reportes"
-								value="sobreturnoCancelado">
-							<label for="sobreturnoCancelado" style="margin-left: -40px; color: purple;">Sobreturnos
-								Cancelados</label> <input type="radio" id="planillaCancelada" name="reportes"
-								value="planillaCancelada">
-							<label for="planillaCancelada" style="margin-left: -40px; color: purple;">Planillas
-								Canceladas</label> <input type="radio" id="vinculacion" name="reportes"
-								value="vinculacion">
-							<label for="vinculacion" style="margin-left: -40px; color: purple;">Vinculacion</label>
-							<input type="radio" id="movimiento" name="reportes" value="movimiento"> <label
-								for="movimiento" style="margin-left: -40px; color: purple;">Movimientos</label>
-							<input type="radio" id="planilla" name="reportes" value="planilla"> <label for="planilla"
-								style="margin-left: -40px; color: purple;">Planillas</label>
-							<input type="radio" id="turno" name="reportes" value="turno"> <label for="turno"
-								style="margin-left: -40px; color: purple;">Turnos</label>
-							<input type="radio" id="sobreturno" name="reportes" value="sobreturno"> <label
-								for="sobreturno" style="margin-left: -40px; color: purple;">Sobreturnos</label>
-						</div>
-						<!-- ESPACIO DESPUES DE LA LINEA -------------------------------------------------------------------------------->
 						<div
-							style="display: flex; justify-content: space-between; border-bottom: 1px solid lightgray; width: 100%;">
+							class="d-flex align-items-center bg-white border px-3 py-1 rounded-pill shadow-sm">
+							<i class="bi bi-clock-fill text-info me-2"></i> <input
+								type="text" id="fechaHora" readonly>
 						</div>
-						<h1 class="text-secondary pb-0"></h1>
-						<!--------------------------------------------------------------------------------------------------------------->
-						<div class="table-responsive" style="height: 250px; overflow-y: auto">
-							<table class="table table-bordered" id="tablaReportes">
-								<!-- columnas -->
-								<thead class="table-secondary">
-								
-									<tr>
-										<!-- Las cabeceras se construirán aqui con JavaScript -->
-									</tr>
+					</div>
+
+					<form id="myForm" th:action="@{/reportes/formReporte}"
+						th:object="${turno}" method="post">
+						<!-- BLOQUE 1: MÉDICO Y MODALIDAD -->
+						<div class="custom-section-box section-azul shadow-sm">
+							<div class="row align-items-end">
+								<div class="col-md-7">
+									<div class="row g-2">
+										<div class="col-6">
+											<span class="box-label">Médico / Profesional</span> <select
+												class="form-select" id="profesional" name="profesional"
+												th:onchange="cargarEspecialidades()">
+												<option value="" disabled selected>Médico...</option>
+												<option th:each="p : ${profesionales}" th:value="${p.id}"
+													th:text="${p.codigo} + ' - ' + ${p.apellido} + ' ' + ${p.nombre}"></option>
+											</select>
+										</div>
+										<div class="col-6">
+											<span class="box-label">Especialidad Asociada</span> <select
+												id="especialidad" name="especialidad" class="form-select"
+												th:onclick="existeEspecialidad()">
+												<option value="" disabled selected>Especialidad...</option>
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="col-md-5 border-start ps-4">
+									<span class="box-label">Modalidad de Reporte</span>
+									<div class="d-flex gap-3">
+										<label class="text-primary small fw-bold"><input
+											type="checkbox" id="isCheckReporteFechas"
+											th:onclick="uncheckOther(this)"> Por Fecha</label> <label
+											class="text-primary small fw-bold"><input
+											type="checkbox" id="isCheckReporteVigente"
+											th:onclick="uncheckOther(this)"> Vigente</label> <label
+											class="text-primary small fw-bold"><input
+											type="checkbox" id="isCheckReporteHistorico"
+											th:onclick="uncheckOther(this)"> Histórico</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- BLOQUE 2: FECHAS Y OBJETO -->
+						<div class="custom-section-box section-lila shadow-sm">
+							<div class="row mb-2">
+								<div class="col-md-6">
+									<span class="box-label">Fecha Desde:</span> <input type="date"
+										class="form-control" id="fechaInicio" name="fechaInicio">
+								</div>
+								<div class="col-md-6">
+									<span class="box-label">Fecha Hasta:</span> <input type="date"
+										class="form-control" id="fechaFinal" name="fechaFinal">
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col-12">
+									<span class="box-label">Seleccione Objeto a Reportar</span>
+									<div class="reporte-selector">
+										<input type="radio" name="reportes" id="r1"
+											value="turnoCancelado"><label for="r1">Turnos
+											Cancelados</label> <input type="radio" name="reportes" id="r2"
+											value="sobreturnoCancelado"><label for="r2">Sobreturnos
+											Cancelados</label> <input type="radio" name="reportes" id="r3"
+											value="planillaCancelada"><label for="r3">Planillas
+											Canceladas</label> <input type="radio" name="reportes" id="r5"
+											value="movimiento"><label for="r5">Movimientos</label>
+										<input type="radio" name="reportes" id="r7" value="turno"><label
+											for="r7">Turnos</label> <input type="radio" name="reportes"
+											id="r8" value="sobreturno"><label for="r8">Sobreturnos</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- TABLA RESULTADOS (ESTRUCTURA VIEJA COMPATIBLE) -->
+						<div class="table-responsive-custom">
+							<table class="table table-sm table-hover mb-0" id="tablaReportes">
+								<thead>
+									<!-- Dinámico por JS -->
 								</thead>
-
-								<!-- filas -->
 								<tbody>
-									<!-- Las filas de datos se añadirán aquí -->
+									<!-- Dinámico por JS -->
 								</tbody>
-
 							</table>
 						</div>
 
-						<div class="d-flex mb-3" style="margin-top: 20px;">
-									<!--th:onclick="existePlanillaActiva()"  verifica planillaActiva y campos del formulario. -->
-									<button type="button" class="btn btn-primary btn-lg flex-fill me-1" id="btnGenerarReporte"
-										th:onclick="renderizarReporte()">Mostrar Turnos</button>
-									<!-- boton oculto pero funcional el th:onclick -->
-									<button type="button" class="btn btn-primary btn-lg flex-fill me-1" id="btnImprimirPdf" th:onclick="imprimirReportePdf();"
-										target="_blank">Imprimir
-										en PDF</button>
-								</div>
+						<!-- ACCIONES -->
+						<div class="row g-2">
+							<div class="col-6">
+								<button type="button" class="btn btn-success w-100 fw-bold"
+									style="height: 45px;" th:onclick="renderizarReporte()">PROCESAR
+									DATOS</button>
+							</div>
+							<div class="col-6">
+								<button type="button" class="btn btn-warning w-100 fw-bold"
+									style="height: 45px;" id="btnImprimirPdf"
+									th:onclick="imprimirReportePdf()" disabled>GENERAR PDF</button>
+							</div>
+						</div>
 					</form>
 				</div>
 			</div>
 		</div>
-		
-		<!--<div class="d-flex mb-3" style="margin-top: 20px;">
-			th:onclick="existePlanillaActiva()"  verifica planillaActiva y campos del formulario. 
-			<button type="button" class="btn btn-primary btn-lg flex-fill me-1" id="btnGenerarReporte"
-				th:onclick="renderizarReporte()">Mostrar Turnos</button>
-			 boton oculto pero funcional el th:onclick 
-			<a class="btn btn-primary btn-lg flex-fill me-1" id="btnImprimirPdf" th:onclick="imprimirReportePdf();"
-				target="_blank">Imprimir
-				en PDF</a>
-		</div>-->
-
-
 	</div>
-	<footer th:replace="~{layout/layout :: footer}"></footer>
 
-	<script th:replace="reportes/js/load-combobox-vinculacion-reportes :: javascript"></script>
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script
+		th:replace="reportes/js/load-combobox-vinculacion-reportes :: javascript"></script>
 	<script th:replace="reportes/js/funcionesParaReportes :: javascript"></script>
 
 	<script>
-		// FUNCION PARA Fecha y Hora AL [CARGAR LA PAGINA]
 		function actualizarFechaHora() {
 			const fechaHoraActual = new Date();
 			const opciones = {
-				weekday: 'long',
-				timeZone: 'America/Argentina/Buenos_Aires'
+				weekday : 'long',
+				timeZone : 'America/Argentina/Buenos_Aires'
 			};
 			const diaSemana = fechaHoraActual.toLocaleDateString('es-AR',
-				opciones);
-			const fechaHoraFormateada = diaSemana.toUpperCase() + ' '
-				+ fechaHoraActual.toLocaleString();
-			document.getElementById("fechaHora").value = fechaHoraFormateada;
+					opciones);
+			const el = document.getElementById("fechaHora");
+			if (el)
+				el.value = diaSemana.toUpperCase() + ' '
+						+ fechaHoraActual.toLocaleString();
 		}
+		setInterval(actualizarFechaHora, 1000);
+		actualizarFechaHora();
 
-		// Actualizar la fecha y hora cada segundo (FECHA Y HORA)
-		try {
-			setInterval(actualizarFechaHora, 1000);
-		} catch (error) {
-			console
-				.error(
-					"Se produjo un error en setInterval(actualizarFechaHora, 1000):",
-					error);
-		}
-
-		// Inicializar la fecha y hora al cargar la página (FECHA Y HORA)
-		try {
-			actualizarFechaHora();
-		} catch (error) {
-			console.error("Se produjo un error en actualizar Fecha Hora:", error);
+		//llenamos fechaFinal a partir de fechaInicio
+		const f1 = document.getElementById('fechaInicio');
+		const f2 = document.getElementById('fechaFinal');
+		if (f1 && f2) {
+			f1.addEventListener('input', function() {
+				f2.value = this.value;
+			});
 		}
 	</script>
-	
-	
-	<script>
-		//duplicamos valor en FechaFinal mientras escribimos la fechaInicial.
-	  const fecha1 = document.getElementById('fechaInicio');
-	  const fecha2 = document.getElementById('fechaFinal');
-
-	  fecha1.addEventListener('input', function() {
-	    fecha2.value = this.value; // Asigna el valor del primer input al segundo
-	  });
-	</script>
-	
 </body>
-
 </html>

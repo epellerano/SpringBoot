@@ -1,188 +1,813 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<!-- <!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
 <head th:replace="~{layout/layout :: head}">
-    <!-- Font Awesome 7 Local -->
-    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
 </head>
 <style>
-    /* Estética SIGAT: Full Width y Control de Altura */
-    .viewport-container {
-        min-height: calc(100vh - 110px);
-        padding: 1.5rem 15px;
-    }
+/* SIGAT: MEDICAL ELITE - LISTADO SOBRETURNOS ESPEJADO */
+.viewport-container {
+	min-height: calc(100vh - 70px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 25px 0 10px 0;
+}
 
-    .header-clinica {
-        border-bottom: 2px solid #dee2e6;
-        position: relative;
-        padding-bottom: 12px;
-        margin-bottom: 20px;
-    }
-    .header-clinica::after {
-        content: "";
-        position: absolute; bottom: -2px; left: 0;
-        width: 120px; height: 4px;
-        background-color: #0d6efd; border-radius: 2px;
-    }
+.container-custom-width {
+	max-width: 98%;
+	width: 98%;
+	margin: 0 auto;
+}
 
-    /* Panel de Búsqueda Estilizado */
-    .search-panel {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
+.card-full {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
 
-    /* Tabla Médica Moderna con Scroll */
-    .table-container {
-        height: 400px;
-        overflow-y: auto;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: white;
-    }
-    .table thead th {
-        position: sticky; top: 0;
-        background-color: #f1f5f9;
-        color: #475569;
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        z-index: 10;
-        border-bottom: 2px solid #dee2e6;
-    }
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
 
-    .badge-especialidad {
-        background-color: #d1fae5;
-        color: #065f46;
-        border: 1px solid #10b981;
-        padding: 0.4em 0.7em;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-    }
+.titulo-grande {
+	font-size: 1.6rem !important;
+	font-weight: 800;
+	color: #1a202c;
+	letter-spacing: -0.5px;
+}
 
-    .btn-action-sobreturno {
-        width: 35px;
-        height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
+/* Panel con estilo azul de Turnos */
+.search-panel {
+	background-color: #f0f7ff;
+	border: 1px solid #cfe2ff;
+	border-left: 6px solid #0d6efd;
+	border-radius: 10px;
+	padding: 15px 20px;
+	margin-bottom: 15px;
+}
+
+.table-container {
+	height: 48vh;
+	overflow-y: auto;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: white;
+}
+
+.header-table-dark {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: #212529 !important;
+	color: white !important;
+	font-weight: 800;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	padding: 12px 10px !important;
+}
+
+.btn-action-sobreturno {
+	width: 32px;
+	height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	transition: all 0.2s;
+}
+
+.btn-individual-sobreturno.disabled-mode {
+	opacity: 0.3 !important;
+	pointer-events: none !important;
+	filter: grayscale(1);
+}
+
+.badge-clinico {
+	background-color: #e0f2fe;
+	color: #0369a1;
+	border: 1px solid #bae6fd;
+	padding: 4px 8px;
+	font-weight: 800;
+	text-transform: uppercase;
+	font-size: 0.65rem;
+}
+
+.form-check-input {
+	width: 1.2rem;
+	height: 1.2rem;
+	cursor: pointer;
+	border: 2px solid #cbd5e1;
+}
+
+.row-selected {
+	background-color: #fff9db !important;
+}
+
+.box-label {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #64748b;
+	text-transform: uppercase;
+	margin-bottom: 4px;
+	display: block;
+}
 </style>
+
 <body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
 
-    <header th:replace="~{layout/layout :: header}"></header>
+	<div class="viewport-container">
+		<div class="container-custom-width">
+			<div class="card card-full shadow">
+				<div class="card-body p-3 px-4">
 
-    <div class="container-fluid viewport-container px-lg-4">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-1">
-                
-                <!-- ENCABEZADO Y BOTÓN NUEVO -->
-                <div class="header-clinica d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="fa-solid fa-notes-medical fa-2x text-primary me-3"></i>
-                        <div>
-                            <h3 th:text="${titulo}" class="fw-bold text-dark mb-0" style="font-family: Arial;"></h3>
-                            <p class="text-muted mb-0 small fw-bold text-uppercase" style="font-size: 0.7rem;">SIGAT • Control Central de Busqueda de Citas Médicas</p>
-                        </div>
-                    </div>
-                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/sobreturnos/formSobreturno}" 
-                       class="btn btn-primary fw-bold shadow-sm px-4">
-                        <i class="fa-solid fa-calendar-plus me-2"></i>NUEVO SOBRETURNO
-                    </a>
-                </div>
-
-                <!-- PANEL DE FILTROS DE PACIENTE -->
-                <div class="search-panel">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-magnifying-glass me-1"></i> Paciente Apellido</label>
-                            <input type="text" id="filtroBusquedaApellido" class="form-control" placeholder="Buscar por apellido..." onclick="limpiarFiltros()">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-address-card me-1"></i> Paciente DNI</label>
-                            <input type="text" id="filtroBusquedaDni" class="form-control" placeholder="Buscar por DNI..." onclick="limpiarFiltros()">
-                        </div>
-                        <div class="col-md-4">
-							<button type="button"
-								class="btn btn-outline-warning w-100 fw-bold"
-								onclick="limpiarFiltros()">
-								<i class="fa-solid fa-broom me-2"></i>LIMPIAR FILTROS
-							</button>
+					ENCABEZADO
+					<div class="header-clinica">
+						<div class="d-flex align-items-center">
+							<i class="fa-solid fa-notes-medical fa-2x text-primary me-3"></i>
+							<div>
+								<h3 th:text="${titulo}" class="mb-0 titulo-grande"></h3>
+								<p class="text-muted mb-0 small fw-bold text-uppercase"
+									style="font-size: 0.6rem;">SIGAT • Gestión de Sobreturnos</p>
+							</div>
 						</div>
+						<div class="d-flex gap-2">
+							<button type="button" id="btnSobreturnosMasivo"
+								class="btn btn-danger fw-bold shadow-sm px-4"
+								style="display: none;"
+								onclick="enviarCancelacionSobreturnosMasiva()">
+								<i class="fa-solid fa-ban me-2"></i>CANCELAR SELECCIONADOS
+							</button>
+							<a sec:authorize="hasRole('ROLE_ADMIN')"
+								th:href="@{/sobreturnos/formSobreturno}"
+								class="btn btn-primary fw-bold shadow-sm px-4"> <i
+								class="fa-solid fa-calendar-plus me-2"></i>NUEVO SOBRETURNO
+							</a>
+						</div>
+					</div>
+
+					PANEL DE FILTROS
+					<div class="search-panel shadow-sm">
+						<div class="row g-3 align-items-end">
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-magnifying-glass me-1"></i> Paciente
+									Apellido</span> <input type="text" id="filtroBusquedaApellido"
+									class="form-control" placeholder="Apellido..."
+									onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-address-card me-1"></i> Paciente DNI</span> <input
+									type="text" id="filtroBusquedaDni" class="form-control"
+									placeholder="DNI..." onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<button type="button"
+									class="btn btn-outline-warning w-100 fw-bold shadow-sm"
+									onclick="limpiarFiltrosLocal()">
+									<i class="fa-solid fa-broom me-2"></i>LIMPIAR BÚSQUEDA
+								</button>
+							</div>
+						</div>
+					</div>
+
+					TABLA DE SOBRETURNOS
+					<div class="table-container shadow-sm">
+						<table class="table table-hover align-middle mb-0"
+							id="tablaListadoSobreturnos">
+							<thead>
+								<tr>
+									<th class="header-table-dark text-center" style="width: 50px;">
+										<input class="form-check-input" type="checkbox"
+										id="checkTodosSobreturnos"
+										onclick="seleccionarTodosSobreturnos(this)">
+									</th>
+									<th class="header-table-dark text-center">ID</th>
+									<th class="header-table-dark">Alta</th>
+									<th class="header-table-dark">Profesional</th>
+									<th class="header-table-dark">Especialidad</th>
+									<th class="header-table-dark">Paciente</th>
+									<th class="header-table-dark">DNI</th>
+									<th class="header-table-dark">Fecha / Hora Cita</th>
+
+									CABECERA ATENDER: Fondo Negro, Solo para Médicos
+									<th class="text-center" sec:authorize="hasRole('ROLE_MEDICO')"
+										style="background-color: #000 !important; color: #fff !important; vertical-align: middle; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">
+										ATENDER</th>
+									<th class="header-table-dark text-center">Acciones</th>
+
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="sobreturno: ${sobreturnos}">
+									Checkbox
+									<td class="text-center"><input type="checkbox"
+										class="form-check-input check-sobreturno"
+										th:value="${sobreturno.id}"
+										onchange="actualizarInterfazSobreturnos(this)"></td>
+
+									ID
+									<td class="text-center font-monospace small"
+										th:text="${sobreturno.id}"></td>
+
+									Alta
+									<td class="small text-muted"
+										th:text="${#temporals.format(sobreturno.fechaCreacion, 'dd/MM/yyyy')}"></td>
+
+									Profesional
+									<td>
+										<div class="d-flex align-items-center">
+											<i class="fa-solid fa-user-doctor text-primary me-2"></i> <span
+												class="fw-bold text-dark"
+												th:text="${sobreturno.profesional.apellido} + ' ' + ${sobreturno.profesional.nombre}"></span>
+										</div>
+									</td>
+
+									Especialidad
+									<td><span class="badge badge-clinico"
+										th:text="${sobreturno.especialidad.especialidadNombre}"></span></td>
+
+									Paciente
+									<td class="text-dark fw-bold"
+										th:text="${sobreturno.paciente.apellido} + ' ' + ${sobreturno.paciente.nombre}"></td>
+
+									DNI
+									<td th:text="${sobreturno.paciente.dni}"></td>
+
+									Fecha Citación
+									<td class="fw-bold text-danger"><i
+										class="fa-solid fa-clock-pulse me-1 small"></i> <span
+										th:text="${#temporals.format(sobreturno.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></span>
+									</td>
+
+									COLUMNA ATENDER (Solo visible para MÉDICO y en VERDE)
+									<td class="text-center" sec:authorize="hasRole('ROLE_MEDICO')"
+										style="background-color: #f8fafc;"><a
+										th:href="@{/consultorio/atender/{id}(id=${sobreturno.paciente.id}, sobreturno=${sobreturno.id})}"
+										class="btn btn-sm btn-success fw-bold shadow-sm"
+										style="padding: 5px 15px; border-radius: 4px;"> <i
+											class="fa-solid fa-stethoscope me-1"></i> ATENDER
+									</a></td>
+
+									ACCIONES ADMINISTRATIVAS (Grisadas/Inhabilitadas si es MÉDICO)
+									<td class="text-center">
+										<div class="d-flex justify-content-center gap-1"
+											th:style="${#authorization.expression('hasRole(''ROLE_MEDICO'')') ? 'pointer-events: none; opacity: 0.5;' : ''}">
+
+											<button type="button"
+												class="btn btn-action-turno btn-outline-info btn-individual-sobreturno"
+												th:onclick="|printSobreturno('${sobreturno.id}')|"
+												th:disabled="${#authorization.expression('hasRole(''ROLE_MEDICO'')')}">
+												<i class="fa-solid fa-print"></i>
+											</button>
+
+											<a
+												th:href="@{/sobreturnos/formSobreturno(profId=${sobreturno.profesional.id}, especId=${sobreturno.especialidad.id})}"
+												class="btn btn-action-turno btn-outline-success btn-individual-sobreturno"
+												th:classappend="${#authorization.expression('hasRole(''ROLE_MEDICO'')') ? 'disabled' : ''}">
+												<i class="fa-solid fa-hand-point-left"></i>
+											</a>
+
+											<button type="button"
+												class="btn btn-action-turno btn-outline-danger btn-individual-sobreturno"
+												th:onclick="'ejecutarBajaIndividualSobret(' + ${sobreturno.id} + ')'"
+												th:disabled="${#authorization.expression('hasRole(''ROLE_MEDICO'')')}">
+												<i class="fa-solid fa-ban"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+
+
+						</table>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+
+	<script
+		th:replace="sobreturnos/js/funcionesParaListarSobreturnos :: javascript"></script>
+
+	<script th:inline="javascript">
+        // FUNCIÓN PARA CANCELACIÓN INDIVIDUAL (POST SEGURO)
+        function ejecutarBajaIndividualSobret(id) {
+            if (confirm('¿Desea CANCELAR este sobreturno? El registro se mantendrá como cancelado.')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/sobreturnos/eliminar';
+
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = 'id';
+                inputId.value = id;
+                form.appendChild(inputId);
+
+                const tokenMeta = document.querySelector("meta[name='_csrf']");
+                if (tokenMeta) {
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden';
+                    inputToken.name = '_csrf';
+                    inputToken.value = tokenMeta.getAttribute("content");
+                    form.appendChild(inputToken);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function actualizarInterfazSobreturnos(elemento) {
+            if(elemento) resaltarFilaSobreturno(elemento);
+            const seleccionados = document.querySelectorAll('.check-sobreturno:checked').length;
+            const botonMasivo = document.getElementById('btnSobreturnosMasivo');
+            const botonesIndividuales = document.querySelectorAll('.btn-individual-sobreturno');
+            
+            if (seleccionados > 1) {
+                botonMasivo.style.display = 'block';
+                botonesIndividuales.forEach(btn => btn.classList.add('disabled-mode'));
+            } else {
+                botonMasivo.style.display = 'none';
+                botonesIndividuales.forEach(btn => btn.classList.remove('disabled-mode'));
+            }
+        }
+
+        function seleccionarTodosSobreturnos(source) {
+            const checkboxes = document.querySelectorAll('.check-sobreturno');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+                resaltarFilaSobreturno(cb);
+            });
+            actualizarInterfazSobreturnos();
+        }
+
+        function resaltarFilaSobreturno(checkbox) {
+            const fila = checkbox.closest('tr');
+            if (checkbox.checked) fila.classList.add('row-selected');
+            else fila.classList.remove('row-selected');
+        }
+
+        function enviarCancelacionSobreturnosMasiva() {
+            const seleccionados = document.querySelectorAll('.check-sobreturno:checked');
+            const ids = Array.from(seleccionados).map(cb => cb.value);
+
+            if (ids.length === 0) return;
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
+
+            Swal.fire({
+                title: '¿Confirmar Cancelación?',
+                text: `Se cancelarán ${ids.length} sobreturnos seleccionados.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, Confirmar',
+                cancelButtonText: 'No, Volver'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/sobreturnos/cancelar-multiple",
+                        type: "POST",
+                        data: { ids: ids },
+                        traditional: true,
+                        beforeSend: function(xhr) {
+                            if (header && token) { xhr.setRequestHeader(header, token); }
+                        },
+                        success: function(res) {
+                            if (res === "OK") {
+                                seleccionados.forEach(cb => {
+                                    $(cb).closest('tr').fadeOut(600, function() { 
+                                        $(this).remove(); 
+                                        actualizarInterfazSobreturnos();
+                                    });
+                                });
+                                location.reload(); // Recarga para limpiar la vista según tu flujo
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        function limpiarFiltrosLocal() {
+            document.getElementById('filtroBusquedaApellido').value = '';
+            document.getElementById('filtroBusquedaDni').value = '';
+            if(typeof filtrarTabla === 'function') filtrarTabla();
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
+</head>
+<style>
+/* SIGAT: MEDICAL ELITE - LISTADO SOBRETURNOS ESPEJADO */
+.viewport-container {
+	min-height: calc(100vh - 70px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 25px 0 10px 0;
+}
+
+.container-custom-width {
+	max-width: 98%;
+	width: 98%;
+	margin: 0 auto;
+}
+
+.card-full {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.titulo-grande {
+	font-size: 1.6rem !important;
+	font-weight: 800;
+	color: #1a202c;
+	letter-spacing: -0.5px;
+}
+
+.search-panel {
+	background-color: #f0f7ff;
+	border: 1px solid #cfe2ff;
+	border-left: 6px solid #0d6efd;
+	border-radius: 10px;
+	padding: 15px 20px;
+	margin-bottom: 15px;
+}
+
+.table-container {
+	height: 48vh;
+	overflow-y: auto;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: white;
+}
+
+.header-table-dark {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: #212529 !important;
+	color: white !important;
+	font-weight: 800;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	padding: 12px 10px !important;
+}
+
+.badge-clinico {
+	background-color: #e0f2fe;
+	color: #0369a1;
+	border: 1px solid #bae6fd;
+	padding: 4px 8px;
+	font-weight: 800;
+	text-transform: uppercase;
+	font-size: 0.65rem;
+}
+
+.row-selected {
+	background-color: #fff9db !important;
+}
+
+.box-label {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #64748b;
+	text-transform: uppercase;
+	margin-bottom: 4px;
+	display: block;
+}
+
+.form-check-input {
+	width: 1.2rem;
+	height: 1.2rem;
+	cursor: pointer;
+	border: 2px solid #cbd5e1;
+}
+
+.btn-individual-sobreturno.disabled-mode {
+	opacity: 0.3 !important;
+	pointer-events: none !important;
+}
+</style>
+
+<body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<div class="viewport-container">
+		<div class="container-custom-width">
+			<div class="card card-full shadow">
+				<div class="card-body p-3 px-4">
+
+					<!-- ENCABEZADO -->
+					<div class="header-clinica">
+						<div class="d-flex align-items-center">
+							<i class="fa-solid fa-notes-medical fa-2x text-primary me-3"></i>
+							<div>
+								<h3 th:text="${titulo}" class="mb-0 titulo-grande"></h3>
+								<p class="text-muted mb-0 small fw-bold text-uppercase"
+									style="font-size: 0.6rem;">SIGAT • Gestión de Sobreturnos</p>
+							</div>
+						</div>
+						<div class="d-flex gap-2">
+							<button type="button" id="btnSobreturnosMasivo"
+								class="btn btn-danger fw-bold shadow-sm px-4"
+								style="display: none;"
+								onclick="enviarCancelacionSobreturnosMasiva()">
+								<i class="fa-solid fa-ban me-2"></i>CANCELAR SELECCIONADOS
+							</button>
+							<a sec:authorize="hasRole('ROLE_ADMIN')"
+								th:href="@{/sobreturnos/formSobreturno}"
+								class="btn btn-primary fw-bold shadow-sm px-4"> <i
+								class="fa-solid fa-calendar-plus me-2"></i>NUEVO SOBRETURNO
+							</a>
+						</div>
+					</div>
+
+					<!-- PANEL DE FILTROS -->
+					<div class="search-panel shadow-sm">
+						<div class="row g-3 align-items-end">
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-magnifying-glass me-1"></i> Paciente
+									Apellido</span> <input type="text" id="filtroBusquedaApellido"
+									class="form-control" placeholder="Apellido..."
+									onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-address-card me-1"></i> Paciente DNI</span> <input
+									type="text" id="filtroBusquedaDni" class="form-control"
+									placeholder="DNI..." onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<button type="button"
+									class="btn btn-outline-warning w-100 fw-bold shadow-sm"
+									onclick="limpiarFiltrosLocal()">
+									<i class="fa-solid fa-broom me-2"></i>LIMPIAR BÚSQUEDA
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- TABLA DE SOBRETURNOS -->
+					<div class="table-container shadow-sm">
+						<table class="table table-hover align-middle mb-0"
+							id="tablaListadoSobreturnos">
+							<thead>
+								<tr>
+									<th class="header-table-dark text-center" style="width: 50px;">
+										<input class="form-check-input" type="checkbox"
+										id="checkTodosSobreturnos"
+										onclick="seleccionarTodosSobreturnos(this)">
+									</th>
+									<th class="header-table-dark text-center">ID</th>
+									<th class="header-table-dark">Alta</th>
+									<th class="header-table-dark">Profesional</th>
+									<th class="header-table-dark">Especialidad</th>
+									<th class="header-table-dark">Paciente</th>
+									<th class="header-table-dark">DNI</th>
+									<th class="header-table-dark">Fecha / Hora Cita</th>
+									<!-- AGREGAR ESTA -->
+									<th class="header-table-dark text-center">Estado</th>
+									<!-- CABECERA ATENDER: Fondo Negro, Solo para Médicos -->
+									<th class="text-center" sec:authorize="hasRole('ROLE_MEDICO')"
+										style="background-color: #000 !important; color: #fff !important; vertical-align: middle; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">
+										ATENDER</th>
+
+									<th class="header-table-dark text-center">Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="sobreturno: ${sobreturnos}">
+									<td class="text-center"><input type="checkbox"
+										class="form-check-input check-sobreturno"
+										th:value="${sobreturno.id}"
+										onchange="actualizarInterfazSobreturnos(this)"></td>
+									<td class="text-center font-monospace small"
+										th:text="${sobreturno.id}"></td>
+									<td class="small text-muted"
+										th:text="${#temporals.format(sobreturno.fechaCreacion, 'dd/MM/yyyy')}"></td>
+									<td>
+										<div class="d-flex align-items-center">
+											<i class="fa-solid fa-user-doctor text-primary me-2"></i> <span
+												class="fw-bold text-dark"
+												th:text="${sobreturno.profesional.apellido} + ' ' + ${sobreturno.profesional.nombre}"></span>
+										</div>
+									</td>
+									<td><span class="badge badge-clinico"
+										th:text="${sobreturno.especialidad.especialidadNombre}"></span></td>
+									<td class="text-dark fw-bold"
+										th:text="${sobreturno.paciente.apellido} + ' ' + ${sobreturno.paciente.nombre}"></td>
+									<td th:text="${sobreturno.paciente.dni}"></td>
+									<td class="fw-bold text-danger"><i
+										class="fa-solid fa-clock me-1 small"></i> <span
+										th:text="${#temporals.format(sobreturno.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></span>
+									</td>
+
+									<!-- CELDA DE ESTADO DINÁMICO -->
+									<td class="text-center"><span
+										th:if="${sobreturno.estado.id == 9}"
+										class="badge bg-success shadow-sm"> <i
+											class="fa-solid fa-check-double me-1"></i> ATENDIDO
+									</span> <span th:if="${sobreturno.estado.id == 4}"
+										class="badge bg-primary shadow-sm"> <i
+											class="fa-solid fa-user-clock me-1"></i> OCUPADO
+									</span> <span
+										th:if="${sobreturno.estado.id != 9 && sobreturno.estado.id != 4}"
+										class="badge bg-secondary"
+										th:text="${sobreturno.estado.nombre}"></span></td>
+
+									<!-- COLUMNA ATENDER (Solo visible para MÉDICO y en VERDE) -->
+									<td class="text-center" sec:authorize="hasRole('ROLE_MEDICO')"
+										style="background-color: #f8fafc;">
+										<!-- BOTÓN VERDE: Solo si está Ocupado (ID 4) --> <a
+										th:if="${sobreturno.estado.id == 4}"
+										th:href="@{/consultorio/atender/{id}(id=${sobreturno.paciente.id}, sobreturno=${sobreturno.id})}"
+										class="btn btn-sm btn-success fw-bold shadow-sm"
+										style="padding: 5px 15px; border-radius: 4px; min-width: 115px;">
+											<i class="fa-solid fa-stethoscope me-1"></i> ATENDER
+									</a> <!-- BOTÓN AZUL: Solo si ya fue Atendido (ID 9) --> <a
+										th:if="${sobreturno.estado.id == 9}"
+										th:href="@{/consultorio/atender/{id}(id=${sobreturno.paciente.id}, sobreturno=${sobreturno.id})}"
+										class="btn btn-sm btn-outline-primary fw-bold"
+										style="padding: 5px 15px; border-radius: 4px; min-width: 115px;">
+											<i class="fa-solid fa-eye me-1"></i> VER FICHA
+									</a>
+									</td>
+
+									<!-- ACCIONES ADMINISTRATIVAS (Grisadas si es MÉDICO) -->
+									<td class="text-center">
+										<div class="d-flex justify-content-center gap-1"
+											th:style="${#authorization.expression('hasRole(''ROLE_MEDICO'')') ? 'pointer-events: none; opacity: 0.5;' : ''}">
+											<button type="button"
+												class="btn btn-action-turno btn-outline-info btn-individual-sobreturno"
+												th:onclick="|printSobreturno('${sobreturno.id}')|">
+												<i class="fa-solid fa-print"></i>
+											</button>
+											<a
+												th:href="@{/sobreturnos/formSobreturno(profId=${sobreturno.profesional.id}, especId=${sobreturno.especialidad.id})}"
+												class="btn btn-action-turno btn-outline-success btn-individual-sobreturno">
+												<i class="fa-solid fa-hand-point-left"></i>
+											</a>
+											<button type="button"
+												class="btn btn-action-turno btn-outline-danger btn-individual-sobreturno"
+												th:onclick="'ejecutarBajaIndividualSobret(' + ${sobreturno.id} + ')'">
+												<i class="fa-solid fa-ban"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>	
+
+	<script
+		th:replace="sobreturnos/js/funcionesParaListarSobreturnos :: javascript"></script>
+
+	<script th:inline="javascript">
+        function ejecutarBajaIndividualSobret(id) {
+            if (confirm('¿Desea CANCELAR este sobreturno?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/sobreturnos/eliminar';
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden'; name = 'id'; inputId.value = id;
+                form.appendChild(inputId);
+                const token = document.querySelector("meta[name='_csrf']");
+                if (token) {
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden'; name = '_csrf'; inputToken.value = token.getAttribute("content");
+                    form.appendChild(inputToken);
+                }
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function actualizarInterfazSobreturnos(elemento) {
+            if(elemento) resaltarFilaSobreturno(elemento);
+            const seleccionados = document.querySelectorAll('.check-sobreturno:checked').length;
+            const botonMasivo = document.getElementById('btnSobreturnosMasivo');
+            const botonesIndividuales = document.querySelectorAll('.btn-individual-sobreturno');
+            if (seleccionados > 1) {
+                botonMasivo.style.display = 'block';
+                botonesIndividuales.forEach(btn => btn.classList.add('disabled-mode'));
+            } else {
+                botonMasivo.style.display = 'none';
+                botonesIndividuales.forEach(btn => btn.classList.remove('disabled-mode'));
+            }
+        }
+
+        function seleccionarTodosSobreturnos(source) {
+            document.querySelectorAll('.check-sobreturno').forEach(cb => {
+                cb.checked = source.checked;
+                resaltarFilaSobreturno(cb);
+            });
+            actualizarInterfazSobreturnos();
+        }
+
+        function resaltarFilaSobreturno(checkbox) {
+            const fila = checkbox.closest('tr');
+            if (checkbox.checked) fila.classList.add('row-selected');
+            else fila.classList.remove('row-selected');
+        }
+
+        function enviarCancelacionSobreturnosMasiva() {
+            const seleccionados = document.querySelectorAll('.check-sobreturno:checked');
+            const ids = Array.from(seleccionados).map(cb => cb.value);
+            if (ids.length === 0) return;
+            Swal.fire({
+                title: '¿Confirmar?', text: `Se cancelarán ${ids.length} sobreturnos.`, icon: 'warning',
+                showCancelButton: true, confirmButtonText: 'Sí, Confirmar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/sobreturnos/cancelar-multiple", type: "POST", data: { ids: ids }, traditional: true,
+                        success: function(res) { if (res === "OK") location.reload(); }
+                    });
+                }
+            });
+        }
+
+        function limpiarFiltrosLocal() {
+            document.getElementById('filtroBusquedaApellido').value = '';
+            document.getElementById('filtroBusquedaDni').value = '';
+            if(typeof filtrarTabla === 'function') filtrarTabla();
+        }
+    </script>
+	<script>
+    function consultarServidor(idConsulta) {
+        // Usamos el mismo endpoint que en el consultorio
+        fetch('/consultorio/detalle-historia/' + idConsulta)
+            .then(res => res.json())
+            .then(data => {
+                // Llenamos el encabezado del panel
+                document.getElementById('ref-fecha-medico').innerText = `Consulta: ${data.fecha} - Dr. ${data.medico}`;
+
+                // Llenamos el contenido clínico
+                const contenido = `
+                    <div class="referencia-item">
+                        <label class="label-elite text-danger" style="font-size:0.65rem; font-weight:800; text-transform:uppercase;">Alergias</label>
+                        <div class="p-2 mb-3 bg-danger bg-opacity-10 border rounded small text-danger fw-bold">${data.alergias || 'Sin alergias registradas'}</div>
+                        
+                        <label class="label-elite text-primary border-bottom pb-1 w-100">Evolución Médica</label>
+                        <div class="p-3 mb-3 bg-light border rounded" style="max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-size: 0.85rem; line-height: 1.4;">
+                            ${data.evolucion || '-'}
+                        </div>
+
+                        <label class="label-elite text-success border-bottom pb-1 w-100">Diagnóstico</label>
+                        <div class="p-2 mb-3 border rounded fw-bold text-success" style="background-color: #f0fdf4;">
+                            ${data.diagnostico || '-'}
+                        </div>
+
+                        <label class="label-elite text-info">Indicaciones / Receta</label>
+                        <div class="p-2 bg-light border rounded small">${data.indicaciones || '-'}</div>
                     </div>
-                </div>
+                `;
 
-                <!-- TABLA DE SOBRETURNOS -->
-                <div class="table-container shadow-sm">
-                    <table class="table table-hover align-middle mb-0" id="tablaListadoSobreturnos">
-                        <thead>
-                            <tr>
-                                <th class="text-center">ID</th>
-                                <th>Alta</th>
-                                <th>Profesional</th>
-                                <th>Especialidad</th>
-                                <th>Paciente</th>
-                                <th>DNI</th>
-                                <th>Fecha Citación</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="sobreturno: ${sobreturnos}">
-                                <td class="text-center font-monospace small" th:text="${sobreturno.id}"></td>
-                                <td th:text="${#temporals.format(sobreturno.fechaCreacion, 'dd/MM/yyyy')}"></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-user-doctor text-primary me-2"></i>
-                                        <span class="fw-bold text-dark" th:text="${sobreturno.profesional.apellido} + ' ' + ${sobreturno.profesional.nombre}"></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge badge-especialidad" th:text="${sobreturno.especialidad.especialidadNombre}"></span>
-                                </td>
-                                <td class="text-dark fw-bold" th:text="${sobreturno.paciente.apellido} + ' ' + ${sobreturno.paciente.nombre}"></td>
-                                <td th:text="${sobreturno.paciente.dni}"></td>
-                                <td class="fw-bold text-danger">
-                                    <i class="fa-solid fa-clock-pulse me-1"></i>
-                                    <span th:text="${#temporals.format(sobreturno.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></span>
-                                </td>
-                                
-                                <!-- ACCIONES AGRUPADAS -->
-                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <!-- Imprimir -->
-                                        <button class="btn btn-action-sobreturno btn-outline-info" 
-                                                th:onclick="|printSobreturno('${sobreturno.id}')|" title="Reimprimir Cupo">
-                                            <i class="fa-solid fa-print"></i>
-                                        </button>
-                                        <!-- Repetir / Nuevo -->
-                                        <a th:href="@{/sobreturnos/formSobreturno(profId=${sobreturno.profesional.id}, especId=${sobreturno.especialidad.id})}" 
-                                           class="btn btn-action-sobreturno btn-outline-success" title="Nuevo para este Médico">
-                                            <i class="fa-solid fa-hand-point-left"></i>
-                                        </a>
-                                        <!-- Eliminar -->
-                                        <a th:href="@{/sobreturnos/eliminar/} + ${sobreturno.id}" 
-                                           class="btn btn-action-sobreturno btn-outline-danger" 
-                                           th:onclick="return confirm('¿Desea eliminar este sobreturno?');" title="Anular Cupo">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                document.getElementById('contenidoReferencia').innerHTML = contenido;
 
-            </div>
-        </div>
-    </div>
-
-    <footer th:replace="~{layout/layout :: footer}"></footer>
-    <script th:replace="sobreturnos/js/funcionesParaListarSobreturnos :: javascript"></script>
+                // Abrimos el panel lateral
+                const panelElement = document.getElementById('panelReferencia');
+                const panel = bootstrap.Offcanvas.getOrCreateInstance(panelElement);
+                panel.show();
+            });
+    }
+    </script>
 </body>
 </html>

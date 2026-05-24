@@ -13,4 +13,7 @@ public interface IEstadoService {
 	
 	// listar estado solo activo
 	public List<Estado> findByEstadoActivo(String term);
+	
+	//HISTORIA CLINICA
+	public Estado findById(Long id);
 }

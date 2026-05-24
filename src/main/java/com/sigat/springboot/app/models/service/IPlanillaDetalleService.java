@@ -7,10 +7,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.repository.query.Param;
+
+import com.sigat.springboot.app.models.entity.Especialidad;
+import com.sigat.springboot.app.models.entity.PlanillaCabecera;
 import com.sigat.springboot.app.models.entity.PlanillaDetalle;
+import com.sigat.springboot.app.models.entity.Profesional;
+import com.sigat.springboot.app.models.entity.Sobreturno;
 import com.sigat.springboot.app.models.entity.Turno;
 
 public interface IPlanillaDetalleService {
+	
+	//para mostrar numero de box en sobreturnos
+	public Integer findBoxByCabeceraId(Long cabeceraId);
 	
 	// ... tus otros métodos (como el de actualizar estado) ...
     public PlanillaDetalle findOne(Long id);
@@ -39,13 +48,14 @@ public interface IPlanillaDetalleService {
 	//muestra los turnos libres (de todos los Dias)de acuerdo a la planilla detalle por ProfId y EspecialidadID.
 	public List<PlanillaDetalle> mostrarTurnosLibresTodos(Long profId, Long EspecId);
 	
-	//muestra los turnos libres (de todos los Dias)de acuerdo a la planilla detalle por ProfId y EspecialidadID.
-	//public List<PlanillaDetalle> mostrarHorariosParaSobreturno(Long profId, Long EspecId);
-	
-	
-	
 	//muestra los turnos libres de acuerdo a la planilla detalle por ProfId, EspecialidadID y diaId.
 	public List<PlanillaDetalle> mostrarTurnosLibresTodosByDiaId(Long profId, Long EspecId, Long diaId);
+	
+	//PARA TRABAJAR EN SOBRETURNOS Y LISTAR LOS TURNOS LIBRES
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosTodos(Long profId, Long EspecId);
+		
+	//PARA TRABAJAR EN SOBRETURNOS Y LISTAR LOS TURNOS LIBRES POR DIA
+	public List<PlanillaDetalle> mostrarHorariosParaSobreturnosByDiaId(Long profId, Long EspecId, Long diaId);
 	
 	// Metodo guardar - editar
 	public void save(PlanillaDetalle planilladetalle);
@@ -85,4 +95,27 @@ public interface IPlanillaDetalleService {
 	
 	//ACTUALIZAMOS en Planilladetalle el estado_id=6 (CANCELADO). X Fechas horas. (vista: Cancelar Planillas) Turnos Ocupados
 	public void actualizarPlanillaDetalleCanceladoFechasHorasTO(Long profId, Long EspecId, Date fechaHoraIni, Date fechaHoraFin ,String estadoId, String motivo);
+	
+	// Método para liberar varios IDs de planilla a la vez
+	void updatePlanillaDetalleMasivoLibre(List<Long> ids);
+	
+	//NUEVA FORMA DE CANCELAR PLANILLAS MASIVAMENTE
+	// Asegurate que tenga los 6 parámetros y el boolean al final
+	public String ejecutarBajaMedicaMasivaCompleta(Long profId, Long especId, String inicio, String fin, String motivo, boolean ignorarBackup) throws Exception;
+	
+	//para sobreturnos solamente
+	void generarPdfLlamadosElite(List<Turno> turnos, List<Sobreturno> sobreturnos, Profesional prof, Especialidad espec, String fIni, String fFin, String tipo) throws Exception;
+	
+	//PARA RESTAURACION (AUDITORIA)
+	// Este es el que busca para la tabla
+	List<PlanillaCabecera> findPlanillasCanceladas(Long profId, Long especId, String desde, String hasta);
+
+	// Este es el que ya habías empezado a poner
+	String restaurarPlanillaMasiva(Long profId, Long especId, String desde, String hasta);
+	
+	//Mostrar detalle de lo que esta cancelado y se va a restaurar
+	public List<PlanillaDetalle> findByPlanillaCabeceraIdAndEstadoId(Long cabeceraId, Long estadoId);
+
+	
+
 }

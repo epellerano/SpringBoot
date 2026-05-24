@@ -129,10 +129,8 @@
 				dataType: "json",
 				success: function (datos) {
 					moment.locale('es');
-
 					// Si hay datos
 					if (datos && datos.length > 0) {
-
 						// habilitar boton Imprimir PDF.
 						document.getElementById('btnImprimirPdf').disabled = false;
 
@@ -801,6 +799,8 @@
 		document.getElementById('fechaFinal').disabled = true;
 		// deshabilitar boton imprimir PDF
 		document.getElementById('btnImprimirPdf').disabled = true;
+		//foco en primer check
+		document.getElementById('isCheckReporteFechas').checked = true;
 	</script>
 </body>
 

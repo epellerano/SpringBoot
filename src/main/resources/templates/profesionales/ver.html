@@ -61,8 +61,12 @@
 }
 
 .info-label i {
-	margin-right: 6px;
+	margin-right: 4px;
 	color: #0d6efd;
+}
+
+.awesome {
+	margin-right: 6px;
 }
 
 .info-value {
@@ -147,7 +151,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-user"></i>Apellido
+												<i class="awesome fa-solid fa-user"></i>Apellido
 											</div>
 											<div class="info-value text-uppercase"
 												th:text="${profesional.apellido}"></div>
@@ -156,7 +160,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-signature"></i>Nombre
+												<i class="awesome fa-solid fa-signature"></i>Nombre
 											</div>
 											<div class="info-value text-uppercase"
 												th:text="${profesional.nombre}"></div>
@@ -165,7 +169,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-id-card"></i>DNI
+												<i class="awesome fa-solid fa-id-card"></i>DNI
 											</div>
 											<div class="info-value" th:text="${profesional.dni}"></div>
 										</div>
@@ -173,7 +177,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-certificate"></i>Matrícula
+												<i class="awesome fa-solid fa-certificate"></i>Matrícula
 											</div>
 											<div class="info-value text-success"
 												th:text="${profesional.matricula}"></div>
@@ -186,7 +190,7 @@
 									<div class="col-sm-12">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-envelope"></i>Email
+												<i class="awesome fa-solid fa-envelope"></i>Email
 											</div>
 											<div class="info-value" th:text="${profesional.email}"></div>
 										</div>
@@ -194,7 +198,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-phone"></i>Teléfono
+												<i class="awesome fa-solid fa-phone"></i>Teléfono
 											</div>
 											<div class="info-value" th:text="${profesional.telefono}"></div>
 										</div>
@@ -202,7 +206,7 @@
 									<div class="col-sm-6">
 										<div class="info-box">
 											<div class="info-label">
-												<i class="fa-solid fa-calendar"></i>Fecha Alta
+												<i class="awesome fa-solid fa-calendar"></i>Fecha Alta
 											</div>
 											<div class="info-value"
 												th:text="${#dates.format(profesional.createAt,'dd/MM/yyyy')}"></div>

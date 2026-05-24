@@ -65,7 +65,7 @@
 
     /* --- ESTILOS DE TABLA PREMIUM --- */
     .table thead th {
-        background-color: #f8fafc;
+        background-color: #f4f6f9;
         color: #475569;
         text-transform: uppercase;
         font-size: 0.7rem;
@@ -168,7 +168,7 @@
                                 <!-- Ver Detalle -->
                                 <td class="text-center" sec:authorize="hasRole('ROLE_USER')">
                                     <a th:href="@{/pacientes/verPaciente/} + ${paciente.id}" class="btn-action-link">
-                                        <i class="fa-solid fa-circle-info fa-lg"></i>
+                                        <i class="fa-solid fa-circle-info fa-lg" style="color:#10b981;"></i>
                                     </a>
                                 </td>
 
@@ -212,7 +212,7 @@
 
                 <!-- PAGINADOR -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <p class="small text-muted mb-0">Registros de pacientes bajo normativa SIGAT</p>
+                    <p class="small text-muted mb-0">Pacientes registrados bajo normativa SIGAT</p>
                     <nav th:replace="~{paginator-nav :: paginator}"></nav>
                 </div>
 

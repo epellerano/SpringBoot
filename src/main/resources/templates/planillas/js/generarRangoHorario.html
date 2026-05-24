@@ -78,7 +78,7 @@
 					Tabla.deleteRow(x);
 				}
 				//Deshabilitamos el boton guardar
-				document.getElementById('btnGuardar').disabled = true;
+				//document.getElementById('btnGuardar').disabled = true;
 				//limpiamos la tabla Comparacion con datos de MysQl.
     			var Tabla = document.getElementById("TablaMysql");
     			var rowCount = Tabla.rows.length;
@@ -121,7 +121,7 @@
 					Tabla.deleteRow(x);
 				}
 				//Deshabilitamos el boton guardar
-				document.getElementById('btnGuardar').disabled = true;				
+				//document.getElementById('btnGuardar').disabled = true;				
 				//limpiamos la tabla Comparacion con datos de MysQl.
     			var Tabla = document.getElementById("TablaMysql");
     			var rowCount = Tabla.rows.length;
@@ -738,11 +738,16 @@
 			}
 	    
 	  //duplicamos valor en FechaFinal mientras escribimos la fechaInicial.
-		const fecha1 = document.getElementById('fechaInicio');
-		const fecha2 = document.getElementById('fechaFinal');
-		fecha1.addEventListener('input', function () {
-			fecha2.value = this.value; // Asigna el valor del primer input al segundo
-		});
+		document.addEventListener('DOMContentLoaded', function () {
+    const fecha1 = document.getElementById('fechaInicio');
+    const fecha2 = document.getElementById('fechaFinal');
+
+    if (fecha1 && fecha2) {
+        fecha1.addEventListener('input', function () {
+            fecha2.value = this.value; 
+        });
+    }
+});
 		
 	</script>
 </body>

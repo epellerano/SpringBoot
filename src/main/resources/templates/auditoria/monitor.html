@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head th:replace="~{layout/layout :: head}">
+</head>
+<style>
+/* --- ESTÉTICA MONITOR RADAR SIGAT --- */
+:root {
+	--med-cyan: #0891b2;
+	--med-blue: #164e63;
+	--med-bg: #f8fafc;
+	/* Nuevo Cian Fuerte: Más profundo y con carácter médico */
+	--med-planilla: #0e7490;
+}
+
+.viewport-container {
+	padding-top: 1.5rem !important;
+	padding-bottom: 2rem !important;
+}
+
+/* Efecto Elevación para las Cards */
+.card-monitor {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.card-monitor:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Cajas de Iconos */
+.icon-box-circle {
+	width: 55px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	flex-shrink: 0;
+}
+
+/* Clases auxiliares para el nuevo color de planilla */
+.text-planilla {
+	color: var(--med-planilla) !important;
+}
+
+.bg-planilla-soft {
+	background-color: rgba(14, 116, 144, 0.1) !important;
+}
+
+.border-planilla {
+	border-color: rgba(14, 116, 144, 0.25) !important;
+}
+
+/* Estilos de Tabla */
+.table-radar thead th {
+	background-color: #f1f5f9 !important;
+	color: #475569 !important;
+	font-weight: 800;
+	text-transform: uppercase;
+	font-size: 0.65rem;
+	letter-spacing: 1px;
+	border: none;
+}
+
+.table-radar tbody tr {
+	transition: 0.2s;
+}
+
+.table-radar tbody tr:hover {
+	background-color: #f0f9ff !important;
+}
+
+/* Achicamos la fuente solo en el cuerpo de la tabla */
+.table-radar tbody td {
+	font-size: 0.88rem; /* Un tamaño más pequeño y elegante */
+	padding-top: 10px !important;
+	padding-bottom: 10px !important;
+}
+
+/* Ajuste opcional para los textos pequeños debajo de los nombres */
+.table-radar tbody .small {
+	font-size: 0.78rem !important;
+}
+
+.btn-auditar {
+	font-size: 0.7rem;
+	font-weight: 800;
+	letter-spacing: 0.5px;
+	border-radius: 8px;
+	transition: 0.3s;
+}
+</style>
+
+<body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
+
+	<div class="container-fluid viewport-container px-md-5">
+
+		<!-- HEADER DE PÁGINA -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<div class="d-flex align-items-center">
+				<div class="bg-dark p-3 rounded-4 me-3 shadow">
+					<i class="fa-solid fa-tower-observation fa-xl text-white"></i>
+				</div>
+				<div>
+					<h3 class="fw-bold text-dark mb-0">Monitor de Integridad</h3>
+					<p class="text-muted mb-0 small fw-bold uppercase"
+						style="letter-spacing: 1px;">SIGAT • Radar de Registros
+						Pendientes de Auditoría</p>
+				</div>
+			</div>
+			<button class="btn btn-white border fw-bold shadow-sm rounded-3"
+				onclick="location.reload()">
+				<i class="fa-solid fa-arrows-rotate me-2 text-primary"></i>Refrescar
+				Radar
+			</button>
+		</div>
+
+		<!-- FILA DE INDICADORES (CORRECCIÓN DE CONTRASTE Y VISIBILIDAD) -->
+<div class="row g-3 mb-3">
+    
+    <!-- CARD 1: TURNOS (Fondo Pastel - Icono Sólido) -->
+    <div class="col-md-4">
+        <div class="card card-monitor shadow-sm rounded-4 h-100 border-0" style="background-color: #fff5f5;">
+            <div class="card-body p-4 d-flex align-items-center">
+                <!-- Icono con fondo sólido y símbolo blanco para distinguir -->
+                <div class="icon-box-circle bg-danger text-white me-3 shadow-sm">
+                    <i class="fa-solid fa-user-lock fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="text-danger fw-bold text-uppercase mb-1" style="font-size: 0.62rem; letter-spacing: 0.5px;">Turnos Cancelados</h6>
+                    <h2 class="fw-bold mb-0 text-dark" th:text="${totalTurnos}">0</h2>
+                    <span class="text-danger small fw-bold" style="font-size: 0.6rem;"><i class="fa-solid fa-circle-exclamation me-1"></i>Crítico</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD 2: SOBRETURNOS (Fondo Pastel - Icono Sólido) -->
+    <div class="col-md-4">
+        <div class="card card-monitor shadow-sm rounded-4 h-100 border-0" style="background-color: #fff9db;">
+            <div class="card-body p-4 d-flex align-items-center">
+                <!-- Icono con fondo sólido y símbolo blanco -->
+                <div class="icon-box-circle bg-warning text-white me-3 shadow-sm" style="background-color: #f59f00 !important;">
+                    <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="text-warning fw-bold text-uppercase mb-1" style="font-size: 0.62rem; letter-spacing: 0.5px; color: #d97706 !important;">Sobreturnos Cancelados</h6>
+                    <h2 class="fw-bold mb-0 text-dark" th:text="${totalSobreturnos}">0</h2>
+                    <span class="text-warning small fw-bold" style="font-size: 0.6rem; color: #d97706 !important;"><i class="fa-solid fa-clock-rotate-left me-1"></i>Pendiente</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD 3: PLANILLAS (Fondo Pastel - Icono Sólido) -->
+    <div class="col-md-4">
+        <div class="card card-monitor shadow-sm rounded-4 h-100 border-0" style="background-color: #e0f2f1;">
+            <div class="card-body p-4 d-flex align-items-center">
+                <!-- Icono con fondo sólido Cian Petrolato y símbolo blanco -->
+                <div class="icon-box-circle text-white me-3 shadow-sm" style="background-color: var(--med-planilla) !important;">
+                    <i class="fa-solid fa-calendar-xmark fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="text-planilla fw-bold text-uppercase mb-1" style="font-size: 0.62rem; letter-spacing: 0.5px;">Agendas Canceladas</h6>
+                    <h2 class="fw-bold mb-0 text-dark" th:text="${totalPlanillas}">0</h2>
+                    <span class="text-planilla small fw-bold" style="font-size: 0.6rem;"><i class="fa-solid fa-calendar-check me-1"></i>Gestión</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+		<!-- TABLA DE SUPERVISIÓN UNIFICADA -->
+		<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white py-2 border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">
+            <i class="fa-solid fa-list-check me-2 text-primary"></i>Cronología de Cancelaciones
+        </h6>
+        <div class="d-flex flex-column align-items-end">
+            <div class="input-group input-group-sm" style="width: 300px;">
+                <span class="input-group-text bg-light border-end-0">
+                    <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                </span>
+                <input type="text" id="buscadorRadar" class="form-control bg-light border-start-0" 
+                       placeholder="Buscar por Médico, Paciente o DNI...">
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <!-- CONTENEDOR CON ALTURA FIJA Y SCROLL VERTICAL -->
+        <div class="table-responsive" style="height: 335px; overflow-y: auto; overflow-x: hidden;">
+            <table class="table table-radar align-middle mb-0" id="tablaRadar" style="width: 100%; table-layout: fixed;">
+                <thead class="sticky-top" style="z-index: 10;">
+                    <tr>
+                        <th class="ps-4" style="width: 15%;">Categoría</th>
+                        <th style="width: 18%;">Fecha y Hora</th>
+                        <th style="width: 22%;">Médico / Especialidad</th>
+                        <th style="width: 25%;">Paciente / Referencia</th>
+                        <th class="text-center" style="width: 10%;">Estado</th>
+                        <th class="text-center" style="width: 10%;">Acciones</th>
+                    </tr>
+                </thead>
+						<tbody>
+							<!-- TURNOS -->
+							<tr th:each="t : ${turnos}">
+								<td class="ps-4"><span
+									class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2">TURNO</span></td>
+								<td class="fw-bold text-dark"
+									th:text="${#dates.format(t.planilladetalle.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+								<td>
+									<div class="fw-bold"
+										th:text="${t.profesional.apellido} + ' ' + ${t.profesional.nombre}"></div>
+									<div class="small text-muted"
+										th:text="${t.especialidad.especialidadNombre}"></div>
+								</td>
+								<td>
+									<div class="fw-bold"
+										th:text="${t.paciente.apellido} + ' ' + ${t.paciente.nombre}"></div>
+									<div class="small text-muted"
+										th:text="'DNI: ' + ${t.paciente.dni}"></div>
+								</td>
+								<td class="text-center"><span
+									class="text-danger fw-bold small">CANCELADO</span></td>
+								<td class="text-center"><a
+									th:href="@{/auditoria/centro-recuperacion(tipo='TURNOS', profId=${t.profesional.id}, especId=${t.especialidad.id})}"
+									class="btn btn-sm btn-outline-primary btn-auditar px-3 shadow-sm">AUDITAR</a></td>
+							</tr>
+
+							<!-- SOBRETURNOS -->
+							<tr th:each="s : ${sobreturnos}">
+								<td class="ps-4"><span
+									class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2">SOBRETURNO</span></td>
+								<td class="fw-bold text-dark"
+									th:text="${#temporals.format(s.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+								<td>
+									<div class="fw-bold"
+										th:text="${s.profesional.apellido} + ' ' + ${s.profesional.nombre}"></div>
+									<div class="small text-muted"
+										th:text="${s.especialidad.especialidadNombre}"></div>
+								</td>
+								<td>
+									<div class="fw-bold"
+										th:text="${s.paciente.apellido} + ' ' + ${s.paciente.nombre}"></div>
+									<div class="small text-muted"
+										th:text="'DNI: ' + ${s.paciente.dni}"></div>
+								</td>
+								<td class="text-center"><span
+									class="text-warning fw-bold small">CANCELADO</span></td>
+								<td class="text-center"><a
+									th:href="@{/auditoria/centro-recuperacion(tipo='SOBRETURNOS', profId=${s.profesional.id}, especId=${s.especialidad.id})}"
+									class="btn btn-sm btn-outline-primary btn-auditar px-3 shadow-sm">AUDITAR</a></td>
+							</tr>
+
+							<!-- PLANILLAS (CON EL NUEVO CIAN) -->
+							<tr th:each="p : ${planillas}">
+								<td class="ps-4"><span
+									class="badge bg-planilla-soft text-planilla border border-planilla px-2">AGENDA</span></td>
+								<td class="fw-bold text-dark"
+									th:text="${#dates.format(p.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+								<td>
+									<div class="fw-bold"
+										th:text="${p.planillacabecera.profesional.apellido} + ' ' + ${p.planillacabecera.profesional.nombre}"></div>
+									<div class="small text-muted"
+										th:text="${p.planillacabecera.especialidad.especialidadNombre}"></div>
+								</td>
+								<td>
+									<div class="fw-bold text-planilla">HORARIO CANCELADO</div>
+									<div class="small text-muted"
+										th:text="${p.planillacabecera.dia.nombre}"></div>
+								</td>
+								<td class="text-center"><span
+									class="text-planilla fw-bold small">PLANILLA CANCELADA</span></td>
+								<td class="text-center"><a
+									th:href="@{/auditoria/centro-recuperacion(tipo='PLANILLAS', profId=${p.planillacabecera.profesional.id}, especId=${p.planillacabecera.especialidad.id})}"
+									class="btn btn-sm btn-outline-primary btn-auditar px-3 shadow-sm">AUDITAR</a></td>
+							</tr>
+
+							<!-- VACÍO -->
+							<tr id="filaVacia"
+								th:if="${#lists.isEmpty(turnos) and #lists.isEmpty(sobreturnos) and #lists.isEmpty(planillas)}">
+								<td colspan="6" class="text-center py-5"><i
+									class="fa-solid fa-circle-check fa-4x text-success opacity-25 mb-3"></i>
+									<h5 class="fw-bold text-muted">Agenda sin interrupciones</h5>
+									<p class="small text-muted">No se detectaron cancelaciones
+										activas en el sistema.</p></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+
+	<script>
+		document
+				.getElementById('buscadorRadar')
+				.addEventListener(
+						'keyup',
+						function() {
+							if (document.getElementById('filaVacia')) {
+								this.value = "";
+								return;
+							}
+
+							let filtro = this.value.toUpperCase();
+							let tabla = document.getElementById('tablaRadar');
+							let filas = tabla.getElementsByTagName('tr');
+
+							for (let i = 1; i < filas.length; i++) {
+								// Celda 2: Médico / Especialidad
+								// Celda 3: Paciente / Referencia / DNI
+								let celdaMedico = filas[i]
+										.getElementsByTagName('td')[2];
+								let celdaPaciente = filas[i]
+										.getElementsByTagName('td')[3];
+
+								if (celdaMedico && celdaPaciente) {
+									let textoMedico = celdaMedico.textContent
+											|| celdaMedico.innerText;
+									let textoPaciente = celdaPaciente.textContent
+											|| celdaPaciente.innerText;
+
+									// Comprobamos si el filtro coincide con el médico O con el paciente/DNI
+									if (textoMedico.toUpperCase().indexOf(
+											filtro) > -1
+											|| textoPaciente.toUpperCase()
+													.indexOf(filtro) > -1) {
+										filas[i].style.display = "";
+									} else {
+										filas[i].style.display = "none";
+									}
+								}
+							}
+						});
+	</script>
+</body>
+</html>

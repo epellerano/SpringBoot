@@ -29,18 +29,28 @@ public class BackupService {
     @Value("${spring.database.name}") 
     private String dbName;
 
-    public boolean ejecutarBackup() {
+ // Modificamos la firma para recibir el tipo (Sobreturnos, Turnos, Planillas)
+    public boolean ejecutarBackup(String tipo) {
         try {
-            File folder = new File(BACKUP_DIRECTORY);
-            if (!folder.exists()) folder.mkdirs();
+            // 1. Construimos la ruta dinámica: BackupBDCancelacion + Sobreturnos, etc.
+            String rutaDinamica = "C:/Users/Public/Documents/BackupBDCancelacion" + tipo + "/";
+            File folder = new File(rutaDinamica);
+            
+            // 2. Si la carpeta no existe (ej: BackupBDCancelacionSobreturnos), la crea
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
 
+            // 3. Limpiamos backups viejos solo en esa subcarpeta
             limpiarBackupsAntiguos(folder);
 
-            String fileName = "backup_" + System.currentTimeMillis() + ".bak";
+            // 4. Nombramos el archivo incluyendo el tipo para que sea fácil de identificar
+            // Ejemplo: backup_Sobreturnos_1713745200000.bak
+            String fileName = "backup_" + tipo + "_" + System.currentTimeMillis() + ".bak";
             File backupFile = new File(folder, fileName);
 
             List<String> commandArgs = new ArrayList<>();
-            commandArgs.add(MYSQLDUMP_EXE); // Uso de la constante que elimina el warning
+            commandArgs.add(MYSQLDUMP_EXE); 
             commandArgs.add("-u" + user.trim());
             
             if (password != null && !password.trim().isEmpty()) {
@@ -59,17 +69,18 @@ public class BackupService {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println("LOG MYSQLDUMP: " + line);
+                    System.out.println("LOG MYSQLDUMP (" + tipo + "): " + line);
                 }
             }
 
             return process.waitFor() == 0;
         } catch (Exception e) {
-            System.err.println("Error crítico: No se encuentra el archivo en " + MYSQLDUMP_EXE);
+            System.err.println("Error crítico en backup de " + tipo + " en " + MYSQLDUMP_EXE);
             e.printStackTrace();
             return false;
         }
     }
+
 
     private void limpiarBackupsAntiguos(File folder) {
         File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".bak"));

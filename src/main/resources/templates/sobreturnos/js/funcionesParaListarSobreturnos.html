@@ -9,59 +9,81 @@
 		return days[moment(date).day()];
 	}
 	
-	//Funcion Ver datos del sobreturno y reimprimir por id mediante la funcion que escucha click en impresora.
-	  function printSobreturno(sobreturno_id) {
-		//Continuamos
-		$.ajax({
-       url: "/api/sobreturnosLibresController/obtener-sobreturno-id/" + sobreturno_id,
- 		method: "GET",
- 		success: function(data) { 			
-           moment.locale('es-ar');
-           data.forEach(function(sobreturno) {
-              swal.fire({
-           	   title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL SOBRETURNO ASIGNADO</h5>
-           		   <p style='float: center;color: green; font-size: 22px;'>${ObtenerDiaEspañol(sobreturno.rangoFechaHora) + ' ' + moment(sobreturno.rangoFechaHora).format('DD/MM/YYYY HH:mm')}</p><hr style='margin-bottom: -5px;'>`,
-		      html: `
-		    	  <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${sobreturno.profesional.apellido.toUpperCase() + ' ' + sobreturno.profesional.nombre.toUpperCase()}</span><br>
-		    	  <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${sobreturno.especialidad.especialidadCodigo + ' - ' + sobreturno.especialidad.especialidadNombre.toUpperCase()}</span><br>
-		    	  <hr>
-		    	  <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${sobreturno.paciente.apellido.toUpperCase() + ' ' + sobreturno.paciente.nombre.toUpperCase()}</span><br>
-		    	  <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${sobreturno.paciente.dni}</span><br>
-		    	  <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${sobreturno.observacion.toUpperCase()}</span><br>
-		    	  <hr>
-		    	  <span style='font-family: Arial; font-size: 12px;'>Juan Francisco Segui 1331 - Grand Bourg || Telefonos: 02320-410000/411317/486666</span><br>
-		    	  <span style='font-family: Arial; font-size: 12px;'>** Asistir 20 Minutos antes de su hora asignada **</span><br>				    	  				    	  						
-		    	  <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>www.centromedicosalud.com</span>
-		      `,
-		      //icon: "info",
-		      imageUrl : '/images/termalPrinter-56.png',
-		      showDenyButton: true,
-		      confirmButtonText: `
-		    	    <i class="fa fa-print"></i> Imprimir
-		    	  `,
-		      denyButtonText: 'Cerrar Ventana',	
-		      denyButtonColor: "#3085d6",
-		      customClass: {
-		      popup: 'swal2-border-custom' //Style producido en styleformTurno.css
-		      }
-		      })
-		      .then((result) => {
-		      if (result.isConfirmed) {
-		      //Reimprimimos en turno
-		      									
-		      Swal.fire('IMPRIMIENDO', 'El sobreturno seleccionado', 'success')
-		      } else if (result.isDenied) {
-		      //Swal.fire('HASTA PRONTO', '', 'info')
-		      }
-		      });	                	
-           });
-           
- 		},
- 		error: function(error) {
-           console.log(error);
-       }
-   });
+	//Funcion Ver datos del sobreturno y reimprimir por id mediante la funcion que escucha click en icono impresora.
+	function printSobreturno(sobreturno_id, elemento) {
+    
+    // 1. CAPTURA EL NÚMERO DE BOX MEDIANTE TEXTO PLANO DE LA FILA
+    let valorBox = '';
+    if (elemento) {
+        // Agarramos todo el texto visible de la fila <tr> actual
+        let textoCompletoFila = $(elemento).closest('tr').text();
+        
+        // Buscamos la palabra "box" en minúscula o mayúscula seguida de cualquier caracter y el número
+        let coincidencia = textoCompletoFila.match(/box\s*:\s*([0-9]+)/i) || textoCompletoFila.match(/box\s*—?\s*([0-9]+)/i);
+        
+        if (coincidencia && coincidencia[1]) {
+            valorBox = coincidencia[1].trim(); 
+        }
+    }
+
+	    // 2. CONTINUAMOS CON TU FLUJO NORMAL AJAX
+	    $.ajax({
+	        url: "/api/sobreturnosLibresController/obtener-sobreturno-id/" + sobreturno_id,
+	        method: "GET",
+	        success: function(data) { 			
+	            moment.locale('es-ar');
+	            data.forEach(function(sobreturno) {
+
+	                // SANITIZACIÓN DE VARIABLES
+	                let fechaRaw = sobreturno.rangoFechaHora ? sobreturno.rangoFechaHora : new Date();
+	                let stringFechaYHora = ObtenerDiaEspañol(fechaRaw) + ' ' + moment(fechaRaw).format('DD/MM/YYYY HH:mm');
+	                let profesionalTxt = (sobreturno.profesional && sobreturno.profesional.apellido) ? (sobreturno.profesional.apellido + ' ' + (sobreturno.profesional.nombre || '')) : 'S/P';
+	                let specialtyTxt = (sobreturno.especialidad && sobreturno.especialidad.especialidadNombre) ? (sobreturno.especialidad.especialidadCodigo + ' - ' + sobreturno.especialidad.especialidadNombre) : 'S/E';
+	                let pacienteTxt = (sobreturno.paciente && sobreturno.paciente.apellido) ? (sobreturno.paciente.apellido + ' ' + (sobreturno.paciente.nombre || '')) : 'S/P';
+	                let pacienteDni = (sobreturno.paciente && sobreturno.paciente.dni) ? sobreturno.paciente.dni : '';
+	                let observacionTxt = (sobreturno.observacion) ? sobreturno.observacion : '';
+
+	                // SI EL FRONTEND DETECTÓ UN BOX, SE INYECTA LA LÍNEA VERDE
+	                let lineaBoxHtml = (valorBox !== '') ? `
+	                    <span style='float: left;'>Box / Consultorio:</span><span style='float: left; color: green; font-weight: bold;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BOX NRO ${valorBox}</span><br>
+	                ` : '';
+
+	                swal.fire({
+	                    title: `<h5 style='margin-bottom: -25px;text-decoration: underline;margin-top: -25px;'>COMPROBANTE DEL SOBRETURNO ASIGNADO</h5>
+	                        <p style='float: center;color: green; font-size: 22px;'>${stringFechaYHora}</p><hr style='margin-bottom: -5px;'>`,
+	                    html: `
+	                        <span style='float: left;'>Profesional Seleccionado:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${profesionalTxt.toUpperCase()}</span><br>
+	                        <span style='float: left;;'>Especialidad Seleccionada:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${specialtyTxt.toUpperCase()}</span><br>
+	                        ${lineaBoxHtml}
+	                        <hr>
+	                        <span style='float: left;'>Paciente Apellido Nombre:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;${pacienteTxt.toUpperCase()}</span><br>
+	                        <span style='float: left;'>Paciente Documento:</span><span style='float: left; color: blue;'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${pacienteDni}</span><br>
+	                        <span style='float: left; '>Observaciones del Turno:</span><span style='text-align: left; position: relative; right: -13; color: blue; display: inline-block; width: 365px; height: 60px; overflow-y: auto; border: 1px solid ghostwhite; margin-bottom: -17px;'>${observacionTxt.toUpperCase()}</span><br>
+	                        <hr>
+	                        <span style='font-family: Arial; font-size: 12px;'>Juan Francisco Segui 1331 - Grand Bourg || Telefonos: 02320-410000/411317/486666</span><br>
+	                        <span style='font-family: Arial; font-size: 12px;'>** Asistir 20 Minutos antes de su hora asignada **</span><br>				    	  				    	  						
+	                        <span style='font-family: Arial; font-size: 12px; text-decoration: underline;'>www.centromedicosalud.com</span>
+	                    `,
+	                    imageUrl : '/images/termalPrinter-56.png',
+	                    showDenyButton: true,
+	                    confirmButtonText: `<i class="fa fa-print"></i> Imprimir`,
+	                    denyButtonText: 'Cerrar Ventana',	
+	                    denyButtonColor: "#3085d6",
+	                    customClass: { popup: 'swal2-border-custom' }
+	                }).then((result) => {
+	                    if (result.isConfirmed) {
+	                        Swal.fire('IMPRIMIENDO', 'El sobreturno seleccionado', 'success');
+	                    }
+	                });	                	
+	            });
+	        },
+	        error: function(error) { console.log(error); }
+	    });
 	}
+
+
+
+
 	
 	//FUNCION PARA FILTRAR SOBRETURNOS POR APELLIDO EN listarSobreturnos.html
 	     document.getElementById('filtroBusquedaApellido').addEventListener('input', function() {
@@ -119,6 +141,9 @@
 	        // Repite la lógica de filtrado para mostrar todas las filas (textoFiltro vacío)
 	        document.getElementById('filtroBusquedaDni').dispatchEvent(new Event('input'));
 	    }
+	  
+	  
+
 
 	</script>
 	</body>

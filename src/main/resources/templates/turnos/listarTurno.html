@@ -1,182 +1,393 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://thymeleaf.org">
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org">
 <head th:replace="~{layout/layout :: head}">
-    <!-- Font Awesome 7 Local -->
-    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+<link rel="stylesheet" th:href="@{/css/all.min.css}">
 </head>
 <style>
-    /* Estética SIGAT: Full Width y Control de Altura */
-    .viewport-container {
-        min-height: calc(100vh - 110px);
-        padding: 1.5rem 15px;
-    }
+/* SIGAT: MEDICAL ELITE - LISTADO INTELIGENTE */
+.viewport-container {
+	min-height: calc(100vh - 70px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 25px 0 10px 0;
+}
 
-    .header-clinica {
-        border-bottom: 2px solid #dee2e6;
-        position: relative;
-        padding-bottom: 12px;
-        margin-bottom: 20px;
-    }
-    .header-clinica::after {
-        content: "";
-        position: absolute; bottom: -2px; left: 0;
-        width: 100px; height: 4px;
-        background-color: #0d6efd; border-radius: 2px;
-    }
+.container-custom-width {
+	max-width: 98%;
+	width: 98%;
+	margin: 0 auto;
+}
 
-    /* Panel de Búsqueda Estilizado */
-    .search-panel {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
+.card-full {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
 
-    /* Tabla Médica Moderna */
-    .table-container {
-        height: 400px; /* Altura optimizada para ver muchos turnos */
-        overflow-y: auto;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: white;
-    }
-    .table thead th {
-        position: sticky; top: 0;
-        background-color: #f1f5f9;
-        color: #475569;
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        z-index: 10;
-        border-bottom: 2px solid #dee2e6;
-    }
+.header-clinica {
+	border-bottom: 2px solid #dee2e6;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
 
-    .badge-clinico {
-        background-color: #d1fae5;
-        color: #065f46;
-        border: 1px solid #10b981;
-        padding: 0.4em 0.7em;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-    }
+.titulo-grande {
+	font-size: 1.6rem !important;
+	font-weight: 800;
+	color: #1a202c;
+	letter-spacing: -0.5px;
+}
 
-    .btn-action-turno {
-        width: 35px;
-        height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
+.search-panel {
+	background-color: #f0f7ff;
+	border: 1px solid #cfe2ff;
+	border-left: 6px solid #0d6efd;
+	border-radius: 10px;
+	padding: 15px 20px;
+	margin-bottom: 15px;
+}
+
+.table-container {
+	height: 48vh;
+	overflow-y: auto;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	background: white;
+}
+
+.header-table-dark {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: #212529 !important;
+	color: white !important;
+	font-weight: 800;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	padding: 12px 10px !important;
+}
+
+.btn-action-turno {
+	width: 32px;
+	height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	transition: all 0.2s;
+}
+
+/* ESTADO DESHABILITADO PARA ACCIONES INDIVIDUALES */
+.btn-action-turno.disabled-mode {
+	opacity: 0.3 !important;
+	pointer-events: none !important;
+	filter: grayscale(1);
+}
+
+.badge-clinico {
+	background-color: #e0f2fe;
+	color: #0369a1;
+	border: 1px solid #bae6fd;
+	padding: 4px 8px;
+	font-weight: 800;
+	text-transform: uppercase;
+	font-size: 0.65rem;
+}
+
+.form-check-input {
+	width: 1.2rem;
+	height: 1.2rem;
+	cursor: pointer;
+	border: 2px solid #cbd5e1;
+}
+
+.row-selected {
+	background-color: #fff9db !important;
+}
+
+.box-label {
+	font-size: 0.65rem;
+	font-weight: 800;
+	color: #64748b;
+	text-transform: uppercase;
+	margin-bottom: 4px;
+	display: block;
+}
 </style>
+
 <body class="bg-light">
+	<header th:replace="~{layout/layout :: header}"></header>
 
-    <header th:replace="~{layout/layout :: header}"></header>
+	<div class="viewport-container">
+		<div class="container-custom-width">
+			<div class="card card-full shadow">
+				<div class="card-body p-3 px-4">
 
-    <div class="container-fluid viewport-container px-lg-4">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-1">
-                
-                <!-- ENCABEZADO Y BOTÓN NUEVO -->
-                <div class="header-clinica d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="fa-solid fa-calendar-check fa-2x text-primary me-3"></i>
-                        <div>
-                            <h3 th:text="${titulo}" class="fw-bold text-dark mb-0" style="font-family: Arial;"></h3>
-                            <p class="text-muted mb-0 small fw-bold text-uppercase" style="font-size: 0.7rem;">SIGAT • Control Central de Busqueda de Citas Médicas</p>
-                        </div>
-                    </div>
-                    <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/turnos/formTurno}" 
-                       class="btn btn-primary fw-bold shadow-sm px-4">
-                        <i class="fa-solid fa-calendar-plus me-2"></i>GENERAR NUEVO TURNO
-                    </a>
-                </div>
+					<!-- ENCABEZADO -->
+					<div class="header-clinica">
+						<div class="d-flex align-items-center">
+							<i class="fa-solid fa-calendar-check fa-2x text-primary me-3"></i>
+							<div>
+								<h3 th:text="${titulo}" class="mb-0 titulo-grande"></h3>
+								<p class="text-muted mb-0 small fw-bold text-uppercase"
+									style="font-size: 0.6rem;">SIGAT • Gestión de Citas Médicas</p>
+							</div>
+						</div>
+						<div class="d-flex gap-2">
+							<button type="button" id="btnCancelarMasivo"
+								class="btn btn-danger fw-bold shadow-sm px-4"
+								style="display: none;"
+								onclick="ejecutarCancelacionSeleccionados()">
+								<i class="fa-solid fa-ban me-2"></i>CANCELAR SELECCIONADOS
+							</button>
+							<a sec:authorize="hasRole('ROLE_ADMIN')"
+								th:href="@{/turnos/formTurno}"
+								class="btn btn-primary fw-bold shadow-sm px-4"> <i
+								class="fa-solid fa-calendar-plus me-2"></i>NUEVO TURNO
+							</a>
+						</div>
+					</div>
 
-                <!-- PANEL DE FILTROS -->
-                <div class="search-panel">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-magnifying-glass me-1"></i> Buscar por Apellido</label>
-                            <input type="text" id="filtroBusquedaApellido" class="form-control" placeholder="Escriba apellido..." onclick="limpiarFiltros()">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-secondary"><i class="fa-solid fa-address-card me-1"></i> Buscar por DNI</label>
-                            <input type="text" id="filtroBusquedaDni" class="form-control" placeholder="Escriba documento..." onclick="limpiarFiltros()">
-                        </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-outline-warning w-100 fw-bold" onclick="limpiarFiltros()">
-                                <i class="fa-solid fa-broom me-2"></i>BORRAR FILTROS
-                            </button>
-                        </div>
-                    </div>
-                </div>
+					<!-- PANEL DE FILTROS -->
+					<div class="search-panel shadow-sm">
+						<div class="row g-3 align-items-end">
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-magnifying-glass me-1"></i> Buscar por
+									Apellido</span> <input type="text" id="filtroBusquedaApellido"
+									class="form-control" placeholder="Apellido del paciente..."
+									onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<span class="box-label"><i
+									class="fa-solid fa-address-card me-1"></i> Buscar por DNI</span> <input
+									type="text" id="filtroBusquedaDni" class="form-control"
+									placeholder="Documento..." onkeyup="filtrarTabla()">
+							</div>
+							<div class="col-md-4">
+								<button type="button"
+									class="btn btn-outline-warning w-100 fw-bold shadow-sm"
+									onclick="limpiarFiltrosLocal()">
+									<i class="fa-solid fa-broom me-2"></i>LIMPIAR BÚSQUEDA
+								</button>
+							</div>
+						</div>
+					</div>
 
-                <!-- TABLA DE TURNOS -->
-                <div class="table-container shadow-sm">
-                    <table class="table table-hover align-middle mb-0" id="tablaListadoTurnos">
-                        <thead>
-                            <tr>
-                                <th class="text-center">ID</th>
-                                <th>Alta</th>
-                                <th>Profesional</th>
-                                <th>Especialidad</th>
-                                <th>Paciente</th>
-                                <th>DNI</th>
-                                <th>Fecha Cita</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="turno: ${turnos}">
-                                <td class="text-center font-monospace small" th:text="${turno.id}"></td>
-                                <td th:text="${#temporals.format(turno.fechaCreacion, 'dd/MM/yyyy')}"></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-user-doctor text-primary me-2"></i>
-                                        <span class="fw-bold text-dark" th:text="${turno.profesional.apellido} + ' ' + ${turno.profesional.nombre}"></span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge badge-clinico" th:text="${turno.especialidad.especialidadNombre}"></span>
-                                </td>
-                                <td class="text-dark fw-bold" th:text="${turno.paciente.apellido} + ' ' + ${turno.paciente.nombre}"></td>
-                                <td th:text="${turno.paciente.dni}"></td>
-                                <td class="fw-bold text-primary">
-                                    <i class="fa-solid fa-clock-pulse me-1"></i>
-                                    <span th:text="${#dates.format(turno.planilladetalle.rangoFechaHora, 'dd/MM/yyyy HH:mm')}"></span>
-                                </td>
-                                
-                                <!-- ACCIONES -->
-                                <td class="text-center" sec:authorize="hasRole('ROLE_ADMIN')">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <button class="btn btn-action-turno btn-outline-info" th:onclick="|printTurno('${turno.id}')|" title="Imprimir Comprobante">
-                                            <i class="fa-solid fa-print"></i>
-                                        </button>
-                                        <a th:href="@{/turnos/formTurno(profId=${turno.profesional.id}, especId=${turno.especialidad.id})}" 
-                                           class="btn btn-action-turno btn-outline-success" title="Repetir / Nuevo Turno">
-                                            <i class="fa-solid fa-hand-point-left"></i>
-                                        </a>
-                                        <a th:href="@{/turnos/eliminar/} + ${turno.id}" 
-                                           class="btn btn-action-turno btn-outline-danger" 
-                                           th:onclick="return confirm('¿Está seguro que desea eliminar este turno?');" title="Eliminar">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+					<!-- TABLA DE TURNOS -->
+					<form id="formSeleccionTurnos"
+						th:action="@{/turnos/cancelar-seleccion}" method="post">
+						<div class="table-container shadow-sm">
+							<table class="table table-hover align-middle mb-0"
+								id="tablaListadoTurnos">
+								<thead>
+									<tr>
+										<th class="header-table-dark text-center" style="width: 50px;">
+											<input class="form-check-input" type="checkbox" id="checkAll"
+											onclick="toggleAll(this)">
+										</th>
+										<th class="header-table-dark">Alta</th>
+										<th class="header-table-dark">Profesional</th>
+										<th class="header-table-dark">Especialidad</th>
+										<th class="header-table-dark">Paciente</th>
+										<th class="header-table-dark">DNI</th>
+										<th class="header-table-dark">Fecha / Hora Cita</th>
 
-            </div>
-        </div>
-    </div>
+										<!-- 1. NUEVA COLUMNA DE ESTADO -->
+										<th class="header-table-dark text-center">Estado</th>
 
-    <footer th:replace="~{layout/layout :: footer}"></footer>
-    <script th:replace="turnos/js/funcionesParaListarTurnos :: javascript"></script>
+										<!-- 2. COLUMNA ATENCIÓN (Solo Médicos) con fondo oscuro -->
+										<th class="header-table-dark text-center"
+											sec:authorize="hasRole('ROLE_MEDICO')">Atención</th>
+
+										<th class="header-table-dark text-center">Acciones</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="turno: ${turnos}">
+										<td class="text-center"><input
+											class="form-check-input checkTurno" type="checkbox"
+											name="ids" th:value="${turno.id}"
+											onclick="actualizarInterfazSeleccion(this)"></td>
+										<td class="small text-muted"
+											th:text="${#temporals.format(turno.fechaCreacion, 'dd/MM/yyyy')}"></td>
+										<!-- <td><span class="fw-bold text-dark"
+											th:text="${turno.profesional.apellido} + ' ' + ${turno.profesional.nombre}"></span>
+										</td> -->
+										<td>
+											<div class="d-flex align-items-center">
+												<i class="fa-solid fa-user-doctor text-primary me-2"></i> <span
+													class="fw-bold text-dark"
+													th:text="${turno.profesional.apellido} + ' ' + ${turno.profesional.nombre}"></span>
+											</div>
+										</td>										
+										<td><span class="badge badge-clinico"
+											th:text="${turno.especialidad.especialidadNombre}"></span></td>
+										<td class="text-dark fw-bold"
+											th:text="${turno.paciente.apellido} + ' ' + ${turno.paciente.nombre}"></td>
+										<td th:text="${turno.paciente.dni}"></td>
+										<td class="fw-bold text-primary"><i
+											class="fa-solid fa-clock me-1 small"></i> <span
+											th:text="${#dates.format(turno.planilladetalle.rangoFechaHora, 'dd/MM/yyyy HH:mm')}">
+										</span></td>
+
+
+										<!-- CELDA DE ESTADO DINÁMICO -->
+										<td class="text-center"><span
+											th:if="${turno.estado.id == 9}"
+											class="badge bg-success shadow-sm"> <i
+												class="fa-solid fa-check-double me-1"></i> ATENDIDO
+										</span> <span th:if="${turno.estado.id == 4}"
+											class="badge bg-primary shadow-sm"> <i
+												class="fa-solid fa-user-clock me-1"></i> OCUPADO
+										</span> <!-- Otros estados que no sean 4 o 9 --> <span
+											th:if="${turno.estado.id != 9 && turno.estado.id != 4}"
+											class="badge bg-secondary" th:text="${turno.estado.nombre}"></span>
+										</td>
+
+										<!-- CELDA ATENCIÓN (Solo Médicos) -->
+										<td class="text-center" sec:authorize="hasRole('ROLE_MEDICO')">
+											<!-- Si todavía no fue atendido (ID 4), mostramos el botón verde -->
+											<a th:if="${turno.estado.id == 4}"
+											th:href="@{'/consultorio/atender/' + ${turno.paciente.id}(turno=${turno.id})}"
+											class="btn btn-sm btn-success fw-bold shadow-sm"> <i
+												class="fa-solid fa-stethoscope me-1"></i> ATENDER
+										</a> <!-- Si ya fue atendido (ID 9), mostramos un botón azul de "Revisar" -->
+											<a th:if="${turno.estado.id == 9}"
+											th:href="@{'/consultorio/atender/' + ${turno.paciente.id}(turno=${turno.id})}"
+											class="btn btn-sm btn-outline-primary fw-bold"> <i
+												class="fa-solid fa-eye me-1"></i> VER FICHA
+										</a>
+										</td>
+
+										<!-- COLUMNA ACCIONES (ADMIN vs MÉDICO) -->
+										<td class="text-center">
+											<div class="d-flex justify-content-center gap-1">
+
+												<!-- ACCIONES ACTIVAS PARA ADMIN -->
+												<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+													<button type="button"
+														class="btn btn-action-turno btn-outline-info"
+														th:onclick="|printTurno('${turno.id}')|">
+														<i class="fa-solid fa-print"></i>
+													</button>
+													<a
+														th:href="@{/turnos/formTurno(profId=${turno.profesional.id}, especId=${turno.especialidad.id})}"
+														class="btn btn-action-turno btn-outline-success"> <i
+														class="fa-solid fa-hand-point-left"></i>
+													</a>
+													<button type="button"
+														class="btn btn-action-turno btn-outline-danger"
+														th:onclick="|enviarAnulacionTurnoIndividual('${turno.id}')|">
+														<i class="fa-solid fa-ban"></i>
+													</button>
+												</th:block>
+
+												<!-- ACCIONES BLOQUEADAS PARA MÉDICO (Opción B) -->
+												<th:block
+													sec:authorize="hasRole('ROLE_MEDICO') and !hasRole('ROLE_ADMIN')">
+													<button type="button"
+														class="btn btn-sm btn-outline-secondary disabled"
+														style="opacity: 0.4; border-style: dashed;"
+														title="Acción restringida">
+														<i class="fa-solid fa-lock small"></i>
+													</button>
+												</th:block>
+
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{layout/layout :: footer}"></footer>
+	<script th:replace="turnos/js/funcionesParaListarTurnos :: javascript"></script>
+
+	<script th:inline="javascript">
+	
+	function enviarAnulacionTurnoIndividual(id) {
+	    if (confirm('¿Confirma cancelar este turno individualmente?')) {
+	        // Creamos un formulario dinámico que viaja por fuera del de selección masiva
+	        const form = document.createElement('form');
+	        form.method = 'POST';
+	        form.action = '/turnos/eliminar'; 
+
+	        const inputId = document.createElement('input');
+	        inputId.type = 'hidden';
+	        inputId.name = 'id';
+	        inputId.value = id;
+	        form.appendChild(inputId);
+
+	        // Seguridad CSRF (para que Spring no lo rebote)
+	        const tokenMeta = document.querySelector("meta[name='_csrf']");
+	        if (tokenMeta) {
+	            const inputToken = document.createElement('input');
+	            inputToken.type = 'hidden';
+	            inputToken.name = '_csrf';
+	            inputToken.value = tokenMeta.getAttribute("content");
+	            form.appendChild(inputToken);
+	        }
+
+	        document.body.appendChild(form);
+	        form.submit();
+	    }
+	}
+	
+	
+        function actualizarInterfazSeleccion(el) {
+            if(el) toggleRowHighlight(el);
+            
+            const seleccionados = document.querySelectorAll('.checkTurno:checked').length;
+            const btnMasivo = document.getElementById('btnCancelarMasivo');
+            const botonesIndividuales = document.querySelectorAll('.btn-individual');
+
+            if (seleccionados > 1) {
+                btnMasivo.style.display = 'block';
+                botonesIndividuales.forEach(btn => btn.classList.add('disabled-mode'));
+            } else {
+                btnMasivo.style.display = 'none';
+                botonesIndividuales.forEach(btn => btn.classList.remove('disabled-mode'));
+            }
+        }
+
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.checkTurno');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+                toggleRowHighlight(cb);
+            });
+            actualizarInterfazSeleccion();
+        }
+
+        function toggleRowHighlight(checkbox) {
+            const row = checkbox.closest('tr');
+            if (checkbox.checked) row.classList.add('row-selected');
+            else row.classList.remove('row-selected');
+        }
+
+        function ejecutarCancelacionSeleccionados() {
+            const num = document.querySelectorAll('.checkTurno:checked').length;
+            if (confirm('¿Está seguro que desea cancelar los ' + num + ' turnos seleccionados?')) {
+                document.getElementById('formSeleccionTurnos').submit();
+            }
+        }
+
+        function limpiarFiltrosLocal() {
+            document.getElementById('filtroBusquedaApellido').value = '';
+            document.getElementById('filtroBusquedaDni').value = '';
+            if(typeof filtrarTabla === 'function') filtrarTabla();
+        }
+    </script>
 </body>
 </html>

@@ -2,6 +2,7 @@ package com.sigat.springboot.app.controllers;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -25,11 +26,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sigat.springboot.app.models.entity.Especialidad;
+import com.sigat.springboot.app.models.entity.Estado;
 import com.sigat.springboot.app.models.entity.Paciente;
 import com.sigat.springboot.app.models.entity.PlanillaCabecera;
 import com.sigat.springboot.app.models.entity.PlanillaDetalle;
 import com.sigat.springboot.app.models.entity.Profesional;
 import com.sigat.springboot.app.models.entity.Sobreturno;
+import com.sigat.springboot.app.models.service.BackupService;
 import com.sigat.springboot.app.models.service.EmailService;
 import com.sigat.springboot.app.models.service.IEspecialidadService;
 import com.sigat.springboot.app.models.service.IPacienteService;
@@ -53,7 +56,11 @@ public class SobreturnoController {
 	@Autowired
 	private ISobreTurnoService sobreturnoService;
 	@Autowired
+	private IPlanillaDetalleService planilladetalleService;
+	@Autowired
 	private MessageSource messageSource;
+	@Autowired
+	private BackupService backupService;
 
 	// Metodo para abrir formulario (GET)
 	@GetMapping("/formSobreturno")
@@ -64,6 +71,14 @@ public class SobreturnoController {
 		model.addAttribute("titulo", "Generar Sobreturno Nuevo..");
 		model.addAttribute("titulobtnConfirmar", "Continuar alta de Sobreturno");
 		model.addAttribute("profesionales", profesionalService.findAll());
+		
+		// --- SOLUCIÓN ELITE: Buscamos el objeto completo si viene el ID ---
+		//---  cuando el listTurno seleccionamos dar otro turno con el mismo profesional ---
+		if (profId != null && profId > 0) {
+	        Profesional prof = profesionalService.findOne(profId);
+	        model.addAttribute("profesionalSeleccionado", prof);
+	    }
+	    // --------------------------------------------------------------------
 		
 		model.addAttribute("profIdPre", profId);
 		model.addAttribute("especIdPre", especId);
@@ -79,20 +94,24 @@ public class SobreturnoController {
 			logger.info("Hola usuario autenticado: ".concat(authentication.getName()));
 		}
 
-		List<Sobreturno> sobreturno = sobreturnoService.findAll();
+		//List<Sobreturno> sobreturno = sobreturnoService.findAll();
+		// CAMBIO AQUÍ: Usamos findAllActivos() en lugar de findAll().
+	    List<Sobreturno> sobreturno = sobreturnoService.findAllActivosYAtendidos();
 		model.addAttribute("titulo", messageSource.getMessage("text.sobreturno.listar.titulo", null, locale));
 		model.addAttribute("sobreturnos", sobreturno);
-		return "sobreturnos/listarSobreturno";
+		//return "sobreturnos/listarSobreturno";
+		return "redirect:/recepcion";
 	}
 
-	// Metodo guardar procesando el formulario (POST)
+	// Metodo guardar procesando el formulario (POST) - CONFIGURACIÓN CON OBSERVACIÓN SEGURA
 	@PostMapping("/formSobreturno")
-	@ResponseBody // Agrega esto para que Spring no busque una página HTML
+	@ResponseBody 
 	public ResponseEntity<?> saveSobreturno(Sobreturno sobreturno, Model model, 
 	        @ModelAttribute("profesional") Long profesionalId,
 	        @ModelAttribute("especialidad") Long especialidadId, 
 	        @ModelAttribute("pacienteId") Long pacienteId,
 	        @ModelAttribute("planillaCabId") String planillaCabId,
+	        @RequestParam(value = "planillaDetId", required = false) String planillaDetIdStr, // <-- CAPTURAMOS EL INPUT HIDDEN
 	        SessionStatus status, RedirectAttributes flash,
 	        @RequestParam("rangoFechaHora") String rangoFechaHoraStr) {
 
@@ -104,7 +123,6 @@ public class SobreturnoController {
 	            rangoFechaHora = LocalDateTime.parse(rangoFechaHoraStr, formatter);
 	        }
 	    } catch (Exception e) {
-	        // En lugar de redirect, devolvemos un error 400 (Bad Request)
 	        return ResponseEntity.badRequest().body("{\"mensaje\": \"Formato de fecha inválido\"}");
 	    }
 
@@ -128,44 +146,180 @@ public class SobreturnoController {
 	    
 	    sobreturno.setRangoFechaHora(rangoFechaHora);
 	    
+	    // --- EXTRAEMOS EL BOX ASOCIADO AL HIDDEN DETALLE Y LO AGREGAMOS A LA OBSERVACIÓN ---
+	    try {
+	        if (planillaDetIdStr != null && !planillaDetIdStr.isEmpty()) {
+	            Long detId = Long.parseLong(planillaDetIdStr);
+	            // Buscamos el detalle por su ID para extraer el número de Box real de ese casillero
+	            var detalle = planilladetalleService.findOne(detId); // Asegurate de usar tu método (findOne o findById)
+	            if (detalle != null && detalle.getBox() != null) {
+	                // Traemos la observación que escribió la recepcionista (si escribió algo)
+	                String obsActual = sobreturno.getObservacion() != null ? sobreturno.getObservacion() : "";
+	                // Lo concatenamos al final de forma limpia
+	                sobreturno.setObservacion(obsActual.trim() + " [BOX: " + detalle.getBox() + "]");
+	            }
+	        }
+	    } catch (Exception e) {
+	        // Si no encuentra el box por cualquier motivo, que no trabe el guardado general del sobreturno
+	    }
+	    // -------------------------------------------------------------------------------------
+	    
 	    try {
 	        // EL GUARDADO REAL
 	        sobreturnoService.registrarSobreturnoCompleto(sobreturno);
 	        status.setComplete();
 
-	        // Si todo sale bien, devolvemos un estado 200 (OK)
 	        return ResponseEntity.ok().body("{\"status\":\"success\"}");
 
 	    } catch (RuntimeException e) {
 	        if ("EL_HORARIO_YA_ESTA_OCUPADO".equals(e.getMessage())) {
-	            // Devolvemos un estado 409 (Conflicto) para que el AJAX detecte el error
 	            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"status\":\"error\", \"mensaje\":\"OCUPADO\"}");
 	        }
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"status\":\"error\"}");
 	    } catch (Exception e) {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"status\":\"error\"}");
 	    }
-
 	}
 
 
 
+
+	/*
+	 * //ELIMINAR INDIVIDUAL
+	 * 
+	 * @GetMapping("/eliminar/{id}") public String eliminar(@PathVariable(value =
+	 * "id") Long id, RedirectAttributes flash) { if (id > 0) { // Obtenemos el
+	 * objeto sobreturno antes de eliminarlo Sobreturno sobreturno =
+	 * sobreturnoService.findOne(id); if (sobreturno != null) { // Eliminamos el
+	 * sobreturno x id. sobreturnoService.delete(id);
+	 * flash.addFlashAttribute("success", "Sobreturno eliminado con exito."); } else
+	 * { flash.addFlashAttribute("danger", "No se pudo eliminar el sobreturno."); }
+	 * } return "redirect:/sobreturnos/listarSobreturno"; }
+	 */
 	
-	@GetMapping("/eliminar/{id}")
-	public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		if (id > 0) {
-			// Obtenemos el objeto sobreturno antes de eliminarlo
-			Sobreturno sobreturno = sobreturnoService.findOne(id);
-			if (sobreturno != null) {
-				// Eliminamos el sobreturno x id.
-				sobreturnoService.delete(id);
-				flash.addFlashAttribute("success", "Sobreturno eliminado con exito.");
-			} else {
-				flash.addFlashAttribute("danger", "No se pudo eliminar el sobreturno.");
-			}
-		}
-		return "redirect:/sobreturnos/listarSobreturno";
+	//Ahora recibirá el ID por parámetro de formulario, no por la URL.
+	@PostMapping("/eliminar") 
+	public String eliminar(@RequestParam("id") Long id, RedirectAttributes flash) {
+	    if (id > 0) {
+	        try {
+	            // 1. BACKUP DE SEGURIDAD (Usando el nuevo sistema de carpetas)
+	            backupService.ejecutarBackup("Sobreturnos");
+
+	            Sobreturno sobreturno = sobreturnoService.findOne(id);
+	            if (sobreturno != null) {
+	                // 2. CANCELAMOS (Estado 6)
+	                Estado estadoCancelado = new Estado();
+	                estadoCancelado.setId(6L);
+	                sobreturno.setEstado(estadoCancelado);
+	                sobreturnoService.save(sobreturno);
+
+	                // 3. GENERAR EL PDF INDIVIDUAL
+	                List<Sobreturno> listaUno = new ArrayList<>();
+	                listaUno.add(sobreturno);
+	                planilladetalleService.generarPdfLlamadosElite(
+	                    new ArrayList<>(), listaUno, 
+	                    sobreturno.getProfesional(), sobreturno.getEspecialidad(), 
+	                    "MANUAL", "INDIVIDUAL", "Sobreturnos"
+	                );
+
+	                flash.addFlashAttribute("success", "Sobreturno cancelado y backup realizado correctamente.");
+	            }
+	        } catch (Exception e) {
+	            flash.addFlashAttribute("danger", "Error al cancelar: " + e.getMessage());
+	        }
+	    }
+	    //return "redirect:/sobreturnos/listarSobreturno";
+	    return "redirect:/recepcion";
 	}
+
+/*
+	//ELIMINAR MASIVAMENTE SELECCIONANDO VARIOS CHECKS
+	@PostMapping("/cancelar-multiple")
+	@ResponseBody
+	public String cancelarMultiple(@RequestParam("ids") List<Long> ids) {
+	    try {
+	    	
+	    	// 1. DISPARAR BACKUP
+	    	backupService.ejecutarBackup("Sobreturnos");
+	        
+	        List<Sobreturno> listaParaPdf = new ArrayList<>();
+	        
+	        // 1. Buscamos y cancelamos uno por uno los seleccionados
+	        for (Long id : ids) {
+	            Sobreturno s = sobreturnoService.findOne(id);
+	            if (s != null) {
+	                Estado cancelado = new Estado();
+	                cancelado.setId(6L);
+	                s.setEstado(cancelado);
+	                sobreturnoService.save(s);
+	                listaParaPdf.add(s);
+	            }
+	        }
+
+	        // 2. Llamamos a tu función de PDF (la que está dentro de PlanillaDetalleService)
+	        if (!listaParaPdf.isEmpty()) {
+	            planilladetalleService.generarPdfLlamadosElite(
+	                new ArrayList<>(), // Lista de turnos vacía
+	                listaParaPdf,      // Nuestra lista de seleccionados
+	                listaParaPdf.get(0).getProfesional(), 
+	                listaParaPdf.get(0).getEspecialidad(), 
+	                "MANUAL", "MANUAL", 
+	                "Sobreturnos"
+	            );
+	        }
+	        return "OK";
+	    } catch (Exception e) {
+	        return "Error: " + e.getMessage();
+	    }
+	}
+	
+	*/
+	
+	// ELIMINAR MASIVAMENTE SELECCIONANDO VARIOS CHECKS
+	@PostMapping("/cancelar-multiple")
+	// // 1. ELIMINAMOS @ResponseBody para que Spring pueda redireccionar la página
+	public String cancelarMultiple(@RequestParam("ids") List<Long> ids, RedirectAttributes flash) {
+	    try {
+	        // 1. DISPARAR BACKUP
+	        backupService.ejecutarBackup("Sobreturnos");
+	        
+	        List<Sobreturno> listaParaPdf = new ArrayList<>();
+	        
+	        // Buscamos y cancelamos uno por uno los seleccionados
+	        for (Long id : ids) {
+	            Sobreturno s = sobreturnoService.findOne(id);
+	            if (s != null) {
+	                Estado cancelado = new Estado();
+	                cancelado.setId(6L);
+	                s.setEstado(cancelado);
+	                sobreturnoService.save(s);
+	                listaParaPdf.add(s);
+	            }
+	        }
+
+	        // 2. Llamamos a tu función de PDF Elite
+	        if (!listaParaPdf.isEmpty()) {
+	            planilladetalleService.generarPdfLlamadosElite(
+	                new ArrayList<>(), 
+	                listaParaPdf,      
+	                listaParaPdf.get(0).getProfesional(), 
+	                listaParaPdf.get(0).getEspecialidad(), 
+	                "MANUAL", "MANUAL", 
+	                "Sobreturnos"
+	            );
+	        }
+	        
+	        flash.addFlashAttribute("success", "Se anularon " + ids.size() + " sobreturnos y se generó el backup/PDF.");
+
+	    } catch (Exception e) {
+	        flash.addFlashAttribute("danger", "Error: " + e.getMessage());
+	    }
+
+	    // // 2. CAMBIAMOS EL "OK" por la redirección a la Planilla Unificada
+	    return "redirect:/recepcion";
+	}
+
+
 
 	// PARA cargar especialidades vinculadas por idProf en JS
 	// (load-comboboc-vinculacion.html).
@@ -217,4 +371,54 @@ public class SobreturnoController {
 		 * .concat(authority.getAuthority()))); return true; } } return false;
 		 */
 	}
+	
+	// ALTA EXPRÉS PARTICULAR - PERFECCIONADO CON ATRIBUTOS EN TEXTO PLANO
+    @PostMapping("/formPacienteExpress")
+    @ResponseBody 
+    public ResponseEntity<?> altaExpresParticular(
+            @RequestParam("dni") String dni,
+            @RequestParam("apellido") String apellido,
+            @RequestParam("nombre") String nombre,
+            @RequestParam("email") String email) {
+        
+        try {
+            // 1. Verificamos duplicados con tu método del servicio de pacientes
+            Paciente existeDni = pacienteService.findByPacienteDni(dni.trim()); 
+            if (existeDni != null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("{\"status\":\"error\", \"mensaje\":\"EXISTE_DNI\"}");
+            }
+
+            // 2. Instanciamos el objeto particular
+            Paciente p = new Paciente();
+            p.setDni(dni.trim());
+            p.setApellido(apellido.toUpperCase().trim());
+            p.setNombre(nombre.toUpperCase().trim());
+            p.setEmail(email.toLowerCase().trim());
+            p.setNumeroSocio("PARTICULAR"); // Tu VARCHAR(255)
+            p.setFoto(""); 
+            p.setCreateAt(new java.util.Date()); // Cubre la fecha obligatoria NOT NULL
+
+            // --- RELLENO CLÍNICO HOMOLOGADO CON "PARTICULAR" ---
+            p.setDomicilio("PARTICULAR");
+            p.setTelefono("PARTICULAR");
+            p.setEstado("PARTICULAR");
+            p.setLocalidad("PARTICULAR");
+            // ----------------------------------------------------
+
+            // 3. Guardado en la base de datos usando tu método de confianza
+            pacienteService.save(p); 
+
+            // Buscamos el ID que generó automáticamente MySQL
+            Paciente guardado = pacienteService.findByPacienteDni(p.getDni());
+            Long idGenerado = (guardado != null) ? guardado.getId() : null;
+
+            return ResponseEntity.ok().body("{\"status\":\"success\", \"id\":" + idGenerado + "}");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"status\":\"error\", \"mensaje\":\"" + e.getMessage() + "\"}");
+        }
+    }
 }
