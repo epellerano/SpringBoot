@@ -199,6 +199,7 @@ public class RegistroController {
         nuevoUsuario.setRoles(Arrays.asList(role));
 
         usuarioService.save(nuevoUsuario);
-    }
+    }    
+ 
 }
 

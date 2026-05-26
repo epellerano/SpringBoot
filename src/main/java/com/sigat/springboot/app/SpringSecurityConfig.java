@@ -38,65 +38,73 @@ public class SpringSecurityConfig {
 
         http.authorizeHttpRequests(
             (authz) -> authz
-                // 1. ACCESOS PÚBLICOS (Estilos, imágenes y endpoints del registro AJAX locales)
-                .requestMatchers("/login", "/registro/**", "/css/**", "/js/**", "/images/**", "/locale").permitAll()
+                // 1. BLINDAJE DE ACCESOS PÚBLICOS Y EXCLUSIÓN DE RECURSOS ESTÁTICOS DE SIGAT
+                .requestMatchers("/login", "/registro/**", "/css/**", "/js/**", "/images/**", "/locale/**", "/favicon.ico", "/error/**").permitAll()
+                .requestMatchers(org.springframework.boot.autoconfigure.security.servlet.PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                
+                // Abrimos el paso absoluto de lectura para que el JavaScript del paciente dibuje las pastillas libres
+                .requestMatchers("/turnos/cargar-especialidades/**").permitAll()
+                .requestMatchers("/turnos/obtener-observaciones/**").permitAll()
+                .requestMatchers("/turnos/listar-horarios/**").permitAll()
                 
                 // 2. CONSULTORIO (HCE) - SOLO MÉDICOS
-                .requestMatchers("/consultorio/**").hasRole("MEDICO")
+                .requestMatchers("/consultorio/**").hasAuthority("ROLE_MEDICO")
 
                 // 3. PROFESIONALES
-                .requestMatchers("/ver/**").hasAnyRole("ADMIN", "MEDICO") 
-                .requestMatchers("/uploads/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/form/**").hasRole("ADMIN")
-                .requestMatchers("/eliminar/**").hasRole("ADMIN")
+                .requestMatchers("/ver/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO") 
+                .requestMatchers("/uploads/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/form/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/eliminar/**").hasAuthority("ROLE_ADMIN")
 
-                // 4. PACIENTES
-                .requestMatchers("/pacientes/listarPaciente").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/pacientes/verPaciente/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/pacientes/formPaciente/**").hasRole("ADMIN")
-                .requestMatchers("/pacientes/eliminarPaciente/**").hasRole("ADMIN")
+                // 4. PACIENTES ADMINISTRATIVOS
+                .requestMatchers("/pacientes/listarPaciente").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/pacientes/verPaciente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/pacientes/formPaciente/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/pacientes/eliminarPaciente/**").hasAuthority("ROLE_ADMIN")
 
                 // 5. ESPECIALIDADES
-                .requestMatchers("/especialidades/verEspecialidad/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/especialidades/formEspecialidad/**").hasRole("ADMIN")
-                .requestMatchers("/especialidades/eliminarEspecialidad/**").hasRole("ADMIN")
+                .requestMatchers("/especialidades/verEspecialidad/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/especialidades/formEspecialidad/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/especialidades/eliminarEspecialidad/**").hasAuthority("ROLE_ADMIN")
 
                 // 6. VINCULACIONES
-                .requestMatchers("/vinculaciones/verVinculacion/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/vinculaciones/formVinculacion/**").hasRole("ADMIN")
-                .requestMatchers("/vinculaciones/eliminarVinculacion/**").hasRole("ADMIN")
+                .requestMatchers("/vinculaciones/verVinculacion/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/vinculaciones/formVinculacion/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/vinculaciones/eliminarVinculacion/**").hasAuthority("ROLE_ADMIN")
 
                 // 7. MOVIMIENTOS
-                .requestMatchers("/movimientos/verMovimiento/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/movimientos/formMovimiento/**").hasRole("ADMIN")
-                .requestMatchers("/movimientos/eliminarMovimiento/**").hasRole("ADMIN")
-                .requestMatchers("/movimientos/editarMovimiento/**").hasRole("ADMIN")
+                .requestMatchers("/movimientos/verMovimiento/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/movimientos/formMovimiento/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/movimientos/eliminarMovimiento/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/movimientos/editarMovimiento/**").hasAuthority("ROLE_ADMIN")
 
                 // 8. PLANILLAS
-                .requestMatchers("/planillacabecera/verPlanillaCabecera/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/planillacabecera/formPlanillaCabecera/**").hasRole("ADMIN")
-                .requestMatchers("/planillacabecera/eliminarPlanillaCabecera/**").hasRole("ADMIN")
-                .requestMatchers("/planillacabecera/editarPlanillaCabecera/**").hasRole("ADMIN")
+                .requestMatchers("/planillacabecera/verPlanillaCabecera/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/planillacabecera/formPlanillaCabecera/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/planillacabecera/eliminarPlanillaCabecera/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/planillacabecera/editarPlanillaCabecera/**").hasAuthority("ROLE_ADMIN")
 
-                // 9. TURNOS (TUS REGLAS ORIGINALES INTACTAS - Bloqueado para el paciente común)
-                .requestMatchers("/turnos/listarTurno").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/turnos/verTurno/**").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/turnos/formTurno/**").hasRole("ADMIN")
-                .requestMatchers("/turnos/eliminarTurno/**").hasRole("ADMIN")
-                .requestMatchers("/turnos/openModal/**").hasRole("ADMIN")
+                // =========================================================================
+                // 9. TURNOS (Gestión de Agenda - Sincronizado con Autogestión de SIGAT)
+                // =========================================================================
+                .requestMatchers("/turnos/autoTurno").hasAnyAuthority("ROLE_ADMIN", "ROLE_PACIENTE")
                 
-                // 10. SOBRETURNOS (TUS REGLAS ORIGINALES INTACTAS - Bloqueado para el paciente común)
-                .requestMatchers("/sobreturnos/listarSobreturno").hasAnyRole("ADMIN", "MEDICO")
-                .requestMatchers("/sobreturnos/formSobreturno/**").hasRole("ADMIN")
-                .requestMatchers("/sobreturnos/eliminar/**").hasRole("ADMIN")
+                .requestMatchers("/turnos/listarTurno").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/turnos/verTurno/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/turnos/formTurno/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/turnos/eliminarTurno/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/turnos/openModal/**").hasAuthority("ROLE_ADMIN")
+                
+                // 10. SOBRETURNOS
+                .requestMatchers("/sobreturnos/listarSobreturno").hasAnyAuthority("ROLE_ADMIN", "ROLE_MEDICO")
+                .requestMatchers("/sobreturnos/formSobreturno/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/sobreturnos/eliminar/**").hasAuthority("ROLE_ADMIN")
 
-                // =========================================================================
-                // 11. AUTOGESTIÓN FUTURA (Habilitamos la API y el ROL para el mañana)
-                // =========================================================================
-                .requestMatchers("/api/**").hasAnyRole("ADMIN", "MEDICO", "PACIENTE", "USER")
-                .requestMatchers("/paciente-web/**").hasRole("PACIENTE") // Reservado para tu vista autoTurno.html
+                // 11. APIS REST: Habilitadas para las consultas libres del calendario de pastillas
+                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/paciente-web/**").hasAuthority("ROLE_PACIENTE") 
 
-                // Cualquier otra petición requiere estar autenticado (Aquí entra libre la secretaria con ROLE_USER)
+                // Cualquier otra petición requiere autenticación estándar
                 .anyRequest().authenticated()
         )
         .formLogin(login -> login
@@ -108,4 +116,7 @@ public class SpringSecurityConfig {
 
         return http.build();
     }
+
+
+
 }

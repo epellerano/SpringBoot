@@ -106,7 +106,7 @@ public class DataInizializer implements CommandLineRunner {
 
 		    // 6. PACIENTES
 		    if (pacienteDao.count() == 0) {
-		        crearPaciente(1L, "Giordano", "Yanina Nadia", "gioryani@hotmail.com", "Luis Vernet 1745", "Grand Bourg", "1166050039", "55588", "28011862", "1980-07-03");
+		        crearPaciente(1L, "Giordano", "Yanina Nadia", "pellerano76@gmail.com", "Luis Vernet 1745", "Grand Bourg", "1166050039", "55588", "28011862", "1980-07-03");
 		        crearPaciente(2L, "Pellerano", "Maria Juliana", "majupelle@hotmail.com", "Luis Vernet 1741", "Grand Bourg", "11645656677", "55589", "29546442", "1986-03-01");
 		        crearPaciente(3L, "Perez", "Mario Alberto", "mario@hotmail.com", "Mendoza 1256", "Tortuguitas", "1123566698", "55590", "27011962", "1976-05-11");
 		        crearPaciente(4L, "Ruperto", "Jose Luis", "joserupe@hotmail.com", "Las Heras 2103", "Pablo Nogues", "1185253697", "55591", "21012362", "1967-10-10");
@@ -170,7 +170,7 @@ public class DataInizializer implements CommandLineRunner {
 		        usuarioDao.save(medico);
 		    }
 		    
-		 // 10. USUARIO PACIENTE DE PRUEBA (Inicializa el nuevo rol exclusivo)
+			 // 10. USUARIO PACIENTE DE PRUEBA (Vinculado físicamente a Yanina Giordano ID 1L)
 		    if (usuarioDao.findByUsername("pacienteprueba") == null) {
 		        Usuario pacienteTest = new Usuario();
 		        pacienteTest.setUsername("pacienteprueba");
@@ -178,23 +178,26 @@ public class DataInizializer implements CommandLineRunner {
 		        pacienteTest.setEnabled(true);
 
 		        Role rP = new Role();
-		        rP.setAuthority("ROLE_PACIENTE"); // <-- Nace tu nuevo rol exclusivo para autogestión
+		        rP.setAuthority("ROLE_PACIENTE"); 
 		        rP.setCreadoPor("Setup");
-
 		        pacienteTest.setRoles(Arrays.asList(rP));
+
+		        // REGLA DE PERSISTENCIA: Rescatamos la ficha ID 1L de Yanina creada en la Parte 1
+		        Paciente yaninaFicha = pacienteDao.findById(1L).orElse(null);
+		        if (yaninaFicha != null) {
+		            // Enlazamos de forma directa la cuenta de login con su registro médico
+		            pacienteTest.setPaciente(yaninaFicha); 
+		        }
+
 		        usuarioDao.save(pacienteTest);
 		    }
 		    
 		 // 11. HISTORIAS CLÍNICAS DE PRUEBA (Para Yanina Giordano - Paciente ID 1)
-		 // Solo se cargan si Yanina no tiene historial previo en la base
 		 if (historiaService.obtenerHistorialPorPaciente(1L).isEmpty()) {
-		     
 		     Paciente yanina = pacienteDao.findById(1L).orElse(null);
 		     Profesional pellerano = profesionalDao.findById(1L).orElse(null);
 
 		     if (yanina != null && pellerano != null) {
-		         
-		         // --- EVOLUCIÓN 1: CONTROL ANUAL (La más antigua) ---
 		         HistoriaClinica h1 = new HistoriaClinica();
 		         h1.setPaciente(yanina);
 		         h1.setProfesional(pellerano);
@@ -206,38 +209,9 @@ public class DataInizializer implements CommandLineRunner {
 		         h1.setDiagnostico("Examen médico preventivo (Z00.0)");
 		         h1.setIndicaciones("Se solicitan estudios: Laboratorio completo y ecografía transvaginal.");
 		         historiaService.guardarHistoria(h1);
-
-					/*
-					 * // --- EVOLUCIÓN 2: CUADRO RESPIRATORIO --- HistoriaClinica h2 = new
-					 * HistoriaClinica(); h2.setPaciente(yanina); h2.setProfesional(pellerano);
-					 * h2.setAlergias("PENICILINA (Reacción alérgica severa)");
-					 * h2.setAntecedentes("Asma infantil controlada. Cesárea en 2015.");
-					 * h2.setMotivoConsulta("Fiebre de 38.5 y dolor de garganta de 48hs."); h2.
-					 * setExamenFisico("Fauces congestivas, amígdalas con placas pultáceas. Auscultación normal."
-					 * ); h2.
-					 * setEvolucionClinica("Se observa cuadro de amigdalitis bacteriana. Paciente refiere dificultad para deglutir."
-					 * ); h2.setDiagnostico("Amigdalitis pultácea aguda (J03.9)"); h2.
-					 * setIndicaciones("Claritromicina 500mg (1 cada 12hs x 7 días). Ibuprofeno 600mg ante dolor."
-					 * ); historiaService.guardarHistoria(h2);
-					 * 
-					 * // --- EVOLUCIÓN 3: ALTA CLÍNICA (La más reciente) --- HistoriaClinica h3 =
-					 * new HistoriaClinica(); h3.setPaciente(yanina); h3.setProfesional(pellerano);
-					 * h3.setAlergias("PENICILINA (Reacción alérgica severa)");
-					 * h3.setAntecedentes("Asma infantil controlada. Cesárea en 2015.");
-					 * h3.setMotivoConsulta("Control evolutivo post tratamiento antibiótico.");
-					 * h3.setExamenFisico("Apirética. Fauces normales. Sin adenopatías cervicales."
-					 * ); h3.
-					 * setEvolucionClinica("Paciente refiere mejoría clínica completa. Finalizó esquema de 7 días."
-					 * ); h3.setDiagnostico("Alta médica - Resolución de cuadro infeccioso."); h3.
-					 * setIndicaciones("Continuar con vida normal. Control ginecológico pendiente para retirar PAP."
-					 * ); historiaService.guardarHistoria(h3);
-					 * 
-					 * System.out.
-					 * println(">>> SIGAT: Historias Clínicas de prueba creadas para Yanina Giordano."
-					 * );
-					 */
 		     }
 		 }
+
 
 		}
 

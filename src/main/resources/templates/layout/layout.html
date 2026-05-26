@@ -54,15 +54,27 @@
 				<div class="collapse navbar-collapse" id="navbarNav">
 					
 					<!-- =========================================================================
-					     MENÚ PRINCIPAL: CONFIGURACIÓN SEGÚN EL ROL LOGUEADO
+					     MENÚ PRINCIPAL: CONFIGURACIÓN SEGÚN EL ROL LOGUEADO (BLINDADO PACIENTES)
 					     ========================================================================= -->
 					<ul class="navbar-nav">
-						<!-- El botón Inicio lo ven todos -->
-						<li class="nav-item"><a class="nav-link active"
-							aria-current="page" th:href="@{/listar}"
-							th:text="#{text.menu.inicio}">Inicio</a></li>
 						
-						<!-- NUEVO ENLACE EXCLUSIVO PARA EL MÉDICO: Solo ve "Mis Citas" de forma directa -->
+						<!-- 1. INICIO EXCLUSIVO PARA SECRETARÍAS Y ADMINISTRADORES -->
+						<th:block sec:authorize="hasAnyRole('ROLE_ADMIN', 'ROLE_USER')">
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" th:href="@{/listar}" th:text="#{text.menu.inicio}">Inicio</a>
+							</li>
+						</th:block>
+						
+						<!-- 2. INICIO EXCLUSIVO PARA EL NUEVO ROL PACIENTE (Lo mantiene en su portal web) -->
+						<th:block sec:authorize="hasRole('ROLE_PACIENTE')">
+							<li class="nav-item">
+								<a class="nav-link fw-bold text-info" th:href="@{/turnos/autoTurno}">
+									<i class="fa-solid fa-house-medical me-1"></i> Mi Panel
+								</a>
+							</li>
+						</th:block>
+						
+						<!-- 3. ENLACE EXCLUSIVO PARA EL MÉDICO: Solo ve "Mis Citas" de forma directa -->
 						<th:block sec:authorize="hasRole('ROLE_MEDICO')">
 							<li class="nav-item">
 								<a class="nav-link fw-bold text-info" th:href="@{/recepcion}">
@@ -71,7 +83,7 @@
 							</li>
 						</th:block>
 
-						<!-- PESTAÑAS EXCLUSIVAS DE LA SECRETARÍA (Desaparecen para el Médico) -->
+						<!-- PESTAÑAS EXCLUSIVAS DE LA SECRETARÍA -->
 						<th:block sec:authorize="hasRole('ROLE_ADMIN')">
 							<li class="nav-item"><a class="nav-link" th:href="@{/listar}"
 								th:text="#{text.menu.profesionales}">Profesionales</a></li>
@@ -131,7 +143,6 @@
 
 							<ul class="dropdown-menu" aria-labelledby="dropdownAnulaciones" id="menuExtrasPrincipal">
 								
-								<!-- EL NUEVO ENLACE ADAPTADO AL INICIO DE EXTRAS -->
 								<li><a class="dropdown-item py-2 fw-bold" th:href="@{/estadisticas/dashboard}" onclick="cerrarTodoElMenu()">
 									<i class="fa-solid fa-square-poll-vertical text-primary" style="margin-right: 8px; width: 16px;"></i>Dashboard Estadístico</a>
 								</li>
@@ -186,6 +197,7 @@
 					</th:block>
 
 				</div>
+
 
 				<!-- LOGIN Y LOGOUT -->
 				<ul class="navbar-nav navbar-right">

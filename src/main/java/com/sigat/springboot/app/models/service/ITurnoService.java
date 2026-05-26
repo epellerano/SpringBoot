@@ -72,6 +72,13 @@ public interface ITurnoService {
 
     //HISTORIA CLINICA
     public Turno findById(Long id);
+    
+    /**
+     * Registra un turno completo desde el portal web de autogestión del paciente.
+     * Genera la persistencia en la tabla Turno, cambia el estado en la planilla detalle
+     * y gatilla el envío de correos institucionales.
+     */
+    void registrarTurnoDesdeWeb(Long planillaDetId, Long planillaCabId, Long pacienteId, String observacion);
 	
 	//SECCION REPORTES --------------------------------------------------------------
 	

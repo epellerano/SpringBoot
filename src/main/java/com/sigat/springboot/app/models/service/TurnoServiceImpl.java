@@ -90,6 +90,60 @@ public class TurnoServiceImpl implements ITurnoService {
 		// 5. Enviamos el mail
 		emailService.enviarMailConfirmacion(turno);
 	}
+	
+	@Override
+	@Transactional
+	public void registrarTurnoDesdeWeb(Long planillaDetId, Long planillaCabId, Long pacienteId, String observacion) {
+
+	    // 1. Buscamos y recuperamos las entidades raíz desde sus servicios de fábrica
+	    PlanillaDetalle pd = planilladetalleService.findOne(planillaDetId);
+	    Paciente pacienteCompleto = pacienteService.findOne(pacienteId);
+	    
+	    Long profesionalId = pd.getPlanillacabecera().getProfesional().getId();
+	    Long especialidadId = pd.getPlanillacabecera().getEspecialidad().getId();
+	    
+	    Profesional profesionalCompleto = profesionalService.findOne(profesionalId);
+	    Especialidad especialidadCompleta = especialidadService.findOne(especialidadId);
+
+	    // 2. Instanciamos el Turno nuevo en caliente
+	    Turno nuevoTurno = new Turno();
+	    nuevoTurno.setObservacion(observacion != null ? observacion : "TURNO PARTICULAR");
+	    
+	    Estado estadoOcupado = new Estado();
+	    estadoOcupado.setId(4L); // ID 4 = OCUPADO
+	    nuevoTurno.setEstado(estadoOcupado);
+	    
+	    // Inyección de la Cabecera (Sana el INNER JOIN de tu query findTurnosOcupados)
+	    if (pd.getPlanillacabecera() != null) {
+	        nuevoTurno.setPlanillacabecera(pd.getPlanillacabecera());
+	    }
+
+	    // VINCULACIÓN DE RELACIÓN CON PLANILLA DETALLE (Aquí viaja la fecha de forma relacional)
+	    nuevoTurno.setPlanilladetalle(pd);
+	    
+	    // Hidratamos el resto de las relaciones obligatorias de tu entidad Turno
+	    nuevoTurno.setPaciente(pacienteCompleto);
+	    nuevoTurno.setProfesional(profesionalCompleto);
+	    nuevoTurno.setEspecialidad(especialidadCompleta);
+
+	    // Sincronizamos la colección bidireccional One-To-Many de la planilla
+	    if (pd.getTurno() == null) {
+	        pd.setTurno(new java.util.ArrayList<>());
+	    }
+	    pd.getTurno().add(nuevoTurno);
+
+	    // 3. Persistimos el Turno en tu tabla nativa de MySQL
+	    turnoDao.save(nuevoTurno);
+
+	    // 4. Marcamos la agenda del médico como ocupada (pd.estado_id = 4)
+	    planilladetalleService.updatePlanillaDetalleTurnoOcupado(String.valueOf(planillaDetId));
+
+	    // 5. El mail vuela de forma asíncrona mediante el hilo @Async
+	    emailService.enviarMailConfirmacion(nuevoTurno);
+	}
+
+
+
 
 	@Override
 	@Transactional(readOnly = true)

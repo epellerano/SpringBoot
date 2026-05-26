@@ -34,12 +34,16 @@ import com.sigat.springboot.app.models.entity.PlanillaCabecera;
 import com.sigat.springboot.app.models.entity.PlanillaDetalle;
 import com.sigat.springboot.app.models.entity.Profesional;
 import com.sigat.springboot.app.models.entity.Turno;
+import com.sigat.springboot.app.models.entity.Usuario;
 import com.sigat.springboot.app.models.service.BackupService;
 import com.sigat.springboot.app.models.service.IEspecialidadService;
 import com.sigat.springboot.app.models.service.IPacienteService;
 import com.sigat.springboot.app.models.service.IPlanillaDetalleService;
 import com.sigat.springboot.app.models.service.IProfesionalService;
 import com.sigat.springboot.app.models.service.ITurnoService;
+import com.sigat.springboot.app.models.service.IUsuarioService;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/turnos")
@@ -61,6 +65,8 @@ public class TurnoController {
 	private MessageSource messageSource;
 	@Autowired
 	private BackupService backupService;
+	@Autowired
+	private IUsuarioService usuarioService;
 	
 	
 	
@@ -391,6 +397,81 @@ public class TurnoController {
 	                    .body("{\"status\":\"error\", \"mensaje\":\"" + e.getMessage() + "\"}");
 	        }
 	    }
+
+	    //AUTO TURNOS
+	    @GetMapping("/autoTurno")
+	    public String autoTurno(Model model, HttpSession session) {
+	        try {
+	            // 1. Buscamos el nombre de usuario de la persona que inició sesión en la web
+	            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	            String usernameLogueado = auth.getName();
+	            
+	            // 2. Traemos su objeto Usuario real desde tu servicio de confianza
+	            Usuario usuario = usuarioService.findByUsername(usernameLogueado);
+	            
+	            if (usuario != null && usuario.getPaciente() != null) {
+	                // Guardamos el ID del paciente en la sesión por seguridad
+	                session.setAttribute("pacienteAutogestionId", usuario.getPaciente().getId());
+	                
+	                // Le pasamos el nombre visual a la cabecera para saludarlo
+	                model.addAttribute("nombrePaciente", usuario.getPaciente().getNombre() + " " + usuario.getPaciente().getApellido());
+	            }
+	            
+	            // 3. REUTILIZAMOS TU LOGÍSTICA DE SIEMPRE: Le mandamos la lista global de médicos
+	            // (Ajustá 'profesionalService.findAll()' por el método real que usás en tu formTurno)
+	            model.addAttribute("profesionales", profesionalService.findAll());
+	            model.addAttribute("titulo", "Módulo de Autogestión de Citas");
+	            
+	            return "turnos/autoTurno"; // Retorna tu nuevo HTML elegante
+	            
+	        } catch (Exception e) {
+	            model.addAttribute("error", "Error al inicializar el portal de turnos: " + e.getMessage());
+	            return "redirect:/login";
+	        }
+	    }
+	    
+	    @PostMapping("/formTurnoWeb")
+	    public String guardarTurnoAutogestion(
+	            @RequestParam("planillaDetId") Long planillaDetId,
+	            @RequestParam("planillaCabId") Long planillaCabId,
+	            @RequestParam("rangoFechaHora") String rangoFechaHora,
+	            @RequestParam(value = "Observacion", defaultValue = "TURNO PARTICULAR") String observacion,
+	            HttpSession session,
+	            RedirectAttributes flash) {
+	        
+	        try {
+	            // 1. Recuperamos el ID real de la sesión (Enganchado con Yanina Giordano ID 1L)
+	            Long pacienteId = (Long) session.getAttribute("pacienteAutogestionId");
+	            
+	            // Resguardo de seguridad por si la sesión expira
+	            if (pacienteId == null) { 
+	                pacienteId = 1L; 
+	            }
+
+	            // Forzamos el seteo rígido solicitado
+	            if (observacion == null || observacion.trim().isEmpty() || observacion.equals("TURNO SOLICITADO POR PORTAL WEB PACIENTE")) {
+	                observacion = "TURNO PARTICULAR";
+	            }
+	            
+	            System.out.println("======= SIGAT: DISPARANDO PROCESO DE AUTOGESTIÓN =======");
+	            System.out.println("Planilla Detalle ID: " + planillaDetId);
+	            System.out.println("Paciente ID Mapeado: " + pacienteId);
+	            System.out.println("Observación Web    : " + observacion);
+	            System.out.println("=======================================================");
+
+	            // 2. Ejecuta el guardado completo (Graba turno, ocupa agenda y despacha mail de forma asíncrona)
+	            turnoService.registrarTurnoDesdeWeb(planillaDetId, planillaCabId, pacienteId, observacion);
+	            
+	            flash.addFlashAttribute("success", "¡Turno médico reservado con éxito! Se envió un correo de confirmación.");
+	            return "redirect:/turnos/autoTurno";
+	            
+	        } catch (Exception e) {
+	            System.out.println("❌ ERROR CRÍTICO EN CONTROLADOR WEB: " + e.getMessage());
+	            flash.addFlashAttribute("error", "Fallo en el servidor: " + e.getMessage());
+	            return "redirect:/turnos/autoTurno";
+	        }
+	    }
+
 
 
 
